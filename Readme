@@ -1,0 +1,3 @@
+A smart cat feeder, an "upgrade" from the feeder on Thingiverse.com, using a 
+Raspberry Pi.  It will use a Raspberry Pi instead of an Arduino and will have
+more "smarts", including a local webpage interface.
