@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <210912.2356>
+#  Last Modified : <210913.1253>
 #
 #  Description	
 #
@@ -49,6 +49,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(__file__))
 
+import AugerMount
+
 class FoodBin(object):
     _Width  = 7.5 * 25.4
     _Height = 20  * 25.4
@@ -57,7 +59,11 @@ class FoodBin(object):
     _Length = 7.5 * 25.4
     _Thickness = .125 * 25.4
     _FingerWidth = .5 * 25.4
+    _BaseThick = (3.0/8.0) * 25.4
+    _BowlExtension = 4 * 25.4
     _Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
+    _BaseColor = tuple([1.0,1.0,0.0])
+    _LidColor  = tuple([1.0,1.0,1.0])
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -92,6 +98,11 @@ class FoodBin(object):
                                         starty=0,\
                                         endy=self._Length-self._BackDepth,\
                                         xoffset=self._Width-self._Thickness)
+        augerMountOrigin = bottomOrigin.add(Base.Vector(self._Width/2,\
+                                                        (3.5/2)*25.4,0))
+        self.bottom = AugerMount.AugerMount.CutHoles(self.bottom,\
+                                                     augerMountOrigin,\
+                                                     self._Thickness)
         frontOrigin = origin.add(Base.Vector(0,0,self._BinBottomOffset))
         self.front = Part.makePlane(self._Height-self._BinBottomOffset,\
                                     self._Width,frontOrigin,YNorm)\
@@ -125,6 +136,22 @@ class FoodBin(object):
                                       xoffset=self._Width-self._Thickness)
         self.left = self.left.cut(self.back)
         self.right = self.right.cut(self.back)
+        baseOrigin = origin.add(Base.Vector(self._Thickness,-self._BowlExtension,0))
+        self.base = Part.makePlane(self._Width-(2*self._Thickness),\
+                                   self._Length-self._BackDepth-\
+                                        self._Thickness+self._BowlExtension,\
+                                   baseOrigin,ZNorm)\
+                        .extrude(Base.Vector(0,0,self._BaseThick))
+        lidOrigin = origin.add(Base.Vector(0,0,self._Height))
+        self.lid = Part.makePlane(self._Width,\
+                                  self._Length-self._BackDepth,\
+                                  lidOrigin,ZNorm)\
+                          .extrude(Base.Vector(0,0,self._Thickness))
+        topOrigin = lidOrigin.add(Base.Vector(0,self._Length-self._BackDepth,0))
+        self.top = Part.makePlane(self._Width,\
+                                  self._BackDepth,\
+                                  topOrigin,ZNorm)\
+                          .extrude(Base.Vector(0,0,self._Thickness))
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
@@ -147,6 +174,20 @@ class FoodBin(object):
         obj.Shape = self.back
         obj.Label=self.name+"_back"
         obj.ViewObject.ShapeColor=self._Color
+        obj = doc.addObject("Part::Feature",self.name+"_base")
+        obj.Shape = self.base
+        obj.Label=self.name+"_base"
+        obj.ViewObject.ShapeColor=self._BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_lid")
+        obj.Shape = self.lid
+        obj.Label=self.name+"_lid"
+        obj.ViewObject.ShapeColor=self._LidColor
+        obj.ViewObject.Transparency=90
+        obj = doc.addObject("Part::Feature",self.name+"_top")
+        obj.Shape = self.top
+        obj.Label=self.name+"_top"
+        obj.ViewObject.ShapeColor=self._Color
+        
     def cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -184,6 +225,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
+    Gui.activeDocument().activeView().viewTop()
     Gui.SendMsgToActiveView("ViewFit")
-    Gui.activeDocument().activeView().viewIsometric()
         
