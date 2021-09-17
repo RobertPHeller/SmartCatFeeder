@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <210913.1253>
+#  Last Modified : <210916.2147>
 #
 #  Description	
 #
@@ -42,7 +42,7 @@
 
 
 import FreeCAD as App
-import Part, Drawing
+import Part, TechDraw
 from FreeCAD import Base
 
 import os
@@ -50,6 +50,7 @@ import sys
 sys.path.append(os.path.dirname(__file__))
 
 import AugerMount
+import Pi4
 
 class FoodBin(object):
     _Width  = 7.5 * 25.4
@@ -61,9 +62,13 @@ class FoodBin(object):
     _FingerWidth = .5 * 25.4
     _BaseThick = (3.0/8.0) * 25.4
     _BowlExtension = 4 * 25.4
+    _pi4StandoffHeight = 6
+    _pi4ZOffset = 6
     _Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     _BaseColor = tuple([1.0,1.0,0.0])
     _LidColor  = tuple([1.0,1.0,1.0])
+    _StandoffColor = tuple([0.0,1.0,1.0])
+    _pi4StandoffDiameter = 6
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -152,6 +157,30 @@ class FoodBin(object):
                                   self._BackDepth,\
                                   topOrigin,ZNorm)\
                           .extrude(Base.Vector(0,0,self._Thickness))
+        pi4Origin = origin.add(Base.Vector(self._Thickness,\
+                                           self._Length-\
+                                           self._BackDepth-\
+                                           (self._pi4StandoffHeight+\
+                                            self._Thickness),\
+                                           self._BaseThick+\
+                                           self._pi4ZOffset+\
+                                           Pi4.Pi4._Width))
+        self.pi4 = Pi4.Pi4(self.name+"_pi4",pi4Origin)
+        self.left = self.left.cut(self.pi4.usb1Cutout(0,self._Thickness))
+        self.left = self.left.cut(self.pi4.usb2Cutout(0,self._Thickness))
+        self.left = self.left.cut(self.pi4.ethCutout(0,self._Thickness))
+        self.back = self.back.cut(self.pi4.MountingHole(1,backOrigin.y,self._Thickness))
+        self.back = self.back.cut(self.pi4.MountingHole(2,backOrigin.y,self._Thickness))
+        self.back = self.back.cut(self.pi4.MountingHole(3,backOrigin.y,self._Thickness))
+        self.back = self.back.cut(self.pi4.MountingHole(4,backOrigin.y,self._Thickness))
+        self.pi4Standoffs = dict()
+        for i in range(1,5):
+            self.pi4Standoffs[i] = self.pi4.Standoff(i,\
+                                            (self._Length-self._BackDepth)-\
+                                            self._Thickness,\
+                                            self._pi4StandoffDiameter,\
+                                            self._pi4StandoffHeight)
+
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
@@ -187,7 +216,12 @@ class FoodBin(object):
         obj.Shape = self.top
         obj.Label=self.name+"_top"
         obj.ViewObject.ShapeColor=self._Color
-        
+        self.pi4.show()
+        for i in range(1,5):
+            obj = doc.addObject("Part::Feature",self.name+("_standoff%d"%(i)))
+            obj.Shape = self.pi4Standoffs[i]
+            obj.Label=self.name+("_standoff%d"%(i))
+            obj.ViewObject.ShapeColor=self._StandoffColor
     def cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -218,6 +252,7 @@ class FoodBin(object):
                                              YNorm).extrude(Base.Vector(0,self._Thickness,0)))
             z += self._FingerWidth*2
         return panel
+
 if __name__ == '__main__':
     if "FoodBin" in App.listDocuments().keys():
         App.closeDocument("FoodBin")
@@ -225,6 +260,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewTop()
+    Gui.activeDocument().activeView().viewFront()
     Gui.SendMsgToActiveView("ViewFit")
         

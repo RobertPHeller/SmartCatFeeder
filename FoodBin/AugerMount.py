@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Mon Sep 13 11:52:17 2021
-#  Last Modified : <210913.1250>
+#  Last Modified : <210917.0801>
 #
 #  Description	
 #
@@ -42,7 +42,7 @@
 
 
 import FreeCAD as App
-import Part, Drawing
+import Part
 from FreeCAD import Base
 
 import os
@@ -65,12 +65,12 @@ class AugerMount(object):
                 Part.makeCircle(cls._MainHoleDiameter/2,origin)))\
                     .extrude(extrude))
         mh1 = origin.add(Base.Vector(-cls._MHoleX,cls._MHoleY1,0))
-        sys.__stderr__.write("*** AugerMount.CutHoles(): mh1 is (%f,%f,%f)\n"%(mh1.x,mh1.y,mh1.z))
+        #sys.__stderr__.write("*** AugerMount.CutHoles(): mh1 is (%f,%f,%f)\n"%(mh1.x,mh1.y,mh1.z))
         panel = panel.cut(Part.Face(Part.Wire(\
                 Part.makeCircle(cls._MountingHoleDiameter/2,mh1)))\
                     .extrude(extrude))
         mh2 = origin.add(Base.Vector(cls._MHoleX,cls._MHoleY1,0))
-        sys.__stderr__.write("*** AugerMount.CutHoles(): mh2 is (%f,%f,%f)\n"%(mh2.x,mh2.y,mh2.z))
+        #sys.__stderr__.write("*** AugerMount.CutHoles(): mh2 is (%f,%f,%f)\n"%(mh2.x,mh2.y,mh2.z))
         panel = panel.cut(Part.Face(Part.Wire(\
                 Part.makeCircle(cls._MountingHoleDiameter/2,mh2)))\
                     .extrude(extrude))
