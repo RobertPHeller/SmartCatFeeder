@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/heller/SmartCatFeeder/ChargerAndPowerSupply/ChargerAndPowerSupply.sch)
-    (date "Sat 18 Sep 2021 08:13:43 AM EDT")
+    (date "Sat 18 Sep 2021 02:27:08 PM EDT")
     (tool "Eeschema 4.0.7+dfsg1-1ubuntu2")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -121,7 +121,7 @@
       (tstamp 6144C258))
     (comp (ref IC1)
       (value LM2576T-005G)
-      (footprint LM2576T-005G:MC34166TG)
+      (footprint TO_SOT_Packages_THT:TO-220-5_Pentawatt_Multiwatt-5_Vertical_StaggeredType1)
       (datasheet https://componentsearchengine.com//LM2576T-005G.pdf)
       (fields
         (field (name Description) "Buck Regulator, Switching, 3.0 A, 15 V 3.0 A, 5.0 V, 52 kHz")
@@ -151,7 +151,7 @@
       (tstamp 6144DDF8))
     (comp (ref L1)
       (value 150uH)
-      (footprint PE-53113NL:PE53113NL)
+      (footprint Inductors_THT:L_Toroid_Vertical_L24.6mm_W15.5mm_P11.44mm_Pulse_KM-4)
       (fields
         (field (name "Mouser Part Number") "673-PE-53113NL "))
       (libsource (lib device) (part L_Small))
@@ -399,18 +399,18 @@
         (pin (num 3) (name ~) (type passive))
         (pin (num 4) (name ~) (type passive)))))
   (libraries
+    (library (logical opto)
+      (uri /usr/share/kicad/library/opto.lib))
+    (library (logical regul)
+      (uri /usr/share/kicad/library/regul.lib))
+    (library (logical device)
+      (uri /usr/share/kicad/library/device.lib))
     (library (logical LM2576T-005G)
       (uri /home/heller/SmartCatFeeder/ChargerAndPowerSupply/LM2576T-005G.lib))
     (library (logical mechanical)
       (uri /usr/share/kicad/library/mechanical.lib))
-    (library (logical opto)
-      (uri /usr/share/kicad/library/opto.lib))
     (library (logical conn)
-      (uri /usr/share/kicad/library/conn.lib))
-    (library (logical device)
-      (uri /usr/share/kicad/library/device.lib))
-    (library (logical regul)
-      (uri /usr/share/kicad/library/regul.lib)))
+      (uri /usr/share/kicad/library/conn.lib)))
   (nets
     (net (code 1) (name "Net-(D3-Pad2)")
       (node (ref F1) (pin 1))
