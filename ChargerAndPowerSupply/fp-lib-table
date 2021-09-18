@@ -1,0 +1,8 @@
+(fp_lib_table
+  (lib (name LM2576T-005G)(type Legacy)(uri "$(KIPRJMOD)/LM2576T-005G.mod")(options "")(descr ""))
+  (lib (name PE-53113NL)(type Legacy)(uri "$(KIPRJMOD)/PE-53113NL.mod")(options "")(descr ""))
+  (lib (name MRT_2)(type Legacy)(uri "$(KIPRJMOD)/MRT_2.mod")(options "")(descr ""))
+  (lib (name 26-60-7020)(type Legacy)(uri "$(KIPRJMOD)/26-60-7020.mod")(options "")(descr ""))
+  (lib (name 26-60-7050)(type Legacy)(uri "$(KIPRJMOD)/26-60-7050.mod")(options "")(descr ""))
+  (lib (name KBP301G)(type Legacy)(uri "$(KIPRJMOD)/KBP301G.mod")(options "")(descr ""))
+)

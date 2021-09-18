@@ -1,0 +1,580 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:switches
+LIBS:relays
+LIBS:motors
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:LM2576T-005G
+LIBS:mechanical
+LIBS:ChargerAndPowerSupply-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L D_Bridge_+AA- D1
+U 1 1 6144A1C8
+P 2750 2700
+F 0 "D1" H 2800 2975 50  0000 L CNN
+F 1 "KBP301" H 2800 2900 50  0000 L CNN
+F 2 "KBP301G:KBP301G" H 2750 2700 50  0001 C CNN
+F 3 "" H 2750 2700 50  0001 C CNN
+F 4 "905-KBP301 " H 2750 2700 60  0001 C CNN "Mouser Part Number"
+	1    2750 2700
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1_Small C2
+U 1 1 6144A22C
+P 3550 3250
+F 0 "C2" H 3560 3320 50  0000 L CNN
+F 1 "2,200 uf" H 3560 3170 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D16.0mm_P7.50mm" H 3550 3250 50  0001 C CNN
+F 3 "" H 3550 3250 50  0001 C CNN
+F 4 "140-REA222M1HBK1636P" H 3550 3250 60  0001 C CNN "Mouser Part Number"
+	1    3550 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1_Small C3
+U 1 1 6144A287
+P 3950 3250
+F 0 "C3" H 3960 3320 50  0000 L CNN
+F 1 "2,200 uf" H 3960 3170 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D16.0mm_P7.50mm" H 3950 3250 50  0001 C CNN
+F 3 "" H 3950 3250 50  0001 C CNN
+F 4 "140-REA222M1HBK1636P" H 3950 3250 60  0001 C CNN "Mouser Part Number"
+	1    3950 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L LM317_3PinPackage U1
+U 1 1 6144A62A
+P 4600 2700
+F 0 "U1" H 4450 2825 50  0000 C CNN
+F 1 "LM317K" H 4600 2825 50  0000 L CNN
+F 2 "TO_SOT_Packages_THT:TO-220_Vertical" H 4600 2950 50  0001 C CIN
+F 3 "" H 4600 2700 50  0001 C CNN
+F 4 "LM317KCT" H 4600 2700 60  0001 C CNN "Mouser Part Number"
+	1    4600 2700
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R1
+U 1 1 6144A6A0
+P 4600 3350
+F 0 "R1" V 4680 3350 50  0000 C CNN
+F 1 "2.2K" V 4600 3350 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal" V 4530 3350 50  0001 C CNN
+F 3 "" H 4600 3350 50  0001 C CNN
+F 4 "603-CFR-12JT-52-2K2" V 4600 3350 60  0001 C CNN "Mouser Part Number"
+	1    4600 3350
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R2
+U 1 1 6144A6C1
+P 5100 2950
+F 0 "R2" V 5180 2950 50  0000 C CNN
+F 1 "220" V 5100 2950 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal" V 5030 2950 50  0001 C CNN
+F 3 "" H 5100 2950 50  0001 C CNN
+F 4 "603-CFR-12JT-52-220R" V 5100 2950 60  0001 C CNN "Mouser Part Number"
+	1    5100 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1_Small C5
+U 1 1 6144A8DF
+P 5500 3250
+F 0 "C5" H 5510 3320 50  0000 L CNN
+F 1 "47 uf" H 5510 3170 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D6.3mm_P2.50mm" H 5500 3250 50  0001 C CNN
+F 3 "" H 5500 3250 50  0001 C CNN
+F 4 "140-REA470M1HBK0611P" H 5500 3250 60  0001 C CNN "Mouser Part Number"
+	1    5500 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L D_Schottky_x2_KCom_AKA D3
+U 1 1 6144ABE1
+P 6350 3000
+F 0 "D3" H 6400 2900 50  0000 C CNN
+F 1 "MR1545" H 6350 3100 50  0000 C CNN
+F 2 "TO_SOT_Packages_THT:TO-220_Vertical" H 6350 3000 50  0001 C CNN
+F 3 "" H 6350 3000 50  0001 C CNN
+	1    6350 3000
+	0    -1   1    0   
+$EndComp
+$Comp
+L Fuse_Small F1
+U 1 1 6144AF0A
+P 6850 3000
+F 0 "F1" H 6850 2940 50  0000 C CNN
+F 1 "2A" H 6850 3060 50  0000 C CNN
+F 2 "MRT_2:MRT2" H 6850 3000 50  0001 C CNN
+F 3 "" H 6850 3000 50  0001 C CNN
+F 4 " 530-MRT2" H 6850 3000 60  0001 C CNN "Mouser Part Number"
+	1    6850 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Conn_01x02_Male J3
+U 1 1 6144B3F8
+P 7300 3300
+F 0 "J3" H 7300 3400 50  0000 C CNN
+F 1 "+ Battery -" H 7300 3100 50  0000 C CNN
+F 2 "26-60-7020:26607020" H 7300 3300 50  0001 C CNN
+F 3 "" H 7300 3300 50  0001 C CNN
+	1    7300 3300
+	-1   0    0    -1  
+$EndComp
+$Comp
+L +12V #PWR01
+U 1 1 6144B4FB
+P 7100 2450
+F 0 "#PWR01" H 7100 2300 50  0001 C CNN
+F 1 "+12V" H 7100 2590 50  0000 C CNN
+F 2 "" H 7100 2450 50  0001 C CNN
+F 3 "" H 7100 2450 50  0001 C CNN
+	1    7100 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR02
+U 1 1 6144B5C9
+P 7100 3850
+F 0 "#PWR02" H 7100 3600 50  0001 C CNN
+F 1 "GND" H 7100 3700 50  0000 C CNN
+F 2 "" H 7100 3850 50  0001 C CNN
+F 3 "" H 7100 3850 50  0001 C CNN
+	1    7100 3850
+	1    0    0    -1  
+$EndComp
+$Comp
+L D_Schottky D4
+U 1 1 6144B7BA
+P 7100 2700
+F 0 "D4" H 7100 2800 50  0000 C CNN
+F 1 "1N5822" H 7100 2600 50  0000 C CNN
+F 2 "Diodes_THT:D_DO-201AD_P15.24mm_Horizontal" H 7100 2700 50  0001 C CNN
+F 3 "" H 7100 2700 50  0001 C CNN
+	1    7100 2700
+	0    1    1    0   
+$EndComp
+$Comp
+L VO615A-6 U2
+U 1 1 6144BA83
+P 6450 2450
+F 0 "U2" H 6450 2750 50  0000 C CNN
+F 1 "VO615A-6" H 6450 2650 50  0000 C CNN
+F 2 "Housings_DIP:DIP-4_W7.62mm" H 6450 2450 50  0001 C CNN
+F 3 "" H 6450 2450 50  0001 C CNN
+	1    6450 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R3
+U 1 1 6144BB5C
+P 5800 2350
+F 0 "R3" V 5880 2350 50  0000 C CNN
+F 1 "1K" V 5800 2350 50  0000 C CNN
+F 2 "Resistors_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal" V 5730 2350 50  0001 C CNN
+F 3 "" H 5800 2350 50  0001 C CNN
+F 4 "603-CFR-12JB-52-1K" V 5800 2350 60  0001 C CNN "Mouser Part Number"
+	1    5800 2350
+	0    1    1    0   
+$EndComp
+$Comp
+L GND #PWR03
+U 1 1 6144BCA1
+P 6750 2700
+F 0 "#PWR03" H 6750 2450 50  0001 C CNN
+F 1 "GND" H 6750 2550 50  0000 C CNN
+F 2 "" H 6750 2700 50  0001 C CNN
+F 3 "" H 6750 2700 50  0001 C CNN
+	1    6750 2700
+	1    0    0    -1  
+$EndComp
+Text Label 6950 1900 0    60   ~ 0
+PowerFail
+$Comp
+L Screw_Terminal_01x02 J1
+U 1 1 6144C258
+P 1500 2650
+F 0 "J1" H 1500 2750 50  0000 C CNN
+F 1 "16VAC" H 1500 2450 50  0000 C CNN
+F 2 "Connectors_Terminal_Blocks:TerminalBlock_Pheonix_MKDS1.5-2pol" H 1500 2650 50  0001 C CNN
+F 3 "" H 1500 2650 50  0001 C CNN
+F 4 "651-1017491" H 1500 2650 60  0001 C CNN "Mouser Part Numer"
+	1    1500 2650
+	-1   0    0    -1  
+$EndComp
+$Comp
+L LM2576T-005G IC1
+U 1 1 6144CAE1
+P 3450 6050
+F 0 "IC1" H 4800 6350 50  0000 L CNN
+F 1 "LM2576T-005G" H 4800 6250 50  0000 L CNN
+F 2 "LM2576T-005G:MC34166TG" H 4800 6150 50  0001 L CNN
+F 3 "https://componentsearchengine.com//LM2576T-005G.pdf" H 4800 6050 50  0001 L CNN
+F 4 "Buck Regulator, Switching, 3.0 A, 15 V 3.0 A, 5.0 V, 52 kHz" H 4800 5950 50  0001 L CNN "Description"
+F 5 "15.57" H 4800 5850 50  0001 L CNN "Height"
+F 6 "863-LM2576T-005G" H 4800 5750 50  0001 L CNN "Mouser2 Part Number"
+F 7 "https://www.mouser.com/Search/Refine.aspx?Keyword=863-LM2576T-005G" H 4800 5650 50  0001 L CNN "Mouser2 Price/Stock"
+F 8 "ON Semiconductor" H 4800 5550 50  0001 L CNN "Manufacturer_Name"
+F 9 "LM2576T-005G" H 4800 5450 50  0001 L CNN "Manufacturer_Part_Number"
+	1    3450 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1_Small C1
+U 1 1 6144DC1D
+P 3350 6450
+F 0 "C1" H 3360 6520 50  0000 L CNN
+F 1 "100uf 50V" H 3360 6370 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D8.0mm_P5.00mm" H 3350 6450 50  0001 C CNN
+F 3 "" H 3350 6450 50  0001 C CNN
+F 4 "667-EEU-FR1H101B " H 3350 6450 60  0001 C CNN "Mouser Part Number"
+	1    3350 6450
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1_Small C4
+U 1 1 6144DDF8
+P 5450 6300
+F 0 "C4" H 5460 6370 50  0000 L CNN
+F 1 "1000uf 16V" H 5460 6220 50  0000 L CNN
+F 2 "Capacitors_THT:CP_Radial_D10.0mm_P5.00mm" H 5450 6300 50  0001 C CNN
+F 3 "" H 5450 6300 50  0001 C CNN
+F 4 "667-EEU-FR1C102" H 5450 6300 60  0001 C CNN "Mouser Part Number"
+	1    5450 6300
+	1    0    0    -1  
+$EndComp
+$Comp
+L L_Small L1
+U 1 1 6144E1AB
+P 5200 6050
+F 0 "L1" V 5100 6050 50  0000 L CNN
+F 1 "150uH" V 5150 5900 50  0000 L CNN
+F 2 "PE-53113NL:PE53113NL" H 5200 6050 50  0001 C CNN
+F 3 "" H 5200 6050 50  0001 C CNN
+F 4 "673-PE-53113NL " V 5200 6050 60  0001 C CNN "Mouser Part Number"
+	1    5200 6050
+	0    1    1    0   
+$EndComp
+$Comp
+L D_Schottky D2
+U 1 1 6144E95E
+P 5050 6400
+F 0 "D2" H 5050 6500 50  0000 C CNN
+F 1 "1N5822" H 5050 6300 50  0000 C CNN
+F 2 "Diodes_THT:D_DO-201AD_P15.24mm_Horizontal" H 5050 6400 50  0001 C CNN
+F 3 "" H 5050 6400 50  0001 C CNN
+	1    5050 6400
+	0    1    1    0   
+$EndComp
+$Comp
+L GND #PWR04
+U 1 1 6144EDB2
+P 3800 6800
+F 0 "#PWR04" H 3800 6550 50  0001 C CNN
+F 1 "GND" H 3800 6650 50  0000 C CNN
+F 2 "" H 3800 6800 50  0001 C CNN
+F 3 "" H 3800 6800 50  0001 C CNN
+	1    3800 6800
+	1    0    0    -1  
+$EndComp
+$Comp
+L +12V #PWR05
+U 1 1 6144EF87
+P 3350 5900
+F 0 "#PWR05" H 3350 5750 50  0001 C CNN
+F 1 "+12V" H 3350 6040 50  0000 C CNN
+F 2 "" H 3350 5900 50  0001 C CNN
+F 3 "" H 3350 5900 50  0001 C CNN
+	1    3350 5900
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR06
+U 1 1 6144F08B
+P 5450 5900
+F 0 "#PWR06" H 5450 5750 50  0001 C CNN
+F 1 "+5V" H 5450 6040 50  0000 C CNN
+F 2 "" H 5450 5900 50  0001 C CNN
+F 3 "" H 5450 5900 50  0001 C CNN
+	1    5450 5900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Conn_01x05_Male J2
+U 1 1 6144F633
+P 6400 5650
+F 0 "J2" H 6400 5950 50  0000 C CNN
+F 1 "+12 G PF +5 G" V 6600 5650 50  0000 C CNN
+F 2 "26-60-7050:26607050" H 6400 5650 50  0001 C CNN
+F 3 "" H 6400 5650 50  0001 C CNN
+	1    6400 5650
+	-1   0    0    -1  
+$EndComp
+$Comp
+L +12V #PWR07
+U 1 1 6144F74A
+P 6000 5450
+F 0 "#PWR07" H 6000 5300 50  0001 C CNN
+F 1 "+12V" H 6000 5590 50  0000 C CNN
+F 2 "" H 6000 5450 50  0001 C CNN
+F 3 "" H 6000 5450 50  0001 C CNN
+	1    6000 5450
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR08
+U 1 1 6144F786
+P 5850 5750
+F 0 "#PWR08" H 5850 5600 50  0001 C CNN
+F 1 "+5V" H 5850 5890 50  0000 C CNN
+F 2 "" H 5850 5750 50  0001 C CNN
+F 3 "" H 5850 5750 50  0001 C CNN
+	1    5850 5750
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR09
+U 1 1 6144F84E
+P 6050 5850
+F 0 "#PWR09" H 6050 5600 50  0001 C CNN
+F 1 "GND" H 6050 5700 50  0000 C CNN
+F 2 "" H 6050 5850 50  0001 C CNN
+F 3 "" H 6050 5850 50  0001 C CNN
+	1    6050 5850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3550 3150 3550 2700
+Wire Wire Line
+	3050 2700 4300 2700
+Wire Wire Line
+	3950 2700 3950 3150
+Connection ~ 3550 2700
+Wire Wire Line
+	2450 2700 2450 3700
+Wire Wire Line
+	2450 3700 7100 3700
+Wire Wire Line
+	3550 3700 3550 3350
+Wire Wire Line
+	3950 3700 3950 3350
+Connection ~ 3550 3700
+Wire Wire Line
+	1800 2400 2750 2400
+Wire Wire Line
+	1800 2400 1800 2650
+Wire Wire Line
+	1800 3000 2750 3000
+Wire Wire Line
+	1800 2750 1800 3000
+Connection ~ 3950 2700
+Wire Wire Line
+	4600 3000 4600 3200
+Wire Wire Line
+	4600 3700 4600 3500
+Connection ~ 3950 3700
+Wire Wire Line
+	4900 2700 6350 2700
+Wire Wire Line
+	5100 2700 5100 2800
+Wire Wire Line
+	5100 3100 4600 3100
+Connection ~ 4600 3100
+Wire Wire Line
+	5500 2700 5500 3150
+Connection ~ 5100 2700
+Wire Wire Line
+	5500 3700 5500 3350
+Connection ~ 4600 3700
+Connection ~ 5500 2700
+Wire Wire Line
+	6350 3700 6350 3300
+Connection ~ 5500 3700
+Wire Wire Line
+	6550 3000 6750 3000
+Wire Wire Line
+	7100 2850 7100 3300
+Wire Wire Line
+	7100 3000 6950 3000
+Wire Wire Line
+	7100 3400 7100 3850
+Connection ~ 6350 3700
+Connection ~ 7100 3000
+Connection ~ 7100 3700
+Wire Wire Line
+	7100 2450 7100 2550
+Wire Wire Line
+	6150 2550 6150 3700
+Wire Wire Line
+	6150 3700 6100 3700
+Connection ~ 6100 3700
+Wire Wire Line
+	6150 2350 5950 2350
+Wire Wire Line
+	5650 2350 5650 2700
+Connection ~ 5650 2700
+Wire Wire Line
+	6750 2550 6750 2700
+Wire Wire Line
+	6950 1900 6750 1900
+Wire Wire Line
+	6750 1900 6750 2350
+Wire Wire Line
+	1800 2650 1700 2650
+Wire Wire Line
+	1800 2750 1700 2750
+Wire Wire Line
+	4950 6050 5100 6050
+Wire Wire Line
+	5300 6050 5450 6050
+Wire Wire Line
+	5450 5900 5450 6200
+Wire Wire Line
+	4950 6150 5450 6150
+Connection ~ 5450 6150
+Wire Wire Line
+	5050 6250 5050 6050
+Connection ~ 5050 6050
+Wire Wire Line
+	5450 6650 5450 6400
+Wire Wire Line
+	3350 6650 5450 6650
+Wire Wire Line
+	5050 6650 5050 6550
+Wire Wire Line
+	3350 6550 3350 6650
+Connection ~ 5050 6650
+Wire Wire Line
+	3800 6800 3800 6650
+Connection ~ 3800 6650
+Wire Wire Line
+	3450 6050 3350 6050
+Wire Wire Line
+	3350 5900 3350 6350
+Wire Wire Line
+	3450 6150 3450 6650
+Connection ~ 3450 6650
+Connection ~ 3450 6250
+Connection ~ 3350 6050
+Connection ~ 5450 6050
+Wire Wire Line
+	6050 5850 6200 5850
+Wire Wire Line
+	5850 5750 6200 5750
+Wire Wire Line
+	6200 5450 6000 5450
+Wire Wire Line
+	6050 5850 6050 5550
+Wire Wire Line
+	6050 5550 6200 5550
+Wire Wire Line
+	5650 5450 5900 5450
+Wire Wire Line
+	5900 5450 5900 5650
+Wire Wire Line
+	5900 5650 6200 5650
+Text Label 5650 5450 2    60   ~ 0
+PowerFail
+$Comp
+L Mounting_Hole MK1
+U 1 1 6145CF01
+P 8650 1050
+F 0 "MK1" H 8650 1250 50  0000 C CNN
+F 1 "Mounting_Hole" H 8650 1175 50  0000 C CNN
+F 2 "Mounting_Holes:MountingHole_4.5mm" H 8650 1050 50  0001 C CNN
+F 3 "" H 8650 1050 50  0001 C CNN
+	1    8650 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mounting_Hole MK2
+U 1 1 6145CF64
+P 8650 1450
+F 0 "MK2" H 8650 1650 50  0000 C CNN
+F 1 "Mounting_Hole" H 8650 1575 50  0000 C CNN
+F 2 "Mounting_Holes:MountingHole_4.5mm" H 8650 1450 50  0001 C CNN
+F 3 "" H 8650 1450 50  0001 C CNN
+	1    8650 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mounting_Hole MK3
+U 1 1 6145CFA5
+P 8650 1900
+F 0 "MK3" H 8650 2100 50  0000 C CNN
+F 1 "Mounting_Hole" H 8650 2025 50  0000 C CNN
+F 2 "Mounting_Holes:MountingHole_4.5mm" H 8650 1900 50  0001 C CNN
+F 3 "" H 8650 1900 50  0001 C CNN
+	1    8650 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mounting_Hole_PAD MK4
+U 1 1 6145CFE8
+P 8750 2350
+F 0 "MK4" H 8750 2600 50  0000 C CNN
+F 1 "Mounting_Hole_PAD" H 8750 2525 50  0000 C CNN
+F 2 "Mounting_Holes:MountingHole_4.5mm_Pad" H 8750 2350 50  0001 C CNN
+F 3 "" H 8750 2350 50  0001 C CNN
+	1    8750 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR010
+U 1 1 6145E26F
+P 8750 2600
+F 0 "#PWR010" H 8750 2350 50  0001 C CNN
+F 1 "GND" H 8750 2450 50  0000 C CNN
+F 2 "" H 8750 2600 50  0001 C CNN
+F 3 "" H 8750 2600 50  0001 C CNN
+	1    8750 2600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8750 2450 8750 2600
+$EndSCHEMATC
