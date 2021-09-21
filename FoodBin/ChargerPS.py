@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 19 19:32:50 2021
-#  Last Modified : <210920.1316>
+#  Last Modified : <210921.0935>
 #
 #  Description	
 #
@@ -146,11 +146,246 @@ class ChargerPS(object):
         obj.Shape = self.powerConn
         obj.Label=self.name+'_powerConn'
         obj.ViewObject.ShapeColor=self._ConnColor
+    
+from abc import ABCMeta, abstractmethod, abstractproperty
+    
+class HM187_7D(object):
+    __metaclass__ = ABCMeta
+    def A():
+        pass
+    @staticmethod
+    def B():
+        pass
+    @staticmethod
+    def C():
+        pass
+    @staticmethod
+    def D():
+        pass
+    @staticmethod
+    def E():
+        pass
+    _backFract = 0.17142857142857143
+    _frameFract = 0.4857142857142857
+    _frontFract = 0.34285714285714286
+    _MHoleDiameter = (3.0/16.0)*25.4
+    _TermWidth = .187*25.4
+    _TermInsulationWidth = .25*25.4
+    _TermLength = .250*25.4
+    _TermThick  = (1.0/16.0)*25.4
+    _termColor = tuple([.75,.75,.75])
+    _insulationColor = tuple([0.0,0.0,0.0])
+    _frameLengthOff = (6.0/16.0)*25.4
+    _frameBobbinOff = .125*25.4
+    _frameColor = tuple([.5,.5,.5])
+    _bobbinColor = tuple([165.0/255.0,42.0/255.0,42.0/255.0])
+    def _buildtransformer(self):
+        YNorm=Base.Vector(0,1,0)
+        self.__frameDepth = self._frameFract*self.B()
+        self.__backDepth   = self._backFract*self.B()
+        bobbinZOff            = self.E()-self.B()
+        self.__frontDepth  = bobbinZOff+self._frontFract*self.B()
         
+        self.__initMHvector()
+        self.frame = Part.makePlane(self.__frameDepth,self.A(),\
+                                     self.origin.add(Base.Vector(0,0,\
+                                                          self.__frontDepth)),\
+                                     YNorm).extrude(Base.Vector(0,1,0))
+        frameBodyLength = self.A()-(self._frameLengthOff*2)
+        #sys.__stderr__.write("*** HM187_7D._buildtransformer(): self.A() = %f,self._frameLengthOff = %f, frameBodyLength = %f\n"%(self.A(),self._frameLengthOff,frameBodyLength))
+        self.frame = self.frame.fuse(\
+            Part.makePlane(self.__frameDepth,frameBodyLength,\
+                           self.origin.add(Base.Vector(self._frameLengthOff,\
+                                                       1,\
+                                                       self.__frontDepth)),\
+                           YNorm).extrude(Base.Vector(0,\
+                                                      self._frameBobbinOff,\
+                                                      0)))
+        C_Remainder = self.C()-(1+self._frameBobbinOff)
+        self.frame = self.frame.fuse(\
+            Part.makePlane(self.__frameDepth,self._frameBobbinOff,
+                           self.origin.add(Base.Vector(self._frameLengthOff,\
+                                                      1+self._frameBobbinOff,\
+                                                      self.__frontDepth)),\
+                           YNorm).extrude(Base.Vector(0,C_Remainder,0)))
+        flangv2 = self._frameLengthOff+frameBodyLength-self._frameBobbinOff
+        self.frame = self.frame.fuse(\
+            Part.makePlane(self.__frameDepth,self._frameBobbinOff,
+                           self.origin.add(Base.Vector(flangv2,\
+                                                       1+self._frameBobbinOff,\
+                                                       self.__frontDepth)),\
+                           YNorm).extrude(Base.Vector(0,C_Remainder,0)))
+        frametop = self.C()-self._frameBobbinOff
+        self.frame = self.frame.fuse(\
+            Part.makePlane(self.__frameDepth,frameBodyLength,\
+                           self.origin.add(Base.Vector(self._frameLengthOff,\
+                                                       frametop,\
+                                                       self.__frontDepth)),\
+                           YNorm).extrude(Base.Vector(0,\
+                                                      self._frameBobbinOff,\
+                                                      0)))
+        self.frame = self.frame.cut(\
+            Part.Face(Part.Wire(Part.makeCircle(self._MHoleDiameter/2.0,\
+                                self._mhvector[1],YNorm))).extrude(Base.Vector(0,1,0)))     
+        self.frame = self.frame.cut(\
+            Part.Face(Part.Wire(Part.makeCircle(self._MHoleDiameter/2.0,\
+                                self._mhvector[2],YNorm))).extrude(Base.Vector(0,1,0)))
+        bobbinLength = frameBodyLength-(2*self._frameBobbinOff)
+        bobbonWidth  = self.B() 
+        self.__bobbinHeight = C_Remainder-self._frameBobbinOff
+        self.__bobbinXOff   = self._frameLengthOff+self._frameBobbinOff
+        self.bobbin = Part.makePlane(bobbonWidth,bobbinLength,\
+                                     self.origin.add(Base.Vector(self.__bobbinXOff,\
+                                                     1+self._frameBobbinOff,\
+                                                     bobbinZOff)),\
+                                     YNorm).extrude(Base.Vector(0,\
+                                                                self.__bobbinHeight,\
+                                                                0))
+        self.terms = dict()
+        self.__terminal(2)
+        self.__terminal(4)
+        self.__terminal(6)
+        self.__terminal(8)
+        self.__terminal(10)
+    def __terminal(self,number):
+        YNorm=Base.Vector(0,1,0)
+        if number < 6:
+            YOff = 1+self._frameBobbinOff
+        else:
+            YOff = self.C()-(1+self._frameBobbinOff+self._TermThick)
+        xnum = (number-1)%5
+        XOff = ((self.B()/4)*xnum)+(self._TermWidth/2.0)+self.__bobbinXOff
+        insulationLength = (self.E()-self.B())-self._TermLength
+        term = Part.makePlane(self._TermLength,self._TermWidth,\
+                              self.origin.add(Base.Vector(XOff,YOff,0)),\
+                              YNorm).extrude(Base.Vector(0,self._TermThick,0))
+        insX = XOff - ((self._TermInsulationWidth-self._TermWidth)/2.0)
+        insulation = Part.makePlane(insulationLength,\
+                                    self._TermInsulationWidth,\
+                                    self.origin.add(Base.Vector(insX,YOff,\
+                                                           self._TermLength)),\
+                                    YNorm).extrude(Base.Vector(0,self._TermThick,0))
+        self.terms[number] = (term,insulation)
+    def __initMHvector(self):
+        xoff0 = (self.A()-self.D())/2.0
+        xoff1 = xoff0+self.D()
+        zoff  = self.__frontDepth + (self.__frameDepth/2.0) 
+        self._mhvector = {
+            1 : self.origin.add(Base.Vector(xoff0,0,zoff)),
+            2 : self.origin.add(Base.Vector(xoff1,0,zoff))
+        }
+    def MountingHole(self,i,yBase,height):
+        mhv = self._mhvector[i]
+        mhz = Base.Vector(mhv.x,yBase,mhv.z)
+        return Part.Face(Part.Wire(Part.makeCircle(self._MHoleDiameter/2.0,\
+                                                   mhz,\
+                                                   Base.Vector(0,1,0))))\
+                             .extrude(Base.Vector(0,height,0))
+    def show(self):
+        doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name+'_frame')
+        obj.Shape = self.frame
+        obj.Label=self.name+'_frame'
+        obj.ViewObject.ShapeColor=self._frameColor
+        obj = doc.addObject("Part::Feature",self.name+'_bobbin')
+        obj.Shape = self.bobbin
+        obj.Label=self.name+'_bobbin'
+        obj.ViewObject.ShapeColor=self._bobbinColor
+        for i in self.terms:
+            term, insulation = self.terms[i]
+            istring = "%d"%(i)
+            obj = doc.addObject("Part::Feature",self.name+'_terminalLug'+istring)
+            obj.Shape = term
+            obj.Label=self.name+'_terminalLug'+istring
+            obj.ViewObject.ShapeColor=self._termColor
+            obj = doc.addObject("Part::Feature",self.name+'_terminalIns'+istring)
+            obj.Shape = insulation
+            obj.Label=self.name+'_terminalIns'+istring
+            obj.ViewObject.ShapeColor=self._insulationColor
+        
+class HM187E16(HM187_7D):
+    @staticmethod
+    def A():
+        return 3.25*25.4
+    @staticmethod
+    def B():
+        return 1.68*25.4
+    @staticmethod
+    def C():
+        return 1.93*25.4
+    @staticmethod
+    def D():
+        return 2.81*25.4
+    @staticmethod
+    def E():
+        return 2.055*25.4
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        self._buildtransformer()
+
+class ACPowerInlet(object):
+    _OuterWidth     = 33
+    _InnerWidth     = 31
+    _OuterHeight    = 30
+    _InnerHeight    = 27
+    _OuterDepth     =  5
+    _InnerDepth     = 15.7
+    _TerminalDepth  = 10
+    _TerminalWidth  = 25
+    _TerminalHeight = 20
+    _BodyColor      = tuple([0.0,0.0,0.0])
+    _TerminalColor  = tuple([.85,.85,.85])
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        self.body = Part.makePlane(self._OuterWidth,\
+                                   self._OuterHeight,\
+                                   self.origin)\
+                                  .extrude(Base.Vector(0,0,-self._OuterDepth))
+        self.innerOrigin = self.origin.add(Base.Vector(\
+                        (self._OuterWidth-self._InnerWidth)/2.0,\
+                        (self._OuterHeight-self._InnerHeight)/2.0,\
+                        0))
+        self.body = self.body.fuse(\
+                Part.makePlane(self._InnerWidth,self._InnerHeight,\
+                               self.innerOrigin)\
+                            .extrude(Base.Vector(0,0,self._InnerDepth)))
+        terminalOrigin = self.origin.add(Base.Vector(\
+                            (self._OuterWidth-self._TerminalWidth)/2.0,\
+                            (self._OuterHeight-self._TerminalHeight)/2.0,\
+                            self._InnerDepth))
+        self.terminals = Part.makePlane(self._TerminalWidth,\
+                                        self._TerminalHeight,\
+                                        terminalOrigin)\
+                                    .extrude(Base.Vector(0,\
+                                                         0,\
+                                                         self._TerminalDepth))
+    def Cutout(self,thickness):
+        return Part.makePlane(self._InnerWidth,self._InnerHeight,\
+                              self.innerOrigin)\
+                             .extrude(Base.Vector(0,0,thickness))
+    def show(self):
+        doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name+"_body")
+        obj.Shape = self.body
+        obj.Label=self.name+"_body"
+        obj.ViewObject.ShapeColor=self._BodyColor
+        obj = doc.addObject("Part::Feature",self.name+"_terminals")
+        obj.Shape = self.terminals
+        obj.Label=self.name+"_terminals"
+        obj.ViewObject.ShapeColor=self._TerminalColor
+
 class ChargerPSBox(object):
     _StandoffHeight = 6
     _StandoffDiameter = 8
     _StandoffColor = tuple([1.0,1.0,0.0])
+    _inletXOff = 4.5*25.4
+    _inletYOff = 1+(ACPowerInlet._OuterHeight/2.0)
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -170,9 +405,24 @@ class ChargerPSBox(object):
                                             self.origin.y+self.box.GUAGE(),\
                                             self._StandoffDiameter,\
                                             self._StandoffHeight)
+        self.transformer = HM187E16(self.name+"_transformer",\
+                        origin.add(Base.Vector(\
+                                   .5*25.4+self.box.GUAGE()+self.board._Width,\
+                                   self.box.GUAGE(),\
+                                   (self.box.B()*.55)-HM187E16.E()/2.0)))
+        for i in range(1,3):
+            self.box.cutout(self.transformer.MountingHole(i,self.origin.y,\
+                                                          self.box.GUAGE()))
+        self.inlet = ACPowerInlet(self.name+"_acinlet",\
+                                  self.origin.add(Base.Vector(self._inletXOff,\
+                                                              self._inletYOff,\
+                                                              0)))
+        self.box.cutout(self.inlet.Cutout(self.box.GUAGE()))
     def show(self):
         self.box.show()
         self.board.show()
+        self.transformer.show()
+        self.inlet.show()
         doc = App.activeDocument()
         for i in range(1,5):
             obj = doc.addObject("Part::Feature",self.name+("_standoff%d"%(i)))
