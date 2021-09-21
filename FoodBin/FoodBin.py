@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <210916.2147>
+#  Last Modified : <210921.1054>
 #
 #  Description	
 #
@@ -51,6 +51,7 @@ sys.path.append(os.path.dirname(__file__))
 
 import AugerMount
 import Pi4
+import ChargerPS
 
 class FoodBin(object):
     _Width  = 7.5 * 25.4
@@ -180,7 +181,19 @@ class FoodBin(object):
                                             self._Thickness,\
                                             self._pi4StandoffDiameter,\
                                             self._pi4StandoffHeight)
-
+        self.chargerps = ChargerPS.ChargerPSBox(self.name+"_chargerPSox",\
+                                                backOrigin.add(\
+                                                 Base.Vector(self._Thickness*2.5,\
+                                                             0,\
+                                                             -(self._Height-self._BinBottomOffset-3*25.4))))
+        for i in range(1,5):
+            self.back = self.back.cut(\
+                self.chargerps.board.MountingHole(i,backOrigin.y,\
+                                                  -self._Thickness))
+        for i in range(1,3):
+            self.back = self.back.cut(\
+                self.chargerps.transformer.MountingHole(i,backOrigin.y,\
+                                                        -self._Thickness))
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
@@ -222,6 +235,7 @@ class FoodBin(object):
             obj.Shape = self.pi4Standoffs[i]
             obj.Label=self.name+("_standoff%d"%(i))
             obj.ViewObject.ShapeColor=self._StandoffColor
+        self.chargerps.show()
     def cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -260,6 +274,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewFront()
+    Gui.activeDocument().activeView().viewRear()
     Gui.SendMsgToActiveView("ViewFit")
         
