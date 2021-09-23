@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <210921.1054>
+#  Last Modified : <210923.1351>
 #
 #  Description	
 #
@@ -57,7 +57,7 @@ class FoodBin(object):
     _Width  = 7.5 * 25.4
     _Height = 20  * 25.4
     _BinBottomOffset = 4 * 25.4
-    _BackDepth = 2 * 25.4
+    _BackDepth = 2.75 * 25.4
     _Length = 7.5 * 25.4
     _Thickness = .125 * 25.4
     _FingerWidth = .5 * 25.4
@@ -70,6 +70,7 @@ class FoodBin(object):
     _LidColor  = tuple([1.0,1.0,1.0])
     _StandoffColor = tuple([0.0,1.0,1.0])
     _pi4StandoffDiameter = 6
+    _BatteryHeight = (3.7+.125)*25.4
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -132,7 +133,8 @@ class FoodBin(object):
         backOrigin = origin.add(Base.Vector(0,\
                                             self._Length-self._BackDepth,\
                                             self._Height))
-        self.back = Part.makePlane(self._Height,self._Width,backOrigin,NegYNorm)\
+        self.back = Part.makePlane(self._Height,self._Width,backOrigin,\
+                                   NegYNorm)\
                     .extrude(Base.Vector(0,-self._Thickness,0))
         self.back = self.back.cut(self.bottom)
         self.back = self.cutZYfingers(self.back,startz=0,endz=self._Height,\
@@ -148,6 +150,38 @@ class FoodBin(object):
                                         self._Thickness+self._BowlExtension,\
                                    baseOrigin,ZNorm)\
                         .extrude(Base.Vector(0,0,self._BaseThick))
+        batteryBaseOrigin = origin.add(Base.Vector(self._Thickness,\
+                                                   self._Length-\
+                                                   self._BackDepth,0))
+        self.batteryBase = Part.makePlane(self._Width-(2*self._Thickness),\
+                                          self._BackDepth,\
+                                          batteryBaseOrigin,ZNorm)\
+                        .extrude(Base.Vector(0,0,self._BaseThick))
+        self.batteryBack = Part.makePlane(self._BatteryHeight,\
+                                          self._Width-(2*self._Thickness),\
+                                          batteryBaseOrigin.add(Base.Vector(\
+                                            0,self._BackDepth,\
+                                            self._BaseThick+\
+                                            self._BatteryHeight)),\
+                                          NegYNorm)\
+                                   .extrude(Base.Vector(0,-self._Thickness,0))
+        self.batteryTop = Part.makePlane(self._Width-25.4-(2*self._Thickness),\
+                                         self._BackDepth,\
+                                         batteryBaseOrigin.add(\
+                                            Base.Vector(25.4,0,\
+                                        (self._BatteryHeight-self._Thickness)+\
+                                        self._BaseThick)))\
+                        .extrude(Base.Vector(0,0,self._Thickness))
+        self.batteryTop = self.cutXZfingers(self.batteryTop,
+                                            zoffset=(self._BatteryHeight-\
+                                                     self._Thickness)+\
+                                                    self._BaseThick,\
+                                            startx=self._Thickness+25.4,\
+                                            endx=self._Width-\
+                                                  self._Thickness,\
+                                            yoffset=self._Length-\
+                                                    self._Thickness)
+        self.batteryBack = self.batteryBack.cut(self.batteryTop)
         lidOrigin = origin.add(Base.Vector(0,0,self._Height))
         self.lid = Part.makePlane(self._Width,\
                                   self._Length-self._BackDepth,\
@@ -220,6 +254,18 @@ class FoodBin(object):
         obj.Shape = self.base
         obj.Label=self.name+"_base"
         obj.ViewObject.ShapeColor=self._BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_batterybase")
+        obj.Shape = self.batteryBase
+        obj.Label=self.name+"_batterybase"
+        obj.ViewObject.ShapeColor=self._BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_batteryBack")
+        obj.Shape = self.batteryBack
+        obj.Label=self.name+"_batteryBack"
+        obj.ViewObject.ShapeColor=self._Color
+        obj = doc.addObject("Part::Feature",self.name+"_batteryTop")
+        obj.Shape = self.batteryTop
+        obj.Label=self.name+"_batteryTop"
+        obj.ViewObject.ShapeColor=self._Color
         obj = doc.addObject("Part::Feature",self.name+"_lid")
         obj.Shape = self.lid
         obj.Label=self.name+"_lid"
