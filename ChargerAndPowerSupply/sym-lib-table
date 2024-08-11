@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name "ChargerAndPowerSupply-rescue")(type "Legacy")(uri "${KIPRJMOD}/ChargerAndPowerSupply-rescue.lib")(options "")(descr ""))
+  (lib (name "LM2576T-005G")(type "Legacy")(uri "${KIPRJMOD}/LM2576T-005G.lib")(options "")(descr ""))
+)
