@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <210923.1351>
+#  Last Modified : <240812.1516>
 #
 #  Description	
 #
@@ -52,10 +52,12 @@ sys.path.append(os.path.dirname(__file__))
 import AugerMount
 import Pi4
 import ChargerPS
+import TouchDisplay
 
 class FoodBin(object):
-    _Width  = 7.5 * 25.4
+    _Width  = 7.75 * 25.4
     _Height = 20  * 25.4
+    _ExtraHeight = 5 * 25.4
     _BinBottomOffset = 4 * 25.4
     _BackDepth = 2.75 * 25.4
     _Length = 7.5 * 25.4
@@ -123,23 +125,37 @@ class FoodBin(object):
                                         endz=self._Height,\
                                         xoffset=self._Width-self._Thickness)
         leftOrigin = origin.add(Base.Vector(0,self._Length,0))
-        self.left = Part.makePlane(self._Height,self._Length,leftOrigin,XNorm)\
+        self.left = Part.makePlane(self._Height+self._ExtraHeight,self._Length,leftOrigin,XNorm)\
                         .extrude(Base.Vector(self._Thickness,0,0))
         self.left = self.left.cut(self.bottom).cut(self.front)
-        rightOrigin = origin.add(Base.Vector(self._Width,self._Length,self._Height))
-        self.right = Part.makePlane(self._Height,self._Length,rightOrigin,NegXNorm)\
+        leftCutOrigin = leftOrigin.add(Base.Vector(0,-self._BackDepth,self._Height))
+        leftcut = Part.makePlane(self._ExtraHeight,\
+                                 self._Length-self._BackDepth,\
+                                 leftCutOrigin,XNorm)\
+                         .extrude(Base.Vector(self._Thickness,0,0))
+        self.left = self.left.cut(leftcut)
+        rightOrigin = origin.add(Base.Vector(self._Width,self._Length,\
+                        self._Height+self._ExtraHeight))
+        self.right = Part.makePlane(self._Height+self._ExtraHeight,self._Length,rightOrigin,NegXNorm)\
                         .extrude(Base.Vector(-self._Thickness,0,0))
         self.right = self.right.cut(self.bottom).cut(self.front)
+        rightCutOrigin = rightOrigin.add(Base.Vector(0,-self._BackDepth,0))
+        rightcut = Part.makePlane(self._ExtraHeight,\
+                                  self._Length-self._BackDepth,\
+                                  rightCutOrigin,NegXNorm)\
+                         .extrude(Base.Vector(-self._Thickness,0,0))
+        self.right = self.right.cut(rightcut)
         backOrigin = origin.add(Base.Vector(0,\
                                             self._Length-self._BackDepth,\
-                                            self._Height))
-        self.back = Part.makePlane(self._Height,self._Width,backOrigin,\
+                                            self._Height+self._ExtraHeight))
+        self.back = Part.makePlane(self._Height+self._ExtraHeight,\
+                                   self._Width,backOrigin,\
                                    NegYNorm)\
                     .extrude(Base.Vector(0,-self._Thickness,0))
         self.back = self.back.cut(self.bottom)
-        self.back = self.cutZYfingers(self.back,startz=0,endz=self._Height,\
+        self.back = self.cutZYfingers(self.back,startz=0,endz=self._Height+self._ExtraHeight,\
                                       yoffset=self._Length-self._BackDepth-self._Thickness)
-        self.back = self.cutZYfingers(self.back,startz=0,endz=self._Height,\
+        self.back = self.cutZYfingers(self.back,startz=0,endz=self._Height+self._ExtraHeight,\
                                       yoffset=self._Length-self._BackDepth-self._Thickness,\
                                       xoffset=self._Width-self._Thickness)
         self.left = self.left.cut(self.back)
@@ -187,34 +203,35 @@ class FoodBin(object):
                                   self._Length-self._BackDepth,\
                                   lidOrigin,ZNorm)\
                           .extrude(Base.Vector(0,0,self._Thickness))
-        topOrigin = lidOrigin.add(Base.Vector(0,self._Length-self._BackDepth,0))
+        topOrigin = lidOrigin.add(Base.Vector(0,self._Length-self._BackDepth,\
+                                              self._ExtraHeight))
         self.top = Part.makePlane(self._Width,\
                                   self._BackDepth,\
                                   topOrigin,ZNorm)\
                           .extrude(Base.Vector(0,0,self._Thickness))
-        pi4Origin = origin.add(Base.Vector(self._Thickness,\
-                                           self._Length-\
-                                           self._BackDepth-\
-                                           (self._pi4StandoffHeight+\
-                                            self._Thickness),\
-                                           self._BaseThick+\
-                                           self._pi4ZOffset+\
-                                           Pi4.Pi4._Width))
-        self.pi4 = Pi4.Pi4(self.name+"_pi4",pi4Origin)
-        self.left = self.left.cut(self.pi4.usb1Cutout(0,self._Thickness))
-        self.left = self.left.cut(self.pi4.usb2Cutout(0,self._Thickness))
-        self.left = self.left.cut(self.pi4.ethCutout(0,self._Thickness))
-        self.back = self.back.cut(self.pi4.MountingHole(1,backOrigin.y,self._Thickness))
-        self.back = self.back.cut(self.pi4.MountingHole(2,backOrigin.y,self._Thickness))
-        self.back = self.back.cut(self.pi4.MountingHole(3,backOrigin.y,self._Thickness))
-        self.back = self.back.cut(self.pi4.MountingHole(4,backOrigin.y,self._Thickness))
-        self.pi4Standoffs = dict()
-        for i in range(1,5):
-            self.pi4Standoffs[i] = self.pi4.Standoff(i,\
-                                            (self._Length-self._BackDepth)-\
-                                            self._Thickness,\
-                                            self._pi4StandoffDiameter,\
-                                            self._pi4StandoffHeight)
+        #pi4Origin = origin.add(Base.Vector(self._Thickness,\
+        #                                   self._Length-\
+        #                                   self._BackDepth-\
+        #                                   (self._pi4StandoffHeight+\
+        #                                    self._Thickness),\
+        #                                   self._BaseThick+\
+        #                                   self._pi4ZOffset+\
+        #                                   Pi4.Pi4._Width))
+        #self.pi4 = Pi4.Pi4(self.name+"_pi4",pi4Origin)
+        #self.left = self.left.cut(self.pi4.usb1Cutout(0,self._Thickness))
+        #self.left = self.left.cut(self.pi4.usb2Cutout(0,self._Thickness))
+        #self.left = self.left.cut(self.pi4.ethCutout(0,self._Thickness))
+        #self.back = self.back.cut(self.pi4.MountingHole(1,backOrigin.y,self._Thickness))
+        #self.back = self.back.cut(self.pi4.MountingHole(2,backOrigin.y,self._Thickness))
+        #self.back = self.back.cut(self.pi4.MountingHole(3,backOrigin.y,self._Thickness))
+        #self.back = self.back.cut(self.pi4.MountingHole(4,backOrigin.y,self._Thickness))
+        #self.pi4Standoffs = dict()
+        #for i in range(1,5):
+        #    self.pi4Standoffs[i] = self.pi4.Standoff(i,\
+        #                                    (self._Length-self._BackDepth)-\
+        #                                    self._Thickness,\
+        #                                    self._pi4StandoffDiameter,\
+        #                                    self._pi4StandoffHeight)
         self.chargerps = ChargerPS.ChargerPSBox(self.name+"_chargerPSox",\
                                                 backOrigin.add(\
                                                  Base.Vector(self._Thickness*2.5,\
@@ -228,6 +245,12 @@ class FoodBin(object):
             self.back = self.back.cut(\
                 self.chargerps.transformer.MountingHole(i,backOrigin.y,\
                                                         -self._Thickness))
+        screenXOff = (self._Width-TouchDisplay.RaspberryPiTouchDisplay.OuterWidth())/2.0
+        screenZOff = -self._ExtraHeight+((self._ExtraHeight-TouchDisplay.RaspberryPiTouchDisplay.OuterHeight())/2.0)
+        touchOrigin = backOrigin.add(Base.Vector(screenXOff,-(self._Thickness+1),screenZOff))
+        self.screen = TouchDisplay.RaspberryPiTouchDisplay("screen",\
+                                                            touchOrigin)
+        self.back = self.back.cut(self.screen.body)
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
@@ -275,12 +298,13 @@ class FoodBin(object):
         obj.Shape = self.top
         obj.Label=self.name+"_top"
         obj.ViewObject.ShapeColor=self._Color
-        self.pi4.show()
-        for i in range(1,5):
-            obj = doc.addObject("Part::Feature",self.name+("_standoff%d"%(i)))
-            obj.Shape = self.pi4Standoffs[i]
-            obj.Label=self.name+("_standoff%d"%(i))
-            obj.ViewObject.ShapeColor=self._StandoffColor
+        self.screen.show(doc)
+        #self.pi4.show()
+        #for i in range(1,5):
+        #    obj = doc.addObject("Part::Feature",self.name+("_standoff%d"%(i)))
+        #    obj.Shape = self.pi4Standoffs[i]
+        #    obj.Label=self.name+("_standoff%d"%(i))
+        #    obj.ViewObject.ShapeColor=self._StandoffColor
         self.chargerps.show()
     def cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
