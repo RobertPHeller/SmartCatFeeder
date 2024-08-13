@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240812.1516>
+#  Last Modified : <240813.1057>
 #
 #  Description	
 #
@@ -188,15 +188,6 @@ class FoodBin(object):
                                         (self._BatteryHeight-self._Thickness)+\
                                         self._BaseThick)))\
                         .extrude(Base.Vector(0,0,self._Thickness))
-        self.batteryTop = self.cutXZfingers(self.batteryTop,
-                                            zoffset=(self._BatteryHeight-\
-                                                     self._Thickness)+\
-                                                    self._BaseThick,\
-                                            startx=self._Thickness+25.4,\
-                                            endx=self._Width-\
-                                                  self._Thickness,\
-                                            yoffset=self._Length-\
-                                                    self._Thickness)
         self.batteryBack = self.batteryBack.cut(self.batteryTop)
         lidOrigin = origin.add(Base.Vector(0,0,self._Height))
         self.lid = Part.makePlane(self._Width,\
@@ -251,6 +242,7 @@ class FoodBin(object):
         self.screen = TouchDisplay.RaspberryPiTouchDisplay("screen",\
                                                             touchOrigin)
         self.back = self.back.cut(self.screen.body)
+        self.screenbracket = self.screen.MakeMountingBracket(self._Thickness)
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
@@ -306,6 +298,10 @@ class FoodBin(object):
         #    obj.Label=self.name+("_standoff%d"%(i))
         #    obj.ViewObject.ShapeColor=self._StandoffColor
         self.chargerps.show()
+        obj = doc.addObject("Part::Feature",self.name+"_screenBracket")
+        obj.Shape = self.screenbracket
+        obj.Label=self.name+"_screenBracket"
+        obj.ViewObject.ShapeColor=self._StandoffColor
     def cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
