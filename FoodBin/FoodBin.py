@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240813.1436>
+#  Last Modified : <240813.1704>
 #
 #  Description	
 #
@@ -82,9 +82,8 @@ class HalfByHalf(object):
         return beam
 
 class FoodBin(object):
-    __Width  = 7.75 * 25.4
+    __Width  = 7.5 * 25.4
     __Height = 20  * 25.4
-    __ExtraHeight = 5 * 25.4
     __BinBottomOffset = 4 * 25.4
     __BackDepth = 2.75 * 25.4
     __Length = 7.5 * 25.4
@@ -152,37 +151,25 @@ class FoodBin(object):
                                         endz=self.__Height,\
                                         xoffset=self.__Width-self.__Thickness)
         leftOrigin = origin.add(Base.Vector(0,self.__Length,0))
-        self.left = Part.makePlane(self.__Height+self.__ExtraHeight,self.__Length,leftOrigin,XNorm)\
+        self.left = Part.makePlane(self.__Height,self.__Length,leftOrigin,XNorm)\
                         .extrude(Base.Vector(self.__Thickness,0,0))
         self.left = self.left.cut(self.bottom).cut(self.front)
-        leftCutOrigin = leftOrigin.add(Base.Vector(0,-self.__BackDepth,self.__Height))
-        leftcut = Part.makePlane(self.__ExtraHeight,\
-                                 self.__Length-self.__BackDepth,\
-                                 leftCutOrigin,XNorm)\
-                         .extrude(Base.Vector(self.__Thickness,0,0))
-        self.left = self.left.cut(leftcut)
         rightOrigin = origin.add(Base.Vector(self.__Width,self.__Length,\
-                        self.__Height+self.__ExtraHeight))
-        self.right = Part.makePlane(self.__Height+self.__ExtraHeight,self.__Length,rightOrigin,NegXNorm)\
+                        self.__Height))
+        self.right = Part.makePlane(self.__Height,self.__Length,rightOrigin,NegXNorm)\
                         .extrude(Base.Vector(-self.__Thickness,0,0))
         self.right = self.right.cut(self.bottom).cut(self.front)
-        rightCutOrigin = rightOrigin.add(Base.Vector(0,-self.__BackDepth,0))
-        rightcut = Part.makePlane(self.__ExtraHeight,\
-                                  self.__Length-self.__BackDepth,\
-                                  rightCutOrigin,NegXNorm)\
-                         .extrude(Base.Vector(-self.__Thickness,0,0))
-        self.right = self.right.cut(rightcut)
         backOrigin = origin.add(Base.Vector(0,\
                                             self.__Length-self.__BackDepth,\
-                                            self.__Height+self.__ExtraHeight))
-        self.back = Part.makePlane(self.__Height+self.__ExtraHeight,\
+                                            self.__Height))
+        self.back = Part.makePlane(self.__Height,\
                                    self.__Width,backOrigin,\
                                    NegYNorm)\
                     .extrude(Base.Vector(0,-self.__Thickness,0))
         self.back = self.back.cut(self.bottom)
-        self.back = self.__cutZYfingers(self.back,startz=0,endz=self.__Height+self.__ExtraHeight,\
+        self.back = self.__cutZYfingers(self.back,startz=0,endz=self.__Height,\
                                       yoffset=self.__Length-self.__BackDepth-self.__Thickness)
-        self.back = self.__cutZYfingers(self.back,startz=0,endz=self.__Height+self.__ExtraHeight,\
+        self.back = self.__cutZYfingers(self.back,startz=0,endz=self.__Height,\
                                       yoffset=self.__Length-self.__BackDepth-self.__Thickness,\
                                       xoffset=self.__Width-self.__Thickness)
         self.left = self.left.cut(self.back)
@@ -227,21 +214,21 @@ class FoodBin(object):
                                         self.__BaseThick)))\
                         .extrude(Base.Vector(0,0,self.__Thickness))
         self.batteryBack = self.batteryBack.cut(self.batteryTop)
-        self.b1 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,0,\
+        self.b1 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
+                                    self.__Thickness+12.5,\
                                     self.__BatteryHeight-self.__BaseThick)),\
-                                   self.__Length)
+                                   self.__Width-(2*self.__Thickness))
         self.b2 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
                                     self.__BackDepth-self.__Thickness,\
                                     self.__BatteryHeight-self.__BaseThick)),\
-                                   self.__Length)
+                                   self.__Width-(2*self.__Thickness))
         
         lidOrigin = origin.add(Base.Vector(0,0,self.__Height))
         self.lid = Part.makePlane(self.__Width,\
                                   self.__Length-self.__BackDepth,\
                                   lidOrigin,ZNorm)\
                           .extrude(Base.Vector(0,0,self.__Thickness))
-        topOrigin = lidOrigin.add(Base.Vector(0,self.__Length-self.__BackDepth,\
-                                              self.__ExtraHeight))
+        topOrigin = lidOrigin.add(Base.Vector(0,self.__Length-self.__BackDepth,0))
         self.top = Part.makePlane(self.__Width,\
                                   self.__BackDepth,\
                                   topOrigin,ZNorm)\
@@ -282,13 +269,6 @@ class FoodBin(object):
             self.back = self.back.cut(\
                 self.chargerps.transformer.MountingHole(i,backOrigin.y,\
                                                         -self.__Thickness))
-        screenXOff = (self.__Width-TouchDisplay.RaspberryPiTouchDisplay.OuterWidth())/2.0
-        screenZOff = -self.__ExtraHeight+((self.__ExtraHeight-TouchDisplay.RaspberryPiTouchDisplay.OuterHeight())/2.0)
-        touchOrigin = backOrigin.add(Base.Vector(screenXOff,-(self.__Thickness+1),screenZOff))
-        self.screen = TouchDisplay.RaspberryPiTouchDisplay("screen",\
-                                                            touchOrigin)
-        self.back = self.back.cut(self.screen.body)
-        self.screenbracket = self.screen.MakeMountingBracket(self.__Thickness)
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
@@ -344,7 +324,6 @@ class FoodBin(object):
         obj.Shape = self.top
         obj.Label=self.name+"_top"
         obj.ViewObject.ShapeColor=self.__Color
-        self.screen.show(doc)
         #self.pi4.show()
         #for i in range(1,5):
         #    obj = doc.addObject("Part::Feature",self.name+("_standoff%d"%(i)))
@@ -352,10 +331,6 @@ class FoodBin(object):
         #    obj.Label=self.name+("_standoff%d"%(i))
         #    obj.ViewObject.ShapeColor=self.__StandoffColor
         self.chargerps.show()
-        obj = doc.addObject("Part::Feature",self.name+"_screenBracket")
-        obj.Shape = self.screenbracket
-        obj.Label=self.name+"_screenBracket"
-        obj.ViewObject.ShapeColor=self.__StandoffColor
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
