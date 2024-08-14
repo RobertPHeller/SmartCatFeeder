@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240813.1704>
+#  Last Modified : <240814.1632>
 #
 #  Description	
 #
@@ -52,7 +52,7 @@ sys.path.append(os.path.dirname(__file__))
 import AugerMount
 import Pi4
 import ChargerPS
-import TouchDisplay
+import Adafruit
 
 class HalfByHalf(object):
     __Width = .5 * 25.4
@@ -91,14 +91,14 @@ class FoodBin(object):
     __FingerWidth = .5 * 25.4
     __BaseThick = (3.0/8.0) * 25.4
     __BowlExtension = 4 * 25.4
-    __pi4StandoffHeight = 6
-    __pi4ZOffset = 6
+    __Adafruit35inTFTZOff = 30
+    __Adafruit35inTFTYOff = 30
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     __BaseColor = tuple([1.0,1.0,0.0])
     __LidColor  = tuple([1.0,1.0,1.0])
     __StandoffColor = tuple([0.0,1.0,1.0])
-    __pi4StandoffDiameter = 6
     __BatteryHeight = (3.7+.125)*25.4
+    __ChargerAboveBinBottom = 5*25.4
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -233,34 +233,20 @@ class FoodBin(object):
                                   self.__BackDepth,\
                                   topOrigin,ZNorm)\
                           .extrude(Base.Vector(0,0,self.__Thickness))
-        #pi4Origin = origin.add(Base.Vector(self.__Thickness,\
-        #                                   self.__Length-\
-        #                                   self.__BackDepth-\
-        #                                   (self.__pi4StandoffHeight+\
-        #                                    self.__Thickness),\
-        #                                   self.__BaseThick+\
-        #                                   self.__pi4ZOffset+\
-        #                                   Pi4.Pi4.__Width))
-        #self.pi4 = Pi4.Pi4(self.name+"__pi4",pi4Origin)
-        #self.left = self.left.cut(self.pi4.usb1Cutout(0,self.__Thickness))
-        #self.left = self.left.cut(self.pi4.usb2Cutout(0,self.__Thickness))
-        #self.left = self.left.cut(self.pi4.ethCutout(0,self.__Thickness))
-        #self.back = self.back.cut(self.pi4.MountingHole(1,backOrigin.y,self.__Thickness))
-        #self.back = self.back.cut(self.pi4.MountingHole(2,backOrigin.y,self.__Thickness))
-        #self.back = self.back.cut(self.pi4.MountingHole(3,backOrigin.y,self.__Thickness))
-        #self.back = self.back.cut(self.pi4.MountingHole(4,backOrigin.y,self.__Thickness))
-        #self.pi4Standoffs = dict()
-        #for i in range(1,5):
-        #    self.pi4Standoffs[i] = self.pi4.Standoff(i,\
-        #                                    (self.__Length-self.__BackDepth)-\
-        #                                    self.__Thickness,\
-        #                                    self.__pi4StandoffDiameter,\
-        #                                    self.__pi4StandoffHeight)
+        self.adafruitTFT = Adafruit.AdafruitTFTFeatherWing(self.name+"_adafruitTFT",\
+                                                            origin.add(Base.Vector(self.__Thickness,\
+                                                                       self.__Adafruit35inTFTYOff,\
+                                                                       self.__Adafruit35inTFTZOff)))
+        self.left = self.left.cut(self.adafruitTFT.ScreenCutout(-self.__Thickness))
+        self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(0,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(1,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(2,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(3,0,self.__Thickness))
         self.chargerps = ChargerPS.ChargerPSBox(self.name+"__chargerPSox",\
                                                 backOrigin.add(\
                                                  Base.Vector(self.__Thickness*2.5,\
                                                              0,\
-                                                             -(self.__Height-self.__BinBottomOffset-3*25.4))))
+                                                             -(self.__Height-self.__BinBottomOffset-self.__ChargerAboveBinBottom))))
         for i in range(1,5):
             self.back = self.back.cut(\
                 self.chargerps.board.MountingHole(i,backOrigin.y,\
@@ -324,12 +310,7 @@ class FoodBin(object):
         obj.Shape = self.top
         obj.Label=self.name+"_top"
         obj.ViewObject.ShapeColor=self.__Color
-        #self.pi4.show()
-        #for i in range(1,5):
-        #    obj = doc.addObject("Part::Feature",self.name+("_standoff%d"%(i)))
-        #    obj.Shape = self.pi4Standoffs[i]
-        #    obj.Label=self.name+("_standoff%d"%(i))
-        #    obj.ViewObject.ShapeColor=self.__StandoffColor
+        self.adafruitTFT.show()
         self.chargerps.show()
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
