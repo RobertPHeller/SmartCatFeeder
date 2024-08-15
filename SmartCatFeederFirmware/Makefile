@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Thu Aug 15 14:29:40 2024
-#  Last Modified : <240815.1526>
+#  Last Modified : <240815.1735>
 #
 #  Description	
 #
@@ -49,9 +49,12 @@ SOURCES = $(wildcard *.cpp) $(wildcard *.h)
 
 all: stamp
 
-stamp: $(INO) $(SOURCES)
+stamp: $(INO) $(SOURCES) Revision.h
 	arduino --verbose --verify --board esp32:esp32:adafruit_feather_esp32s3 $(INO)
 	touch stamp
 
 upload: $(INO) $(SOURCES)
 	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 $(INO)
+
+Revision.h: ../.git/index
+	python3 ./Revision.py

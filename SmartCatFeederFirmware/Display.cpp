@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:12:55 2024
-//  Last Modified : <240815.1529>
+//  Last Modified : <240815.1746>
 //
 //  Description	
 //
@@ -50,6 +50,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <Adafruit_TSC2007.h>
 #include "Display.h"
 
+#include "Revision.h"
 
 #define STMPE_CS 6
 #define TFT_CS   9
@@ -79,9 +80,17 @@ Adafruit_TSC2007 ts = Adafruit_TSC2007();             // newer rev 2 touch conto
 void Initialize()
 {
     tft.begin();
+    tft.setRotation(1);
     tft.fillScreen(HX8357_BLACK);
+    tft.setTextColor(HX8357_WHITE);
+    tft.setTextSize(5);
+    tft.println(PROGRAM_NAME);
+    tft.setTextSize(3);
+    tft.println(BUILD_TIME);
+    tft.println(BUILT_BY);
+    tft.println(REVISION_GIT_HASH);
     if (! ts.begin(0x48, &Wire)) {
-        Serial.println("Couldn't start TSC2007 touchscreen controller");
+        PrintError("Couldn't start TSC2007 touchscreen controller");
         while (1) delay(100);
     }
     
@@ -90,5 +99,11 @@ void Initialize()
     pinMode(TSC_IRQ, INPUT);
 }
 
+void PrintError(const char *message)
+{
+    tft.setTextSize(3);
+    tft.setTextColor(HX8357_RED);
+    tft.println(message);
+}
 
 }

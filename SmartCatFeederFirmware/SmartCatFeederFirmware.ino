@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240815.1542>
+//  Last Modified : <240815.1748>
 //
 //  Description	
 //
@@ -69,7 +69,7 @@ void setup() {
     Serial.begin(115200);
     Display::Initialize();
     if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
-        Serial.println("SPIFFS Mount Failed");
+        Display::PrintError("SPIFFS Mount Failed");
         while (1) delay(100);
     }
     //Networking::Initialize();

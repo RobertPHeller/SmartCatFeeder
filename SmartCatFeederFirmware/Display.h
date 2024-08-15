@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:01:25 2024
-//  Last Modified : <240815.1502>
+//  Last Modified : <240815.1746>
 //
 //  Description	
 //
@@ -53,7 +53,7 @@
 namespace Display {
 
 extern void Initialize();
-
+extern void PrintError(const char *message);
 }
 #endif // __DISPLAY_H
 
