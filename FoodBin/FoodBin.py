@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240814.1632>
+#  Last Modified : <240814.1901>
 #
 #  Description	
 #
@@ -99,6 +99,7 @@ class FoodBin(object):
     __StandoffColor = tuple([0.0,1.0,1.0])
     __BatteryHeight = (3.7+.125)*25.4
     __ChargerAboveBinBottom = 5*25.4
+    __wireHoleRadius = .5*25.4
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -255,6 +256,14 @@ class FoodBin(object):
             self.back = self.back.cut(\
                 self.chargerps.transformer.MountingHole(i,backOrigin.y,\
                                                         -self.__Thickness))
+        wireHoleOrigin = batteryBaseOrigin.add(Base.Vector(self.__wireHoleRadius,\
+                                                           -self.__Thickness,\
+                                                           self.__BatteryHeight-self.__BaseThick-self.__wireHoleRadius))
+        wireHole = Part.Face(Part.Wire(Part.makeCircle(self.__wireHoleRadius,\
+                                                       wireHoleOrigin,\
+                                                       Base.Vector(0,1,0))))\
+                          .extrude(Base.Vector(0,self.__Thickness,0))
+        self.back = self.back.cut(wireHole)
     def show(self):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
