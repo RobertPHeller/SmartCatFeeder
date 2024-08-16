@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240814.1901>
+#  Last Modified : <240815.2244>
 #
 #  Description	
 #
@@ -258,7 +258,7 @@ class FoodBin(object):
                                                         -self.__Thickness))
         wireHoleOrigin = batteryBaseOrigin.add(Base.Vector(self.__wireHoleRadius,\
                                                            -self.__Thickness,\
-                                                           self.__BatteryHeight-self.__BaseThick-self.__wireHoleRadius))
+                                                           self.__BatteryHeight-self.__BaseThick-(2*self.__wireHoleRadius)))
         wireHole = Part.Face(Part.Wire(Part.makeCircle(self.__wireHoleRadius,\
                                                        wireHoleOrigin,\
                                                        Base.Vector(0,1,0))))\
