@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Thu Aug 15 14:29:40 2024
-#  Last Modified : <240815.1754>
+#  Last Modified : <240816.2310>
 #
 #  Description	
 #
@@ -49,11 +49,13 @@ SOURCES = $(wildcard *.cpp) $(wildcard *.h)
 
 all: stamp
 
-stamp: $(INO) $(SOURCES) Revision.h
-	arduino --verbose --verify --board esp32:esp32:adafruit_feather_esp32s3 $(INO)
+stamp: $(INO) $(SOURCES) Revision.h partitions.csv
+	arduino --verbose --verify \
+		--board esp32:esp32:adafruit_feather_esp32s3 \
+		--preserve-temp-files $(INO)
 	touch stamp
 
-upload: $(INO) $(SOURCES) Revision.h
+upload: $(INO) $(SOURCES) Revision.h partitions.csv
 	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 $(INO)
 
 Revision.h: FORCE

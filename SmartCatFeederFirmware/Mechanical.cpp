@@ -1,4 +1,4 @@
-// -!- c++ -!- //////////////////////////////////////////////////////////////
+// -!- C++ -!- //////////////////////////////////////////////////////////////
 //
 //  System        : 
 //  Module        : 
@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Thu Aug 15 15:02:53 2024
-//  Last Modified : <240816.1705>
+//  Created       : Fri Aug 16 16:27:29 2024
+//  Last Modified : <240816.1627>
 //
 //  Description	
 //
@@ -35,27 +35,22 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file Clock.h
+/// @file Mechanical.cpp
 /// @author Robert Heller
-/// @date Thu Aug 15 15:02:53 2024
+/// @date Fri Aug 16 16:27:29 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CLOCK_H
-#define __CLOCK_H
+static const char rcsid[] = "@(#) : $Id$";
 
-namespace Clock {
 
-extern void Initialize();
-typedef struct TimeOfDayStruct {
-    uint8_t Hour;
-    uint8_t Minute;
-} TimeOfDay;
+#include <Adafruit_MotorShield.h>
 
-void timeavailable(struct timeval *t);
+namespace Mechanical {
 
+void Initialize()
+{
 }
 
-#endif // __CLOCK_H
-
+}

@@ -83,3 +83,6 @@ openmrnpath.mk
 
 Revision.h
 stamp
+*#
+make.log
+

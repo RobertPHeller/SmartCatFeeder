@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 14:56:50 2024
-//  Last Modified : <240815.1500>
+//  Last Modified : <240816.1309>
 //
 //  Description	
 //
@@ -46,9 +46,16 @@
 #define __NETWORKING_H
 
 #include <WiFi.h>
-#include <FS.h>
-#include <SPIFFS.h>
+#include <ESPmDNS.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <time.h>
+#include <esp_sntp.h>
 
+
+#include "Preferences.h"
+#include "Clock.h"
+//#include "FeedWebServer.h"
 
 namespace Networking {
 

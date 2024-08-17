@@ -1,4 +1,4 @@
-// -!- c++ -!- //////////////////////////////////////////////////////////////
+// -!- C++ -!- //////////////////////////////////////////////////////////////
 //
 //  System        : 
 //  Module        : 
@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Thu Aug 15 15:02:53 2024
-//  Last Modified : <240816.1705>
+//  Created       : Fri Aug 16 21:32:10 2024
+//  Last Modified : <240816.2204>
 //
 //  Description	
 //
@@ -35,27 +35,34 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file Clock.h
+/// @file FeedWebServer.cpp
 /// @author Robert Heller
-/// @date Thu Aug 15 15:02:53 2024
+/// @date Fri Aug 16 21:32:10 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CLOCK_H
-#define __CLOCK_H
+static const char rcsid[] = "@(#) : $Id$";
 
-namespace Clock {
+#include <WiFi.h>
+#include <ESPmDNS.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
 
-extern void Initialize();
-typedef struct TimeOfDayStruct {
-    uint8_t Hour;
-    uint8_t Minute;
-} TimeOfDay;
 
-void timeavailable(struct timeval *t);
+namespace FeedWebServer {
 
+static WebServer server(80);
+
+void Initialize()
+{
+    //server.on("/", WelcomeAndLogin);
+    //server.onNotFound(FourZeroFour);
+    //server.begin();
 }
 
-#endif // __CLOCK_H
-
+void CheckWebserver()
+{
+    //server.handleClient();
+}
+}

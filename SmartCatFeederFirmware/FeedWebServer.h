@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Thu Aug 15 15:02:53 2024
-//  Last Modified : <240816.1705>
+//  Created       : Fri Aug 16 21:31:26 2024
+//  Last Modified : <240816.2144>
 //
 //  Description	
 //
@@ -35,27 +35,23 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file Clock.h
+/// @file FeedWebServer.h
 /// @author Robert Heller
-/// @date Thu Aug 15 15:02:53 2024
+/// @date Fri Aug 16 21:31:26 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CLOCK_H
-#define __CLOCK_H
+#ifndef __FEEDWEBSERVER_H
+#define __FEEDWEBSERVER_H
 
-namespace Clock {
+namespace FeedWebServer {
 
 extern void Initialize();
-typedef struct TimeOfDayStruct {
-    uint8_t Hour;
-    uint8_t Minute;
-} TimeOfDay;
+extern void CheckWebserver();
 
-void timeavailable(struct timeval *t);
 
 }
 
-#endif // __CLOCK_H
+#endif // __FEEDWEBSERVER_H
 

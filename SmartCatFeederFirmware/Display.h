@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:01:25 2024
-//  Last Modified : <240815.1746>
+//  Last Modified : <240816.2120>
 //
 //  Description	
 //
@@ -54,6 +54,9 @@ namespace Display {
 
 extern void Initialize();
 extern void PrintError(const char *message);
+extern Adafruit_HX8357 Display;
+extern Adafruit_TSC2007 TouchScreen;
+extern int16_t TSMin_x, TSMax_x, TSMin_y, TSMax_y;
 }
 #endif // __DISPLAY_H
 

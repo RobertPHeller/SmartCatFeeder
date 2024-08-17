@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:05:27 2024
-//  Last Modified : <240815.1506>
+//  Last Modified : <240816.1628>
 //
 //  Description	
 //
@@ -45,13 +45,11 @@
 #ifndef __SENSORS_H
 #define __SENSORS_H
 
-#include <Adafruit_NAU7802.h>
-#include <Adafruit_VL6180X.h>
 
 namespace Sensors {
 
 extern void Initialize();
-
+typedef uint16_t Weight;
 }
 
 #endif // __SENSORS_H

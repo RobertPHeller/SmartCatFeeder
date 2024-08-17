@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240815.1748>
+//  Last Modified : <240816.2131>
 //
 //  Description	
 //
@@ -62,6 +62,13 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "Clock.h"
 #include "Mechanical.h"
 #include "Sensors.h"
+#include "Preferences.h"
+#include "Schedule.h"
+#include "FeedWebServer.h"
+
+DEFINE_SINGLETON_INSTANCE(Preferences::Preferences);
+static Preferences::Preferences prefs("/Preferences.dat");
+DECLARESCHEDULE;
 
 #define FORMAT_SPIFFS_IF_FAILED true
 void setup() {
@@ -72,10 +79,12 @@ void setup() {
         Display::PrintError("SPIFFS Mount Failed");
         while (1) delay(100);
     }
-    //Networking::Initialize();
-    //Clock::Initialize();
-    //Mechanical::Initialize();
-    //Sensors::Initialize();
+    prefs.Read();
+    Schedule::Schedule::Read("/Schedule.dat");
+    Clock::Initialize();
+    Networking::Initialize();
+    Mechanical::Initialize();
+    Sensors::Initialize();
 }
                 
 void loop() {

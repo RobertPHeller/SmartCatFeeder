@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Thu Aug 15 15:12:55 2024
-//  Last Modified : <240816.2119>
+//  Created       : Fri Aug 16 16:25:46 2024
+//  Last Modified : <240816.2203>
 //
 //  Description	
 //
@@ -35,76 +35,54 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file Display.cc
+/// @file Clock.cpp
 /// @author Robert Heller
-/// @date Thu Aug 15 15:12:55 2024
+/// @date Fri Aug 16 16:25:46 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
 static const char rcsid[] = "@(#) : $Id$";
 
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_HX8357.h>
-#include <Adafruit_TSC2007.h>
+#include <time.h>
+#include <esp_sntp.h>
+#include <RTClib.h>
+#include <FS.h>
+#include <SPIFFS.h>
 #include "Display.h"
+#include "Preferences.h"
+namespace Clock {
 
-#include "Revision.h"
+static RTC_PCF8523 rtc;
 
-#define STMPE_CS 6
-#define TFT_CS   9
-#define TFT_DC   10
-#define SD_CS    5
-
-#define TFT_RST -1
-
-// For TSC2007
-#define TSC_TS_MINX 300
-#define TSC_TS_MAXX 3800
-#define TSC_TS_MINY 185
-#define TSC_TS_MAXY 3700
-
-
-namespace Display {
-
-// we will assign the calibration values on init
-int16_t TSMin_x, TSMax_x, TSMin_y, TSMax_y;
-// Use hardware SPI and the above for CS/DC
-
-Adafruit_HX8357 Display = Adafruit_HX8357(TFT_CS, TFT_DC, TFT_RST);
-#define TSC_IRQ STMPE_CS
-Adafruit_TSC2007 TouchScreen = Adafruit_TSC2007();             // newer rev 2 touch contoller
-
-
+static const char* ntpServer1 = "pool.ntp.org";
+static const char* ntpServer2 = "time.nist.gov";
 
 void Initialize()
 {
-    Display.begin();
-    Display.setRotation(1);
-    Display.fillScreen(HX8357_BLACK);
-    Display.setTextColor(HX8357_WHITE);
-    Display.setTextSize(5);
-    Display.println(PROGRAM_NAME);
-    Display.setTextSize(3);
-    Display.println(BUILD_TIME);
-    Display.println(BUILT_BY);
-    Display.println(REVISION_GIT_HASH);
-    if (! TouchScreen.begin(0x48, &Wire)) {
-        PrintError("Couldn't start TSC2007 touchscreen controller");
+    struct timespec thetime = {0,0};
+    if (! rtc.begin()) {
+        Display::PrintError("Couldn't find RTC");
         while (1) delay(100);
     }
     
-    TSMin_x = TSC_TS_MINX; TSMax_x = TSC_TS_MAXX;
-    TSMin_y = TSC_TS_MINY; TSMax_y = TSC_TS_MAXY;
-    pinMode(TSC_IRQ, INPUT);
+    if (! rtc.initialized() || rtc.lostPower()) {
+        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    }
+    
+    rtc.start();
+    uint32_t time = rtc.now().unixtime();
+    thetime.tv_sec = time;
+    clock_settime (CLOCK_REALTIME, &thetime);
+    configTzTime(Preferences::Preferences::instance()->GetTimeZone(), 
+                 ntpServer1, ntpServer2);
 }
 
-void PrintError(const char *message)
+void timeavailable(struct timeval *t)
 {
-    Display.setTextSize(3);
-    Display.setTextColor(HX8357_RED);
-    Display.println(message);
+    rtc.adjust(DateTime((uint32_t)(t->tv_sec)));
 }
 
 }
+
+
