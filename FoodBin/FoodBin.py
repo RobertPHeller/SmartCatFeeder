@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240815.2244>
+#  Last Modified : <240818.0937>
 #
 #  Description	
 #
@@ -93,6 +93,11 @@ class FoodBin(object):
     __BowlExtension = 4 * 25.4
     __Adafruit35inTFTZOff = 30
     __Adafruit35inTFTYOff = 30
+    __AdafruitPCF8523ZOff = 30+(1.3*25.4)
+    __AdafruitPCF8523YOff = 2+25.4
+    __AdafruitPCF8523XOff = Adafruit.AdafruitPCF8523.RaisedBoardHeight()
+    __AdafruitNAU7802YOff = 2+25.4
+    __AdafruitNAU7802ZOff = 30
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     __BaseColor = tuple([1.0,1.0,0.0])
     __LidColor  = tuple([1.0,1.0,1.0])
@@ -243,6 +248,22 @@ class FoodBin(object):
         self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(1,0,self.__Thickness))
         self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(2,0,self.__Thickness))
         self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(3,0,self.__Thickness))
+        self.adafruitPCF8523 = Adafruit.AdafruitPCF8523(self.name+"_adafruitPCF8523",\
+                                               origin.add(Base.Vector(self.__Thickness+self.__AdafruitPCF8523XOff,\
+                                                                      self.__AdafruitPCF8523YOff,\
+                                                                      self.__AdafruitPCF8523ZOff)))
+        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(0,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(1,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(2,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(3,0,self.__Thickness))
+        self.adafruitNAU7802 = Adafruit.AdafruitNAU7802(self.name+"_adafruitNAU7802",\
+                                                        origin.add(Base.Vector(self.__Thickness,\
+                                                                      self.__AdafruitNAU7802YOff,\
+                                                                      self.__AdafruitNAU7802ZOff)))
+        self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(0,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(1,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(2,0,self.__Thickness))
+        self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(3,0,self.__Thickness))
         self.chargerps = ChargerPS.ChargerPSBox(self.name+"__chargerPSox",\
                                                 backOrigin.add(\
                                                  Base.Vector(self.__Thickness*2.5,\
@@ -320,6 +341,8 @@ class FoodBin(object):
         obj.Label=self.name+"_top"
         obj.ViewObject.ShapeColor=self.__Color
         self.adafruitTFT.show()
+        self.adafruitPCF8523.show()
+        self.adafruitNAU7802.show()
         self.chargerps.show()
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
@@ -359,6 +382,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewRear()
+    Gui.activeDocument().activeView().viewFront()
     Gui.SendMsgToActiveView("ViewFit")
         
