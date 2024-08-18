@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:04:21 2024
-//  Last Modified : <240815.1505>
+//  Last Modified : <240817.2021>
 //
 //  Description	
 //
@@ -45,7 +45,6 @@
 #ifndef __MECHANICAL_H
 #define __MECHANICAL_H
 
-#include <Adafruit_MotorShield.h>
 
 namespace Mechanical {
 

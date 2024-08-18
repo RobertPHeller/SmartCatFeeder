@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 21:31:26 2024
-//  Last Modified : <240816.2144>
+//  Last Modified : <240817.1351>
 //
 //  Description	
 //
@@ -45,10 +45,46 @@
 #ifndef __FEEDWEBSERVER_H
 #define __FEEDWEBSERVER_H
 
+#include <WebServer.h>
+#include "Singleton.h"
+
 namespace FeedWebServer {
 
-extern void Initialize();
-extern void CheckWebserver();
+class FeedWebServer : public WebServer, public Singleton<FeedWebServer>
+{
+public:
+    FeedWebServer() \
+                : WebServer(80)
+    {
+    }
+    static void StartServer()
+    {
+        instance()->_startServer();
+    }
+private:
+    void _startServer()
+    {
+        on("/", Welcome);
+        on("/style.css", SendStyle);
+        on("/javascript.js", SendJavaScript);
+        on("/Robot1-110.png", SendRobot1_110);
+        onNotFound(NotFound);
+        begin();
+    }
+    static void Welcome() {instance()->_welcome();}
+    void _welcome();
+    static void NotFound() {instance()->_notFound();}
+    void _notFound();
+    static void SendStyle() {instance()->_sendStyle();}
+    void _sendStyle();
+    static void SendJavaScript() {instance()->_sendJavaScript();}
+    void _sendJavaScript();
+    static void SendRobot1_110() {instance()->_sendRobot1_110();}
+    void _sendRobot1_110();
+    String header_(String title);
+    String footer_();
+};
+
 
 
 }

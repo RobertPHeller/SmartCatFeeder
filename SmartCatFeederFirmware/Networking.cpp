@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:24:16 2024
-//  Last Modified : <240816.2130>
+//  Last Modified : <240817.2011>
 //
 //  Description	
 //
@@ -57,6 +57,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "Clock.h"
 #include "Display.h"
 #include "Networking.h"
+#include "FeedWebServer.h"
 
 namespace Networking {
 
@@ -78,12 +79,11 @@ void Initialize()
             delay(500);
             Display::Display.print(".");
         }
+        Display::Display.println("");
         if (WiFi.status() != WL_CONNECTED) {
-            Display::Display.println("");
             Display::PrintError("Not Connected: Network not initialized.");
             return;
         }
-        Display::Display.println("");
         Display::Display.print("Connected to ");
         Display::Display.println(ssid);
         Display::Display.print("IP address: ");
@@ -95,7 +95,9 @@ void Initialize()
             return;
         }
         Display::Display.println("mDNS responder started");
-        
+        FeedWebServer::FeedWebServer::StartServer();
+        // Add service to MDNS-SD
+        MDNS.addService("http", "tcp", 80);
     }
 }
 

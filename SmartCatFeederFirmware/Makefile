@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Thu Aug 15 14:29:40 2024
-#  Last Modified : <240816.2310>
+#  Last Modified : <240817.0819>
 #
 #  Description	
 #
@@ -52,11 +52,13 @@ all: stamp
 stamp: $(INO) $(SOURCES) Revision.h partitions.csv
 	arduino --verbose --verify \
 		--board esp32:esp32:adafruit_feather_esp32s3 \
-		--preserve-temp-files $(INO)
+		--preserve-temp-files --pref upload.maximum_size=3932160\
+		 $(INO)
 	touch stamp
 
 upload: $(INO) $(SOURCES) Revision.h partitions.csv
-	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 $(INO)
+	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 \
+	--pref upload.maximum_size=3932160 $(INO)
 
 Revision.h: FORCE
 	python3 ./Revision.py -d -t -H -U

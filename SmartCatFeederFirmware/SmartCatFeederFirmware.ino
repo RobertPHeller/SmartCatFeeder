@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240816.2131>
+//  Last Modified : <240817.0827>
 //
 //  Description	
 //
@@ -89,4 +89,5 @@ void setup() {
                 
 void loop() {
     // put your main code here, to run repeatedly:
+    FeedWebServer::FeedWebServer::instance()->handleClient();
 }    
