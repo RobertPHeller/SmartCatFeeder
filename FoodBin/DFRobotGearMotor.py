@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Aug 18 11:37:13 2024
-#  Last Modified : <240818.2148>
+#  Last Modified : <240818.2217>
 #
 #  Description	
 #
@@ -319,7 +319,6 @@ class GearMotorMount(object):
     __PipeInner    = 41
     __FlangeHeight = 8
     __FlangeDiameter = 57.78
-    __MountHoleTap = 2.5/2
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -351,25 +350,25 @@ class GearMotorMount(object):
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1(),\
                                               DFRobotGearMotor.MountingHoleY1(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1(),\
                                               DFRobotGearMotor.MountingHoleY2(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2(),\
                                               DFRobotGearMotor.MountingHoleY1(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2(),\
                                               DFRobotGearMotor.MountingHoleY2(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
         self.part = part
