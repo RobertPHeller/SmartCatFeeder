@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Aug 18 11:37:13 2024
-#  Last Modified : <240818.1748>
+#  Last Modified : <240818.2142>
 #
 #  Description	
 #
@@ -51,7 +51,13 @@ sys.path.append(os.path.dirname(__file__))
 
 class DFRobotGearMotor(object):
     __GearBoxHeight = 46
+    @classmethod
+    def GearBoxHeight(cls):
+        return cls.__GearBoxHeight
     __GearBoxWidth  = 32
+    @classmethod
+    def GearBoxWidth(cls):
+        return cls.__GearBoxWidth
     __GearBoxDepth  = 25.2-2.0
     __GearBoxSpacers = 2.0
     __MotorHeight   = 30.8
@@ -64,13 +70,37 @@ class DFRobotGearMotor(object):
     __ShaftClearHole = 6.5
     __ShaftLength   = 18.5
     __ShaftX        = 16
+    @classmethod
+    def ShaftX(cls):
+        return cls.__ShaftX
     __ShaftZ        = 46-(6+9)
+    @classmethod
+    def ShaftY(cls):
+        return cls.__ShaftZ
     __ShaftSpacerDia = 12 # Guess 
+    @classmethod
+    def ShaftSpacerDia(cls):
+        return cls.__ShaftSpacerDia
     __MountingHoleX1 = (32-18)/2
+    @classmethod
+    def MountingHoleX1(cls):
+        return cls.__MountingHoleX1
     __MountingHoleX2 = 32-((32-18)/2)
+    @classmethod
+    def MountingHoleX2(cls):
+        return cls.__MountingHoleX2
     __MountingHoleZ1 = 7
+    @classmethod
+    def MountingHoleY1(cls):
+        return cls.__MountingHoleZ1
     __MountingHoleZ2 = 46-6
+    @classmethod
+    def MountingHoleY2(cls):
+        return cls.__MountingHoleZ2
     __MountingHoleDia = 3.6
+    @classmethod
+    def MountingHoleDia(cls):
+        return cls.__MountingHoleDia
     __MountingHoleSpacerDia = 8 # Guess
     @classmethod
     def CutShaftZ(cls,origin,part,length):
@@ -215,7 +245,7 @@ def radians(degrees):
 class AugerMountPlate(MotorDrivePlate):
     __MountHoleRadius = (16.5+11.5)/2
     __SmallPeg    = 1
-    __LargeHole    = 2.5
+    __LargeHole    = 3.3/2
     __PegLength   = 6
     __StartAngle  = 30
     __DeltaAngle  = 90
@@ -282,12 +312,80 @@ class AgitatorMountPlate(MotorDrivePlate):
         screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig))).extrude(Base.Vector(0,0,self.PlateThick))
         self.plate = self.plate.cut(screwHole)
         
+
+class GearMotorMount(object):
+    __PipeDiameter = 48
+    __PipeHeight   = 14.5
+    __PipeInner    = 41
+    __FlangeHeight = 8
+    __FlangeDiameter = 57.78
+    __MountHoleTap = 2.5/2
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        flange = Part.Face(Part.Wire(Part.makeCircle(self.__FlangeDiameter/2.0,\
+                                                     origin)))\
+                                      .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        pipe = Part.Face(Part.Wire(Part.makeCircle(self.__PipeDiameter/2.0,\
+                                                   origin.add(Base.Vector(0,0,self.__FlangeHeight)))))\
+                                      .extrude(Base.Vector(0,0,self.__PipeHeight))
+        part = flange.fuse(pipe)
+        mountFaceOrigin = origin.add(Base.Vector(-DFRobotGearMotor.ShaftX(),\
+                                                 -(DFRobotGearMotor.GearBoxHeight()-DFRobotGearMotor.ShaftY()),0))
+        mountFace = Part.makePlane(DFRobotGearMotor.GearBoxWidth(),\
+                                   DFRobotGearMotor.GearBoxHeight(),\
+                                   mountFaceOrigin)\
+                           .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        part = part.fuse(mountFace)
+        pipeInner = Part.Face(Part.Wire(Part.makeCircle(self.__PipeInner/2.0,\
+                                                origin.add(Base.Vector(0,0,\
+                                                self.__FlangeHeight)))))\
+                                       .extrude(Base.Vector(0,0,self.__PipeHeight))
+        part = part.cut(pipeInner)
+        shaftSpacer = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.ShaftSpacerDia()/2,\
+                                                          origin)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        part = part.cut(shaftSpacer)
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1(),\
+                                              DFRobotGearMotor.MountingHoleY1(),\
+                                              0))
+        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        part = part.cut(mh)
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1(),\
+                                              DFRobotGearMotor.MountingHoleY2(),\
+                                              0))
+        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        part = part.cut(mh)
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2(),\
+                                              DFRobotGearMotor.MountingHoleY1(),\
+                                              0))
+        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        part = part.cut(mh)
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2(),\
+                                              DFRobotGearMotor.MountingHoleY2(),\
+                                              0))
+        mh = Part.Face(Part.Wire(Part.makeCircle(self.__MountHoleTap,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight))
+        part = part.cut(mh)
+        self.part = part
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name)
+        obj.Shape = self.part
+        obj.Label=self.name
+        obj.ViewObject.ShapeColor=tuple([0.5,0.5,0.5])
     
 if __name__ == '__main__':
     if "Motor" in App.listDocuments().keys():
         App.closeDocument("Motor")
     doc = App.newDocument("Motor")
-    plate = AgitatorMountPlate("AgitatorPlate",Base.Vector(0,0,0))
-    plate.show(doc)
+    mount = GearMotorMount("mount",Base.Vector(0,0,0))
+    mount.show(doc)
     Gui.activeDocument().activeView().viewTop()
     Gui.SendMsgToActiveView("ViewFit")
