@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240818.0937>
+#  Last Modified : <240819.1358>
 #
 #  Description	
 #
@@ -53,6 +53,7 @@ import AugerMount
 import Pi4
 import ChargerPS
 import Adafruit
+import DFRobotGearMotor
 
 class HalfByHalf(object):
     __Width = .5 * 25.4
@@ -80,6 +81,87 @@ class HalfByHalf(object):
                               Base.Vector(0,1,0))\
                   .extrude(Base.Vector(0,length,0))
         return beam
+
+            
+import math
+
+def radians(degrees):
+    return (degrees/180)*math.pi
+
+class Agitator(object):
+    __AgitatorDiskDiameter = 50.8 # 2"
+    __DiskThickness = .125 * 25.4
+    __CenterDowelDiameter = 12.5 # 1/2"
+    __OuterDowelDiameter = 6.25  # 1/4"
+    __OuterDowelRadius   = .75*25.4
+    __OuterDowelStartAngle = 0
+    __OuterDowelDeltaAngle = 90
+    __AgitatorLength = 3 * 25.4
+    __AgitatorDiskSpacing = (3 / 3)*25.4
+    __CenterDowelLength = 4 * 25.4
+    __FrontDowelHoleDiameter = 13.5
+    __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector!")
+        self.origin = origin
+        self.center = Part.Face(Part.Wire(Part.makeCircle(self.__CenterDowelDiameter/2,\
+                                                          origin,
+                                                          Base.Vector(0,1,0))))\
+                            .extrude(Base.Vector(0,-self.__CenterDowelLength,0))
+        self.outerDowels = list()
+        for i in range(0,4):
+            dang = self.__OuterDowelDeltaAngle*i
+            hX = self.__OuterDowelRadius * \
+                        math.cos(radians(self.__OuterDowelStartAngle+dang))
+            hZ = self.__OuterDowelRadius * \
+                        math.sin(radians(self.__OuterDowelStartAngle+dang))
+            dowelOrigin = origin.add(Base.Vector(hX,0,hZ))
+            self.outerDowels.append(\
+                Part.Face(Part.Wire(Part.makeCircle(self.__OuterDowelDiameter/2,\
+                                                    dowelOrigin,\
+                                                    Base.Vector(0,1,0))))\
+                            .extrude(Base.Vector(0,-self.__AgitatorLength,0)))
+        self.disks = list()
+        for i in range(0,4):
+            diskOrigin = origin.add(Base.Vector(0,-(i*self.__AgitatorDiskSpacing),0))
+            disk = Part.Face(Part.Wire(Part.makeCircle(self.__AgitatorDiskDiameter/2,\
+                                                       diskOrigin,\
+                                                       Base.Vector(0,1,0))))\
+                             .extrude(Base.Vector(0,self.__DiskThickness,0))
+            if i == 0:
+                disk = DFRobotGearMotor.AgitatorMountPlate.MountYHoleRing(disk,diskOrigin,self.__DiskThickness)
+            disk = disk.cut(self.center)
+            for j in range(0,4):
+                disk = disk.cut(self.outerDowels[j])
+            self.disks.append(disk)
+    def FrontHole(self,Y,DeltaY):
+        hOrigin = Base.Vector(self.origin.x,Y,self.origin.z)
+        return Part.Face(Part.Wire(Part.makeCircle(self.__FrontDowelHoleDiameter/2,\
+                                                          hOrigin,
+                                                          Base.Vector(0,1,0))))\
+                            .extrude(Base.Vector(0,DeltaY,0))
+        
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name+"_center")
+        obj.Shape = self.center
+        obj.Label=self.name+"_center"
+        obj.ViewObject.ShapeColor=self.__Color
+        for i in range(0,4):
+            name="_outerDowel%d"%(i+1)
+            obj = doc.addObject("Part::Feature",self.name+name)
+            obj.Shape = self.outerDowels[i]
+            obj.Label=self.name+name
+            obj.ViewObject.ShapeColor=self.__Color
+        for i in range(0,4):
+            name="_disk%d"%(i+1)
+            obj = doc.addObject("Part::Feature",self.name+name)
+            obj.Shape = self.disks[i]
+            obj.Label=self.name+name
+            obj.ViewObject.ShapeColor=self.__Color
 
 class FoodBin(object):
     __Width  = 7.5 * 25.4
@@ -264,7 +346,7 @@ class FoodBin(object):
         self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(1,0,self.__Thickness))
         self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(2,0,self.__Thickness))
         self.left = self.left.cut(self.adafruitNAU7802.MakeMountingHole(3,0,self.__Thickness))
-        self.chargerps = ChargerPS.ChargerPSBox(self.name+"__chargerPSox",\
+        self.chargerps = ChargerPS.ChargerPSBox(self.name+"_chargerPSox",\
                                                 backOrigin.add(\
                                                  Base.Vector(self.__Thickness*2.5,\
                                                              0,\
@@ -285,8 +367,30 @@ class FoodBin(object):
                                                        Base.Vector(0,1,0))))\
                           .extrude(Base.Vector(0,self.__Thickness,0))
         self.back = self.back.cut(wireHole)
-    def show(self):
-        doc = App.activeDocument()
+        agitatorMotorOrigin = \
+            DFRobotGearMotor.DFRobotGearMotor_UpsideDown.OriginFromShaftHole(\
+                        bottomOrigin.add(Base.Vector(self.__Width/2,\
+                                                     self.__Length-\
+                                                     self.__BackDepth+\
+                                                     24.4,1.5*25.4)))
+        self.agitatorMotor = DFRobotGearMotor.DFRobotGearMotor_UpsideDown(\
+                            self.name+"_agitatorMotor",\
+                            agitatorMotorOrigin)
+        self.back = self.back.cut(self.agitatorMotor.ShaftHole(backOrigin.y,-self.__Thickness))
+        yoff = DFRobotGearMotor.DFRobotGearMotor.ShaftLength-\
+                DFRobotGearMotor.DFRobotGearMotor.ShaftDFlatLength
+        mplateOrigin = self.agitatorMotor.shaftOrigin.add(Base.Vector(0,-yoff,0))
+        self.agitatorMount = DFRobotGearMotor.AgitatorMountPlate_Y(\
+                            self.name+"_agitatorMount",\
+                            mplateOrigin)
+        agitatorOrigin = mplateOrigin.add(Base.Vector(0,\
+                -DFRobotGearMotor.MotorDrivePlate_Y.HubLength,\
+                0))
+        self.agitator = Agitator(self.name+"_agitator",agitatorOrigin)
+        self.front = self.front.cut(self.agitator.FrontHole(frontOrigin.y,self.__Thickness))
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
         obj = doc.addObject("Part::Feature",self.name+"_bottom")
         obj.Shape = self.bottom
         obj.Label=self.name+"_bottom"
@@ -299,10 +403,12 @@ class FoodBin(object):
         obj.Shape = self.left
         obj.Label=self.name+"_left"
         obj.ViewObject.ShapeColor=self.__Color
+        obj.ViewObject.Transparency=50
         obj = doc.addObject("Part::Feature",self.name+"_right")
         obj.Shape = self.right
         obj.Label=self.name+"_right"
         obj.ViewObject.ShapeColor=self.__Color
+        obj.ViewObject.Transparency=50
         obj = doc.addObject("Part::Feature",self.name+"_back")
         obj.Shape = self.back
         obj.Label=self.name+"_back"
@@ -344,6 +450,9 @@ class FoodBin(object):
         self.adafruitPCF8523.show()
         self.adafruitNAU7802.show()
         self.chargerps.show()
+        self.agitatorMotor.show()
+        self.agitatorMount.show()
+        self.agitator.show()
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -382,6 +491,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewFront()
+    Gui.activeDocument().activeView().viewLeft()
     Gui.SendMsgToActiveView("ViewFit")
         

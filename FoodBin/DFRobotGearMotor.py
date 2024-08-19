@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Aug 18 11:37:13 2024
-#  Last Modified : <240818.2217>
+#  Last Modified : <240819.1355>
 #
 #  Description	
 #
@@ -50,123 +50,120 @@ import sys
 sys.path.append(os.path.dirname(__file__))
 
 class DFRobotGearMotor(object):
-    __GearBoxHeight = 46
-    @classmethod
-    def GearBoxHeight(cls):
-        return cls.__GearBoxHeight
-    __GearBoxWidth  = 32
-    @classmethod
-    def GearBoxWidth(cls):
-        return cls.__GearBoxWidth
-    __GearBoxDepth  = 25.2-2.0
-    __GearBoxSpacers = 2.0
-    __MotorHeight   = 30.8
-    __MotorDiameter = 24.4
-    __MotorCenterXOff = 32-12.2
-    __MotorCenterYOff = 24.2-13.2
-    __ShaftDiameter = 6
-    __ShaftDFlat    = 5.4
-    __ShaftDFlatLength = 12
-    __ShaftClearHole = 6.5
-    __ShaftLength   = 18.5
-    __ShaftX        = 16
-    @classmethod
-    def ShaftX(cls):
-        return cls.__ShaftX
-    __ShaftZ        = 46-(6+9)
+    GearBoxHeight = 46
+    GearBoxWidth  = 32
+    GearBoxDepth  = 25.2-2.0
+    GearBoxSpacers = 2.0
+    MotorHeight   = 30.8
+    MotorDiameter = 24.4
+    MotorCenterXOff = 32-12.2
+    MotorCenterYOff = 24.2-13.2
+    ShaftDiameter = 6
+    ShaftDFlat    = 5.4
+    ShaftDFlatLength = 12
+    ShaftClearHole = 6.5
+    ShaftLength   = 18.5
+    ShaftX        = 16
+    ShaftZ        = 46-(6+9)
     @classmethod
     def ShaftY(cls):
-        return cls.__ShaftZ
-    __ShaftSpacerDia = 12 # Guess 
-    @classmethod
-    def ShaftSpacerDia(cls):
-        return cls.__ShaftSpacerDia
-    __MountingHoleX1 = (32-18)/2
-    @classmethod
-    def MountingHoleX1(cls):
-        return cls.__MountingHoleX1
-    __MountingHoleX2 = 32-((32-18)/2)
-    @classmethod
-    def MountingHoleX2(cls):
-        return cls.__MountingHoleX2
-    __MountingHoleZ1 = 7
+        return cls.ShaftZ
+    ShaftSpacerDia = 12 # Guess 
+    MountingHoleX1 = (32-18)/2
+    MountingHoleX2 = 32-((32-18)/2)
+    MountingHoleZ1 = 7
     @classmethod
     def MountingHoleY1(cls):
-        return cls.__MountingHoleZ1
-    __MountingHoleZ2 = 46-6
+        return cls.MountingHoleZ1
+    MountingHoleZ2 = 46-6
     @classmethod
     def MountingHoleY2(cls):
-        return cls.__MountingHoleZ2
-    __MountingHoleDia = 3.6
-    @classmethod
-    def MountingHoleDia(cls):
-        return cls.__MountingHoleDia
-    __MountingHoleSpacerDia = 8 # Guess
+        return cls.MountingHoleZ2
+    MountingHoleDia = 3.6
+    MountingHoleSpacerDia = 8 # Guess
     @classmethod
     def CutShaftZ(cls,origin,part,length):
         if not isinstance(origin,Base.Vector):
             raise RuntimeError("origin is not a Vector")
         if not isinstance(part,Part.Shape):
             raise RuntimeError("part is not a Shape")
-        shaft = Part.Face(Part.Wire(Part.makeCircle(cls.__ShaftDiameter/2.0,origin,Base.Vector(0,0,1)))).extrude(Base.Vector(0,0,length))
-        d = Part.makePlane(length,cls.__ShaftDiameter,\
-                           origin.add(Base.Vector(-cls.__ShaftDiameter/2.0,\
-                                                  cls.__ShaftDFlat-(cls.__ShaftDiameter/2),\
+        shaft = Part.Face(Part.Wire(Part.makeCircle(cls.ShaftDiameter/2.0,origin,Base.Vector(0,0,1)))).extrude(Base.Vector(0,0,length))
+        d = Part.makePlane(length,cls.ShaftDiameter,\
+                           origin.add(Base.Vector(-cls.ShaftDiameter/2.0,\
+                                                  cls.ShaftDFlat-(cls.ShaftDiameter/2),\
                                                   0)),\
-                           Base.Vector(0,1,0)).extrude(Base.Vector(0,cls.__ShaftDiameter-cls.__ShaftDFlat,0))
+                           Base.Vector(0,1,0)).extrude(Base.Vector(0,cls.ShaftDiameter-cls.ShaftDFlat,0))
         shaft = shaft.cut(d)
         return part.cut(shaft)
+    @classmethod
+    def OriginFromShaftHole(cls,shaftOrigin):
+        if not isinstance(shaftOrigin,Base.Vector):
+            raise RuntimeError("shaftOrigin is not a Vector")
+        return shaftOrigin.add(Base.Vector(-cls.ShaftX,\
+                                           -(cls.GearBoxDepth+cls.GearBoxSpacers),\
+                                           -(cls.ShaftZ+cls.MotorHeight)))
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
             raise RuntimeError("origin is not a Vector")
         self.origin = origin
-        self.motor = Part.Face(Part.Wire(Part.makeCircle(self.__MotorDiameter/2.0,\
-                                         origin.add(Base.Vector(self.__MotorCenterXOff,\
-                                                                self.__MotorCenterYOff,\
+        self.motor = Part.Face(Part.Wire(Part.makeCircle(self.MotorDiameter/2.0,\
+                                         origin.add(Base.Vector(self.MotorCenterXOff,\
+                                                                self.MotorCenterYOff,\
                                                                 0)),\
                                          Base.Vector(0,0,1))))\
-                            .extrude(Base.Vector(0,0,self.__MotorHeight))
-        gearboxOrigin = origin.add(Base.Vector(0,0,self.__MotorHeight))
-        self.gearbox = Part.makePlane(self.__GearBoxWidth,self.__GearBoxDepth,\
+                            .extrude(Base.Vector(0,0,self.MotorHeight))
+        gearboxOrigin = origin.add(Base.Vector(0,0,self.MotorHeight))
+        self.gearbox = Part.makePlane(self.GearBoxWidth,self.GearBoxDepth,\
                                       gearboxOrigin)\
-                           .extrude(Base.Vector(0,0,self.__GearBoxHeight))
+                           .extrude(Base.Vector(0,0,self.GearBoxHeight))
         self.MountingHoles = list()
-        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.__MountingHoleX1,\
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX1,\
                                                                 0,\
-                                                                self.__MountingHoleZ1)))
-        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.__MountingHoleX2,\
+                                                                self.MountingHoleZ1)))
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX2,\
                                                                 0,\
-                                                                self.__MountingHoleZ1)))
-        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.__MountingHoleX1,\
+                                                                self.MountingHoleZ1)))
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX1,\
                                                                 0,\
-                                                                self.__MountingHoleZ2)))
-        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.__MountingHoleX2,\
+                                                                self.MountingHoleZ2)))
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX2,\
                                                                 0,\
-                                                                self.__MountingHoleZ2)))
+                                                                self.MountingHoleZ2)))
         for i in range(0,4):
-            hspace = Part.Face(Part.Wire(Part.makeCircle(self.__MountingHoleSpacerDia/2.0,\
+            hspace = Part.Face(Part.Wire(Part.makeCircle(self.MountingHoleSpacerDia/2.0,\
                                                          self.MountingHoles[i],\
                                                          Base.Vector(0,1,0))))\
-                        .extrude(Base.Vector(0,-self.__GearBoxSpacers,0))
+                        .extrude(Base.Vector(0,-self.GearBoxSpacers,0))
             self.gearbox = self.gearbox.fuse(hspace)
-        self.shaftOrigin = gearboxOrigin.add(Base.Vector(self.__ShaftX,0,self.__ShaftZ))
-        self.shaft = Part.Face(Part.Wire(Part.makeCircle(self.__ShaftDiameter/2.0,\
+        self.shaftOrigin = gearboxOrigin.add(Base.Vector(self.ShaftX,0,self.ShaftZ))
+        self.shaft = Part.Face(Part.Wire(Part.makeCircle(self.ShaftDiameter/2.0,\
                                                          self.shaftOrigin,\
                                                          Base.Vector(0,1,0))))\
-                         .extrude(Base.Vector(0,-self.__ShaftLength))
-        d = Part.makePlane(self.__ShaftDiameter,self.__ShaftDFlatLength,\
-                           self.shaftOrigin.add(Base.Vector(-self.__ShaftDiameter/2,\
-                         -self.__ShaftLength,\
-                                                self.__ShaftDFlat-(self.__ShaftDiameter/2))))\
-                       .extrude(Base.Vector(0,0,self.__ShaftDiameter-self.__ShaftDFlat))
+                         .extrude(Base.Vector(0,-self.ShaftLength))
+        d = Part.makePlane(self.ShaftDiameter,self.ShaftDFlatLength,\
+                           self.shaftOrigin.add(Base.Vector(-self.ShaftDiameter/2,\
+                         -self.ShaftLength,\
+                                                self.ShaftDFlat-(self.ShaftDiameter/2))))\
+                       .extrude(Base.Vector(0,0,self.ShaftDiameter-self.ShaftDFlat))
         #self.d = d
         self.shaft = self.shaft.cut(d)
-        sspace = Part.Face(Part.Wire(Part.makeCircle(self.__ShaftSpacerDia/2.0,\
+        sspace = Part.Face(Part.Wire(Part.makeCircle(self.ShaftSpacerDia/2.0,\
                                                          self.shaftOrigin,\
                                                          Base.Vector(0,1,0))))\
-                         .extrude(Base.Vector(0,-self.__GearBoxSpacers))
+                         .extrude(Base.Vector(0,-self.GearBoxSpacers))
         self.gearbox = self.gearbox.fuse(sspace)
+    def MountingHole(self,i,Y,YDelta):
+        xhole = self.MountingHoles[i]
+        HoleOrigin = Base.Vector(xhole.x,Y,xhole.z)
+        hole = Part.Face(Part.Wire(Part.makeCircle(self.MountingHoleDia/2,HoleOrigin,Base.Vector(0,1,0))))\
+                    .extrude(Base.Vector(0,YDelta,0))
+        return hole
+    def ShaftHole(self,Y,YDelta):
+        HoleOrigin = Base.Vector(self.shaftOrigin.x,Y,self.shaftOrigin.z)
+        hole = Part.Face(Part.Wire(Part.makeCircle(self.ShaftClearHole/2,HoleOrigin,Base.Vector(0,1,0))))\
+                    .extrude(Base.Vector(0,YDelta,0))
+        return hole
     def show(self,doc=None):
         if doc==None:
             doc = App.activeDocument()
@@ -185,6 +182,72 @@ class DFRobotGearMotor(object):
         #obj = doc.addObject("Part::Feature",self.name+'_d')
         #obj.Shape = self.d
         #obj.ViewObject.ShapeColor=tuple([1.0,0.0,0.0])
+
+class DFRobotGearMotor_UpsideDown(DFRobotGearMotor):
+    MountingHoleZ1 = 6
+    MountingHoleZ2 = 46-7
+    ShaftZ        =  6+9
+    MotorCenterYOff = 13.2
+    MotorCenterXOff = 12.2
+    @classmethod
+    def OriginFromShaftHole(cls,shaftOrigin):
+        if not isinstance(shaftOrigin,Base.Vector):
+            raise RuntimeError("shaftOrigin is not a Vector")
+        return shaftOrigin.add(Base.Vector(-cls.ShaftX,\
+                                           -(cls.GearBoxDepth+cls.GearBoxSpacers),\
+                                           -cls.ShaftZ))
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        gearboxOrigin = origin.add(Base.Vector(0,self.GearBoxSpacers,0))
+        self.gearbox = Part.makePlane(self.GearBoxWidth,self.GearBoxDepth,\
+                                      gearboxOrigin)\
+                           .extrude(Base.Vector(0,0,self.GearBoxHeight))
+        self.MountingHoles = list()
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX1,\
+                                                                0,\
+                                                                self.MountingHoleZ1)))
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX2,\
+                                                                0,\
+                                                                self.MountingHoleZ1)))
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX1,\
+                                                                0,\
+                                                                self.MountingHoleZ2)))
+        self.MountingHoles.append(gearboxOrigin.add(Base.Vector(self.MountingHoleX2,\
+                                                                0,\
+                                                                self.MountingHoleZ2)))
+        for i in range(0,4):
+            hspace = Part.Face(Part.Wire(Part.makeCircle(self.MountingHoleSpacerDia/2.0,\
+                                                         self.MountingHoles[i],\
+                                                         Base.Vector(0,1,0))))\
+                        .extrude(Base.Vector(0,-self.GearBoxSpacers,0))
+            self.gearbox = self.gearbox.fuse(hspace)
+        self.shaftOrigin = gearboxOrigin.add(Base.Vector(self.ShaftX,0,self.ShaftZ))
+        self.shaft = Part.Face(Part.Wire(Part.makeCircle(self.ShaftDiameter/2.0,\
+                                                         self.shaftOrigin,\
+                                                         Base.Vector(0,1,0))))\
+                         .extrude(Base.Vector(0,-self.ShaftLength))
+        d = Part.makePlane(self.ShaftDiameter,self.ShaftDFlatLength,\
+                           self.shaftOrigin.add(Base.Vector(-self.ShaftDiameter/2,\
+                         -self.ShaftLength,\
+                                                self.ShaftDFlat-(self.ShaftDiameter/2))))\
+                       .extrude(Base.Vector(0,0,self.ShaftDiameter-self.ShaftDFlat))
+        #self.d = d
+        self.shaft = self.shaft.cut(d)
+        sspace = Part.Face(Part.Wire(Part.makeCircle(self.ShaftSpacerDia/2.0,\
+                                                         self.shaftOrigin,\
+                                                         Base.Vector(0,1,0))))\
+                         .extrude(Base.Vector(0,-self.GearBoxSpacers))
+        self.gearbox = self.gearbox.fuse(sspace)
+        self.motor = Part.Face(Part.Wire(Part.makeCircle(self.MotorDiameter/2.0,\
+                                         origin.add(Base.Vector(self.MotorCenterXOff,\
+                                                                self.MotorCenterYOff,\
+                                                                self.GearBoxHeight)),\
+                                         Base.Vector(0,0,1))))\
+                            .extrude(Base.Vector(0,0,self.MotorHeight))
+                
 
 class MotorDrivePlate(object):
     __PlateDiameter = 39
@@ -237,6 +300,49 @@ class MotorDrivePlate(object):
         Mesh.export(objs,filename)
         doc.removeObject(obj.Label)
 
+class MotorDrivePlate_Y(object):
+    __PlateDiameter = 39
+    PlateThick    = .125*25.4
+    __HubDiameter   = 10
+    HubLength     = 12+3+2
+    __HubScrewDia   = 3.6
+    __HubScrewHeadDepth = 3
+    __HubScrewHeadDia = 5.5
+    __HubShaftDepth = 12
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        plate = Part.Face(Part.Wire(Part.makeCircle(self.__PlateDiameter/2.0,\
+                                                    origin.add(Base.Vector(0,-(self.HubLength-self.PlateThick),0)),Base.Vector(0,1,0)))).extrude(Base.Vector(0,-self.PlateThick,0))
+        hub = Part.Face(Part.Wire(Part.makeCircle(self.__HubDiameter/2.0,\
+                                                    origin,Base.Vector(0,1,0))))\
+                             .extrude(Base.Vector(0,-self.HubLength,0))
+        plate = plate.fuse(hub)
+        #print(type(plate),file=sys.__stderr__)
+        #plate = DFRobotGearMotor.CutShaftY(origin,plate,self.__HubShaftDepth)
+        screwhole = Part.Face(Part.Wire(Part.makeCircle(self.__HubScrewDia/2,\
+                                                        origin,Base.Vector(0,1,0))))\
+                             .extrude(Base.Vector(0,-self.HubLength,0))
+        plate = plate.cut(screwhole)
+        screwhead = Part.Face(Part.Wire(Part.makeCircle(self.__HubScrewHeadDia/2,\
+                                                        origin.add(Base.Vector(0,-(self.HubLength-self.__HubScrewHeadDepth),0)),Base.Vector(0,1,0))))\
+                             .extrude(Base.Vector(0,-self.__HubScrewHeadDepth,0))
+        self.plate = plate.cut(screwhead)
+        #self.screwhead = screwhead
+        
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name)
+        obj.Shape = self.plate
+        obj.Label=self.name
+        obj.ViewObject.ShapeColor=tuple([1.0,1.0,1.0])
+        #obj = doc.addObject("Part::Feature",self.name+"_head")
+        #obj.Shape = self.screwhead
+        #obj.ViewObject.ShapeColor=tuple([1.0,0.0,0.0])
+
 import math
 
 def radians(degrees):
@@ -280,9 +386,29 @@ class AugerMountPlate(MotorDrivePlate):
         
 class AgitatorMountPlate(MotorDrivePlate):
     __MountHoleRadius = (16.5+11.5)/2
-    __LargeHole    = 2.5
+    __LargeHole    = 3.3/2
+    __LargeHoleClear = 4.4/2
     __StartAngle  = 30
     __DeltaAngle  = 90
+    @classmethod
+    def MountYHoleRing(cls,part,origin,thick):
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        if not isinstance(part,Part.Shape):
+            raise RuntimeError("part is not a Shape")
+        for i in range(0,4):
+            dang = cls.__DeltaAngle*i
+            hX = cls.__MountHoleRadius * math.cos(radians(cls.__StartAngle+\
+                                                            dang))
+            hZ = cls.__MountHoleRadius * math.sin(radians(cls.__StartAngle+\
+                                                            dang))
+            holeOorigin = origin.add(Base.Vector(hX,0,hZ))
+            hole = Part.Face(Part.Wire(Part.makeCircle(cls.__LargeHoleClear,\
+                                                       holeOorigin,\
+                                                       Base.Vector(0,1,0))))\
+                            .extrude(Base.Vector(0,thick,0))
+            part = part.cut(hole)
+        return part
     def __init__(self,name,origin):
         super().__init__(name,origin)
         peg1X = self.__MountHoleRadius * math.cos(radians(self.__StartAngle))
@@ -311,6 +437,41 @@ class AgitatorMountPlate(MotorDrivePlate):
         screwHoleOrig = self.origin.add(Base.Vector(peg4X,peg4Y,self.HubLength-self.PlateThick))
         screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig))).extrude(Base.Vector(0,0,self.PlateThick))
         self.plate = self.plate.cut(screwHole)
+
+class AgitatorMountPlate_Y(MotorDrivePlate_Y):
+    __MountHoleRadius = (16.5+11.5)/2
+    __LargeHole    = 3.3/2
+    __LargeHoleClear = 4.4/2
+    __StartAngle  = 30
+    __DeltaAngle  = 90
+    def __init__(self,name,origin):
+        super().__init__(name,origin)
+        peg1X = self.__MountHoleRadius * math.cos(radians(self.__StartAngle))
+        peg1Z = self.__MountHoleRadius * math.sin(radians(self.__StartAngle))
+        peg2X = self.__MountHoleRadius * math.cos(radians(self.__StartAngle+\
+                                                      self.__DeltaAngle))
+        peg2Z = self.__MountHoleRadius * math.sin(radians(self.__StartAngle+\
+                                                      self.__DeltaAngle))
+        peg3X = self.__MountHoleRadius * math.cos(radians(self.__StartAngle+\
+                                                      (self.__DeltaAngle*2)))
+        peg3Z = self.__MountHoleRadius * math.sin(radians(self.__StartAngle+\
+                                                      (self.__DeltaAngle*2)))
+        peg4X = self.__MountHoleRadius * math.cos(radians(self.__StartAngle+\
+                                                      (self.__DeltaAngle*3)))
+        peg4Z = self.__MountHoleRadius * math.sin(radians(self.__StartAngle+\
+                                                      (self.__DeltaAngle*3)))
+        screwHoleOrig = self.origin.add(Base.Vector(peg1X,-(self.HubLength-self.PlateThick),peg1Z))
+        screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig,Base.Vector(0,1,0)))).extrude(Base.Vector(0,-self.PlateThick,0))
+        self.plate = self.plate.cut(screwHole)
+        screwHoleOrig = self.origin.add(Base.Vector(peg2X,-(self.HubLength-self.PlateThick),peg2Z))
+        screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig,Base.Vector(0,1,0)))).extrude(Base.Vector(0,-self.PlateThick,0))
+        self.plate = self.plate.cut(screwHole)
+        screwHoleOrig = self.origin.add(Base.Vector(peg3X,-(self.HubLength-self.PlateThick),peg3Z))
+        screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig,Base.Vector(0,1,0)))).extrude(Base.Vector(0,-self.PlateThick,0))
+        self.plate = self.plate.cut(screwHole)
+        screwHoleOrig = self.origin.add(Base.Vector(peg4X,-(self.HubLength-self.PlateThick),peg4Z))
+        screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig,Base.Vector(0,1,0)))).extrude(Base.Vector(0,-self.PlateThick,0))
+        self.plate = self.plate.cut(screwHole)
         
 
 class GearMotorMount(object):
@@ -331,10 +492,10 @@ class GearMotorMount(object):
                                                    origin.add(Base.Vector(0,0,self.__FlangeHeight)))))\
                                       .extrude(Base.Vector(0,0,self.__PipeHeight))
         part = flange.fuse(pipe)
-        mountFaceOrigin = origin.add(Base.Vector(-DFRobotGearMotor.ShaftX(),\
-                                                 -(DFRobotGearMotor.GearBoxHeight()-DFRobotGearMotor.ShaftY()),0))
-        mountFace = Part.makePlane(DFRobotGearMotor.GearBoxWidth(),\
-                                   DFRobotGearMotor.GearBoxHeight(),\
+        mountFaceOrigin = origin.add(Base.Vector(-DFRobotGearMotor.ShaftX,\
+                                                 -(DFRobotGearMotor.GearBoxHeight-DFRobotGearMotor.ShaftY()),0))
+        mountFace = Part.makePlane(DFRobotGearMotor.GearBoxWidth,\
+                                   DFRobotGearMotor.GearBoxHeight,\
                                    mountFaceOrigin)\
                            .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.fuse(mountFace)
@@ -343,32 +504,32 @@ class GearMotorMount(object):
                                                 self.__FlangeHeight)))))\
                                        .extrude(Base.Vector(0,0,self.__PipeHeight))
         part = part.cut(pipeInner)
-        shaftSpacer = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.ShaftSpacerDia()/2,\
+        shaftSpacer = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.ShaftSpacerDia/2,\
                                                           origin)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(shaftSpacer)
-        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1(),\
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1,\
                                               DFRobotGearMotor.MountingHoleY1(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
-        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1(),\
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1,\
                                               DFRobotGearMotor.MountingHoleY2(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
-        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2(),\
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2,\
                                               DFRobotGearMotor.MountingHoleY1(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
-        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2(),\
+        mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2,\
                                               DFRobotGearMotor.MountingHoleY2(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia()/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
         self.part = part
