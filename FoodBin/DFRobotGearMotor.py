@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Aug 18 11:37:13 2024
-#  Last Modified : <240818.2142>
+#  Last Modified : <240818.2148>
 #
 #  Description	
 #
@@ -380,6 +380,14 @@ class GearMotorMount(object):
         obj.Shape = self.part
         obj.Label=self.name
         obj.ViewObject.ShapeColor=tuple([0.5,0.5,0.5])
+    def MakeSTL(self,filename):
+        doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature","temp")
+        obj.Shape=self.plate
+        objs = list()
+        objs.append(obj)
+        Mesh.export(objs,filename)
+        doc.removeObject(obj.Label)
     
 if __name__ == '__main__':
     if "Motor" in App.listDocuments().keys():
