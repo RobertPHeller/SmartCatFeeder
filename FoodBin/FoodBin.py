@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240819.1358>
+#  Last Modified : <240820.1503>
 #
 #  Description	
 #
@@ -180,6 +180,8 @@ class FoodBin(object):
     __AdafruitPCF8523XOff = Adafruit.AdafruitPCF8523.RaisedBoardHeight()
     __AdafruitNAU7802YOff = 2+25.4
     __AdafruitNAU7802ZOff = 30
+    __Adafruitvl6180xXOff = 25.4
+    __Adafruitvl6180xZOff = 5*25.4
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     __BaseColor = tuple([1.0,1.0,0.0])
     __LidColor  = tuple([1.0,1.0,1.0])
@@ -302,15 +304,18 @@ class FoodBin(object):
                                         self.__BaseThick)))\
                         .extrude(Base.Vector(0,0,self.__Thickness))
         self.batteryBack = self.batteryBack.cut(self.batteryTop)
-        self.b1 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
-                                    self.__Thickness+12.5,\
-                                    self.__BatteryHeight-self.__BaseThick)),\
-                                   self.__Width-(2*self.__Thickness))
-        self.b2 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
-                                    self.__BackDepth-self.__Thickness,\
-                                    self.__BatteryHeight-self.__BaseThick)),\
-                                   self.__Width-(2*self.__Thickness))
-        
+        #self.b1 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
+        #                            self.__Thickness+12.5,\
+        #                            self.__BatteryHeight-self.__BaseThick)),\
+        #                           self.__Width-(2*self.__Thickness))
+        #self.b2 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
+        #                            self.__BackDepth-self.__Thickness,\
+        #                            self.__BatteryHeight-self.__BaseThick)),\
+        #                           self.__Width-(2*self.__Thickness))
+        self.bTopStop =  Part.makePlane(12.5,self.__Width-(self.__Thickness*2),\
+                                batteryBaseOrigin.add(Base.Vector(\
+                                        0,self.__Thickness,(self.__BaseThick+self.__BatteryHeight)-self.__Thickness)),NegYNorm)\
+                                        .extrude(Base.Vector(0,-self.__Thickness,0))
         lidOrigin = origin.add(Base.Vector(0,0,self.__Height))
         self.lid = Part.makePlane(self.__Width,\
                                   self.__Length-self.__BackDepth,\
@@ -388,6 +393,19 @@ class FoodBin(object):
                 0))
         self.agitator = Agitator(self.name+"_agitator",agitatorOrigin)
         self.front = self.front.cut(self.agitator.FrontHole(frontOrigin.y,self.__Thickness))
+        self.vl6180x = Adafruit.Adafruitvl6180x(self.name+"_vl6180x",
+                                                origin.add(Base.Vector(\
+                                                    self.__Adafruitvl6180xXOff,\
+                                                    (self.__Length-self.__BackDepth)-(self.__Thickness+1.6),\
+                                                    self.__Adafruitvl6180xZOff)))
+        for i in range(0,4):
+            self.back = self.back.cut(self.vl6180x.MakeMountingHole(i,backOrigin.y,-self.__Thickness))
+        QWICCableHoleOrigin = origin.add(Base.Vector(\
+                                        self.__Adafruitvl6180xXOff-12.5,\
+                                        self.__Length-self.__BackDepth,\
+                                        self.__Adafruitvl6180xZOff+7.5))
+        hole = Part.Face(Part.Wire(Part.makeCircle(3.125,QWICCableHoleOrigin,YNorm))).extrude(Base.Vector(0,self.__Thickness,0))
+        self.back = self.back.cut(hole)
     def show(self,doc=None):
         if doc==None:
             doc = App.activeDocument()
@@ -417,14 +435,18 @@ class FoodBin(object):
         obj.Shape = self.base
         obj.Label=self.name+"_base"
         obj.ViewObject.ShapeColor=self.__BaseColor
-        obj = doc.addObject("Part::Feature",self.name+"_b1")
-        obj.Shape = self.b1
-        obj.Label=self.name+"_b1"
-        obj.ViewObject.ShapeColor=self.__BaseColor
-        obj = doc.addObject("Part::Feature",self.name+"_b2")
-        obj.Shape = self.b2
-        obj.Label=self.name+"_b2"
-        obj.ViewObject.ShapeColor=self.__BaseColor
+        #obj = doc.addObject("Part::Feature",self.name+"_b1")
+        #obj.Shape = self.b1
+        #obj.Label=self.name+"_b1"
+        #obj.ViewObject.ShapeColor=self.__BaseColor
+        #obj = doc.addObject("Part::Feature",self.name+"_b2")
+        #obj.Shape = self.b2
+        #obj.Label=self.name+"_b2"
+        #obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_bTopStop")
+        obj.Shape = self.bTopStop
+        obj.Label=self.name+"_batterybase"
+        obj.ViewObject.ShapeColor=self.__Color
         obj = doc.addObject("Part::Feature",self.name+"_batterybase")
         obj.Shape = self.batteryBase
         obj.Label=self.name+"_batterybase"
@@ -453,6 +475,7 @@ class FoodBin(object):
         self.agitatorMotor.show()
         self.agitatorMount.show()
         self.agitator.show()
+        self.vl6180x.show()
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -491,6 +514,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewLeft()
+    Gui.activeDocument().activeView().viewRear()
     Gui.SendMsgToActiveView("ViewFit")
         

@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 13 18:16:55 2024
-#  Last Modified : <240817.2113>
+#  Last Modified : <240820.1447>
 #
 #  Description	
 #
@@ -259,7 +259,7 @@ class Adafruitvl6180x(object):
             self.MountingHoles.append(origin.add(Base.Vector(Xin*25.4,0,Zin*25.4)))
         #self.holes = list()
         for i in range(0,4):
-            h = self.MakeMountingHole(i,origin.x,self.__BoardThick)
+            h = self.MakeMountingHole(i,origin.y,self.__BoardThick)
             #self.holes.append(h)
             self.board = self.board.cut(h)
     def MakeMountingHole(self,index,Y,Ydelta):
