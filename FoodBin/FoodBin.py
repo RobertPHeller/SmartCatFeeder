@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240820.1503>
+#  Last Modified : <240821.0923>
 #
 #  Description	
 #
@@ -285,15 +285,6 @@ class FoodBin(object):
                                             self.__BatteryHeight)),\
                                           NegYNorm)\
                                    .extrude(Base.Vector(0,-self.__Thickness,0))
-        self.batteryBack = self.__cutZYfingers(self.batteryBack,\
-                                startz=self.__BaseThick,\
-                                endz=self.__BatteryHeight,\
-                                yoffset=self.__Length-self.__Thickness)
-        self.batteryBack = self.__cutZYfingers(self.batteryBack,\
-                                startz=self.__BaseThick,\
-                                endz=self.__BatteryHeight,\
-                                yoffset=self.__Length-self.__Thickness,\
-                                xoffset=self.__Width-self.__Thickness)
         self.left = self.left.cut(self.batteryBack)
         self.right = self.right.cut(self.batteryBack)
         self.batteryTop = Part.makePlane(self.__Width-25.4-(2*self.__Thickness),\
@@ -303,6 +294,12 @@ class FoodBin(object):
                                         (self.__BatteryHeight-self.__Thickness)+\
                                         self.__BaseThick)))\
                         .extrude(Base.Vector(0,0,self.__Thickness))
+        self.batteryTop = self.__cutXZfingers(self.batteryTop,\
+                                                startx=25.4,\
+                                                zoffset=(self.__BatteryHeight+self.__BaseThick)-self.__Thickness,\
+                                                yoffset=self.__Length-self.__Thickness,\
+                                                endx=self.__Width,\
+                                              )
         self.batteryBack = self.batteryBack.cut(self.batteryTop)
         #self.b1 = HalfByHalf.XBeam(batteryBaseOrigin.add(Base.Vector(0,\
         #                            self.__Thickness+12.5,\
@@ -445,7 +442,7 @@ class FoodBin(object):
         #obj.ViewObject.ShapeColor=self.__BaseColor
         obj = doc.addObject("Part::Feature",self.name+"_bTopStop")
         obj.Shape = self.bTopStop
-        obj.Label=self.name+"_batterybase"
+        obj.Label=self.name+"_bTopStop"
         obj.ViewObject.ShapeColor=self.__Color
         obj = doc.addObject("Part::Feature",self.name+"_batterybase")
         obj.Shape = self.batteryBase
