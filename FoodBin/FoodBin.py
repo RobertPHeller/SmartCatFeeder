@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240822.0010>
+#  Last Modified : <240822.1019>
 #
 #  Description	
 #
@@ -190,10 +190,7 @@ class Bowl(object):
         body = body.cut(inside)
         self.bowl = rim.fuse(body)
     def CutHole(self,part):
-        b = Part.makeCone(self.__BowlBottomDiameter/2,\
-                          (self.__BowlLargeDiameter/2)+self.__Thickness,\
-                          self.__Height,\
-                          Base.Vector(0,0,1))
+        b = Part.Face(Part.Wire(Part.makeCircle((self.__BowlLargeDiameter/2)+self.__Thickness,self.origin))).extrude(Base.Vector(0,0,self.__Height))
         return part.cut(b)
     def show(self,doc=None):
         if doc==None:
@@ -212,7 +209,7 @@ class FoodBin(object):
     __Thickness = .125 * 25.4
     __FingerWidth = .5 * 25.4
     __BaseThick = (3.0/8.0) * 25.4
-    __BowlExtension = 6 * 25.4
+    __BowlExtension = 7 * 25.4
     __Adafruit35inTFTZOff = 30
     __Adafruit35inTFTYOff = 30
     __AdafruitPCF8523ZOff = 30+(1.3*25.4)
@@ -231,8 +228,12 @@ class FoodBin(object):
     __wireHoleRadius = .5*25.4
     __bowlZoff = ((3.0/8.0) * 25.4)+12.7+(.125 * 25.4)
     __bowlXoff = (7.5/2)*25.4
-    __bowlYoff = -3*25.4
+    __bowlYoff = -3.5*25.4
+    __strainXoff = ((7.5/2)-2.5)*25.4
+    __bowlPaddleDiameter = 2*25.4
+    __paddleWidth = 25
     __bowlBoxHeight = 12.7+(.125 * 25.4)+(1*25.4)
+    __bowlBoxSupportThick = (3/4)*25.4
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -451,6 +452,62 @@ class FoodBin(object):
                          origin.add(Base.Vector(self.__bowlXoff,\
                                                 self.__bowlYoff,\
                                                 self.__bowlZoff)))
+        strainO1 = origin.add(Base.Vector(self.__strainXoff,
+                                          self.__bowlYoff,\
+                                          self.__BaseThick))
+        strainOrigin = Adafruit.StrainGuageVerticalFlipped.OriginStrain(\
+                        strainO1.x,strainO1.y,strainO1.z)
+        self.strainGuage = Adafruit.StrainGuageVerticalFlipped(\
+                    self.name+"_strainGuage",\
+                    strainOrigin)
+        paddle =  Part.Face(Part.Wire(Part.makeCircle(\
+                    self.__bowlPaddleDiameter/2,\
+                    origin.add(Base.Vector(self.__bowlXoff,\
+                                           self.__bowlYoff,\
+                                           self.__BaseThick+12.7)))))\
+                          .extrude(Base.Vector(0,0,self.__Thickness))
+        plength = self.__bowlXoff-strainOrigin.x
+        pwidth  = self.__paddleWidth
+        p1 = Part.makePlane(plength,pwidth,\
+                            strainOrigin.add(Base.Vector(0,0,12.7)))\
+                    .extrude(Base.Vector(0,0,self.__Thickness))
+        paddle = paddle.fuse(p1)
+        paddle = paddle.cut(self.strainGuage.StrainMountHole(\
+                        0,strainOrigin.z+12.7,\
+                        self.__Thickness))
+        paddle = paddle.cut(self.strainGuage.StrainMountHole(\
+                        1,strainOrigin.z+12.7,\
+                        self.__Thickness))
+        self.paddle = paddle
+        self.leftBowlBoxSupport = Part.makePlane(\
+                self.__bowlBoxSupportThick,\
+                self.__BowlExtension-12.5,\
+                origin.add(Base.Vector(self.__Thickness,\
+                                       -self.__BowlExtension,\
+                                       self.__BaseThick)))\
+            .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
+        self.rightBowlBoxSupport = Part.makePlane(\
+                self.__bowlBoxSupportThick,\
+                self.__BowlExtension,\
+                origin.add(Base.Vector(self.__Width-(self.__Thickness+self.__bowlBoxSupportThick),\
+                                       -self.__BowlExtension,\
+                                       self.__BaseThick)))\
+            .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
+        self.frontBowlBoxSupport = Part.makePlane(\
+                    self.__Width-(2*((self.__Thickness+self.__bowlBoxSupportThick))),\
+                    self.__bowlBoxSupportThick,\
+                    origin.add(Base.Vector(self.__Thickness+self.__bowlBoxSupportThick,\
+                    -self.__BowlExtension,\
+                    self.__BaseThick)))\
+            .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
+        self.bowlSupportPlate = Part.makePlane(\
+                    self.__Width-(2*self.__Thickness),\
+                    self.__BowlExtension-12.5,\
+                    origin.add(Base.Vector(self.__Thickness,\
+                                           -self.__BowlExtension,\
+                                           self.__BaseThick+(self.__bowlBoxHeight-self.__Thickness))))\
+             .extrude(Base.Vector(0,0,self.__Thickness))
+        self.bowlSupportPlate = self.bowl.CutHole(self.bowlSupportPlate)
     def show(self,doc=None):
         if doc==None:
             doc = App.activeDocument()
@@ -522,6 +579,27 @@ class FoodBin(object):
         self.agitator.show()
         self.vl6180x.show()
         self.bowl.show()
+        self.strainGuage.show()
+        obj = doc.addObject("Part::Feature",self.name+"_paddle")
+        obj.Shape = self.paddle
+        obj.Label=self.name+"_paddle"
+        obj.ViewObject.ShapeColor=self.__Color
+        obj = doc.addObject("Part::Feature",self.name+"_leftBowlBoxSupport")
+        obj.Shape = self.leftBowlBoxSupport
+        obj.Label=self.name+"_leftBowlBoxSupport"
+        obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_rightBowlBoxSupport")
+        obj.Shape = self.rightBowlBoxSupport
+        obj.Label=self.name+"_rightBowlBoxSupport"
+        obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_frontBowlBoxSupport")
+        obj.Shape = self.frontBowlBoxSupport
+        obj.Label=self.name+"_frontBowlBoxSupport"
+        obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_bowlSupportPlate")
+        obj.Shape = self.bowlSupportPlate
+        obj.Label=self.name+"_bowlSupportPlate"
+        obj.ViewObject.ShapeColor=self.__Color
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
