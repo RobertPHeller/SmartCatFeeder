@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240822.1228>
+#  Last Modified : <240822.1420>
 #
 #  Description	
 #
@@ -235,6 +235,7 @@ class FoodBin(object):
     __bowlBoxHeight = 12.7+(.125 * 25.4)+(1*25.4)
     __bowlBoxSupportThick = (3/4)*25.4
     __bowlSupportPlateScrewHoleDiameter = (3/16)*25.4
+    __powerCordNotchSize = (3/8)*25.4
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -510,6 +511,40 @@ class FoodBin(object):
              .extrude(Base.Vector(0,0,self.__Thickness))
         self.bowlSupportPlate = self.bowl.CutHole(bowlSupportPlate)
         self.__bowlSupportPlateScrewHoles()
+        a=self.__Length-(self.__powerCordNotchSize/2)
+        notch = Part.Face(Part.Wire(Part.makeCircle(\
+                    self.__powerCordNotchSize/2,\
+                    origin.add(Base.Vector(0,a,self.__BatteryHeight+50.8)),\
+                    Base.Vector(1,0,0))))\
+                    .extrude(Base.Vector(self.__Width,0,0))
+        notch = notch.fuse(Part.makePlane(\
+                self.__powerCordNotchSize,\
+                self.__powerCordNotchSize/2,\
+                origin.add(Base.Vector(0,self.__Length,\
+                    self.__BatteryHeight+50.8-(self.__powerCordNotchSize/2))),
+                    Base.Vector(1,0,0))\
+                 .extrude(Base.Vector(self.__Length,0,0)))
+        self.right = self.right.cut(notch)
+        self.left  = self.left.cut(notch)
+        self.b1 = HalfByHalf.XBeam(\
+                origin.add(Base.Vector(\
+                        self.__Thickness,\
+                        self.__Length,\
+                        self.__Height-12.5)),
+                        self.__Width-(2*self.__Thickness))
+        self.b2 = HalfByHalf.XBeam(\
+                origin.add(Base.Vector(\
+                        self.__Thickness,\
+                        self.__Length,\
+                        self.__BatteryHeight+12.5-self.__Thickness)),
+                        self.__Width-(2*self.__Thickness))
+        self.b3 = HalfByHalf.ZBeam(\
+                origin.add(Base.Vector(self.__Thickness,self.__Length-12.5,a)),
+                self.__Height-a-12.5)
+        self.b4 = HalfByHalf.ZBeam(\
+                origin.add(Base.Vector(self.__Width-self.__Thickness-12.5,\
+                                       self.__Length-12.5,a)),
+                self.__Height-a-12.5)
     def __bowlSupportPlateScrewHoles(self):
         holes = list()
         holes.append(self.origin.add(Base.Vector(\
@@ -627,6 +662,22 @@ class FoodBin(object):
         obj.Shape = self.bowlSupportPlate
         obj.Label=self.name+"_bowlSupportPlate"
         obj.ViewObject.ShapeColor=self.__Color
+        obj = doc.addObject("Part::Feature",self.name+"_b1")
+        obj.Shape = self.b1
+        obj.Label=self.name+"_b1"
+        obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_b2")
+        obj.Shape = self.b2
+        obj.Label=self.name+"_b2"
+        obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_b3")
+        obj.Shape = self.b3
+        obj.Label=self.name+"_b3"
+        obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_b4")
+        obj.Shape = self.b4
+        obj.Label=self.name+"_b4"
+        obj.ViewObject.ShapeColor=self.__BaseColor
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -665,6 +716,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewRear()
+    Gui.activeDocument().activeView().viewLeft()
     Gui.SendMsgToActiveView("ViewFit")
         
