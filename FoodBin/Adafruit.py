@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 13 18:16:55 2024
-#  Last Modified : <240820.1447>
+#  Last Modified : <240821.1650>
 #
 #  Description	
 #
@@ -281,13 +281,111 @@ class Adafruitvl6180x(object):
         #    obj.Shape = h
         #    obj.ViewObject.ShapeColor=tuple([1.0,0.0,0.0])
 
+class StrainGuage(object):
+    __metaclass__ = ABCMeta
+    Length = 80
+    Square = 12.7
+    FixedMountHoleDiameter = 5.5
+    StrainMountHoleDiameter = 4.5
+    HoleEndOffset = 5
+    HoleSpace = 15
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name)
+        obj.Shape = self.guage
+        obj.Label=self.name
+        obj.ViewObject.ShapeColor=tuple([0.8,0.8,0.8])
+    def FixedMountHole(self,i,Z,ZDelta):
+        mh = self.FixedMountingHoles[i]
+        mhO = Base.Vector(mh.x,mh.y,Z)
+        hole = Part.Face(Part.Wire(Part.makeCircle(self.FixedMountHoleDiameter/2,mhO))).extrude(Base.Vector(0,0,ZDelta))
+        return hole
+    def StrainMountHole(self,i,Z,ZDelta):
+        mh = self.StrainMountingHoles[i]
+        mhO = Base.Vector(mh.x,mh.y,Z)
+        hole = Part.Face(Part.Wire(Part.makeCircle(self.StrainMountHoleDiameter/2,mhO))).extrude(Base.Vector(0,0,ZDelta))
+        return hole
+
+class StrainGuageHorizontal(StrainGuage):
+    @classmethod
+    def OriginStrain(cls,X0,Y0,Z0):
+        return Base.Vector(X0-(cls.Length-(cls.HoleEndOffset+(cls.HoleSpace/2))),\
+                           Y0-cls.Square/2,\
+                           Z0)
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        self.guage = Part.makePlane(self.Length,self.Square,origin).extrude(Base.Vector(0,0,self.Square))
+        self.FixedMountingHoles = list()
+        self.FixedMountingHoles.append(origin.add(Base.Vector(self.HoleEndOffset,self.Square/2.0,0)))
+        self.FixedMountingHoles.append(origin.add(Base.Vector(self.HoleEndOffset+self.HoleSpace,self.Square/2.0,0)))
+        for i in range(0,2):
+            self.guage = self.guage.cut(self.FixedMountHole(i,origin.z,self.Square))
+        self.StrainMountingHoles = list()
+        self.StrainMountingHoles.append(origin.add(Base.Vector(self.Length-self.HoleEndOffset,self.Square/2.0,0)))
+        self.StrainMountingHoles.append(origin.add(Base.Vector(self.Length-(self.HoleEndOffset+self.HoleSpace),self.Square/2.0,0)))
+        for i in range(0,2):
+            self.guage = self.guage.cut(self.StrainMountHole(i,origin.z,self.Square))
+        
+class StrainGuageVertical(StrainGuage):
+    @classmethod
+    def OriginStrain(cls,X0,Y0,Z0):
+        return Base.Vector(X0-cls.Square/2,\
+                           Y0-(cls.Length-(cls.HoleEndOffset+(cls.HoleSpace/2))),\
+                           Z0)
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        self.guage = Part.makePlane(self.Square,self.Length,origin).extrude(Base.Vector(0,0,self.Square))
+        self.FixedMountingHoles = list()
+        self.FixedMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.HoleEndOffset,0)))
+        self.FixedMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.HoleEndOffset+self.HoleSpace,0)))
+        for i in range(0,2):
+            self.guage = self.guage.cut(self.FixedMountHole(i,origin.z,self.Square))
+        self.StrainMountingHoles = list()
+        self.StrainMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.Length-self.HoleEndOffset,0)))
+        self.StrainMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.Length-(self.HoleEndOffset+self.HoleSpace),0)))
+        for i in range(0,2):
+            self.guage = self.guage.cut(self.StrainMountHole(i,origin.z,self.Square))
+        
+class StrainGuageVerticalFlipped(StrainGuage):
+    @classmethod
+    def OriginStrain(cls,X0,Y0,Z0):
+        return Base.Vector(X0-cls.Square/2,\
+                           Y0-(cls.HoleEndOffset+(cls.HoleSpace/2)),\
+                           Z0)
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        self.guage = Part.makePlane(self.Square,self.Length,origin).extrude(Base.Vector(0,0,self.Square))
+        self.StrainMountingHoles = list()
+        self.StrainMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.HoleEndOffset,0)))
+        self.StrainMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.HoleEndOffset+self.HoleSpace,0)))
+        self.FixedMountingHoles = list()
+        self.FixedMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.Length-self.HoleEndOffset,0)))
+        self.FixedMountingHoles.append(origin.add(Base.Vector(self.Square/2,self.Length-(self.HoleEndOffset+self.HoleSpace),0)))
+        for i in range(0,2):
+            self.guage = self.guage.cut(self.FixedMountHole(i,origin.z,self.Square))
+        for i in range(0,2):
+            self.guage = self.guage.cut(self.StrainMountHole(i,origin.z,self.Square))
+        
+        
 
 if __name__ == '__main__':
     if "Display" in App.listDocuments().keys():
         App.closeDocument("Display")
     doc = App.newDocument("Display")
-    display = Adafruitvl6180x("Display",Base.Vector(0,0,0))
-    display.show(doc)
-    Gui.activeDocument().activeView().viewFront()
+    hstrain = StrainGuageHorizontal("Display",StrainGuageHorizontal.OriginStrain(0,0,0))
+    hstrain.show(doc) 
+    vstrain = StrainGuageVerticalFlipped("Display",StrainGuageVerticalFlipped.OriginStrain(120,0,0))
+    vstrain.show(doc)
+    Gui.activeDocument().activeView().viewTop()
     Gui.SendMsgToActiveView("ViewFit")
     

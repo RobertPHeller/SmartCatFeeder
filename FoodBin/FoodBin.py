@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240821.0923>
+#  Last Modified : <240822.0010>
 #
 #  Description	
 #
@@ -163,16 +163,56 @@ class Agitator(object):
             obj.Label=self.name+name
             obj.ViewObject.ShapeColor=self.__Color
 
+class Bowl(object):
+    __OuterDiameter = 5*25.4
+    __BowlLargeDiameter = 4.65*25.4
+    __BowlBottomDiameter = 4.0*25.4
+    __RimSize       = .25*25.4
+    __Height        = 1.25*25.4
+    __Thickness     = 1.5
+    __Color = tuple([0.8,0.8,0.8])
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector!")
+        self.origin = origin
+        outerrad = self.__OuterDiameter/2
+        rim = Part.Face(Part.Wire(Part.makeCircle(outerrad,origin.add(Base.Vector(0,0,self.__Height-self.__Thickness))))).extrude(Base.Vector(0,0,self.__Thickness))
+        rim = rim.cut(Part.Face(Part.Wire(Part.makeCircle(outerrad-self.__RimSize,origin.add(Base.Vector(0,0,self.__Height-self.__Thickness))))).extrude(Base.Vector(0,0,self.__Thickness)))
+        body = Part.makeCone(self.__BowlBottomDiameter/2,\
+                             self.__BowlLargeDiameter/2,\
+                             self.__Height-self.__Thickness,origin,Base.Vector(0,0,1))  
+        inside = Part.makeCone((self.__BowlBottomDiameter/2)-self.__Thickness,\
+                               (self.__BowlLargeDiameter/2)-self.__Thickness,\
+                               self.__Height-2*self.__Thickness,\
+                               origin.add(Base.Vector(0,0,self.__Thickness)),\
+                               Base.Vector(0,0,1))
+        body = body.cut(inside)
+        self.bowl = rim.fuse(body)
+    def CutHole(self,part):
+        b = Part.makeCone(self.__BowlBottomDiameter/2,\
+                          (self.__BowlLargeDiameter/2)+self.__Thickness,\
+                          self.__Height,\
+                          Base.Vector(0,0,1))
+        return part.cut(b)
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name)
+        obj.Shape = self.bowl
+        obj.Label=self.name
+        obj.ViewObject.ShapeColor=self.__Color
+
 class FoodBin(object):
     __Width  = 7.5 * 25.4
     __Height = 20  * 25.4
-    __BinBottomOffset = 4 * 25.4
+    __BinBottomOffset = 6 * 25.4
     __BackDepth = 2.75 * 25.4
     __Length = 7.5 * 25.4
     __Thickness = .125 * 25.4
     __FingerWidth = .5 * 25.4
     __BaseThick = (3.0/8.0) * 25.4
-    __BowlExtension = 4 * 25.4
+    __BowlExtension = 6 * 25.4
     __Adafruit35inTFTZOff = 30
     __Adafruit35inTFTYOff = 30
     __AdafruitPCF8523ZOff = 30+(1.3*25.4)
@@ -181,14 +221,18 @@ class FoodBin(object):
     __AdafruitNAU7802YOff = 2+25.4
     __AdafruitNAU7802ZOff = 30
     __Adafruitvl6180xXOff = 25.4
-    __Adafruitvl6180xZOff = 5*25.4
+    __Adafruitvl6180xZOff = 7*25.4
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     __BaseColor = tuple([1.0,1.0,0.0])
     __LidColor  = tuple([1.0,1.0,1.0])
     __StandoffColor = tuple([0.0,1.0,1.0])
     __BatteryHeight = (3.7+.125)*25.4
-    __ChargerAboveBinBottom = 5*25.4
+    __ChargerAboveBinBottom = 7*25.4
     __wireHoleRadius = .5*25.4
+    __bowlZoff = ((3.0/8.0) * 25.4)+12.7+(.125 * 25.4)
+    __bowlXoff = (7.5/2)*25.4
+    __bowlYoff = -3*25.4
+    __bowlBoxHeight = 12.7+(.125 * 25.4)+(1*25.4)
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -403,6 +447,10 @@ class FoodBin(object):
                                         self.__Adafruitvl6180xZOff+7.5))
         hole = Part.Face(Part.Wire(Part.makeCircle(3.125,QWICCableHoleOrigin,YNorm))).extrude(Base.Vector(0,self.__Thickness,0))
         self.back = self.back.cut(hole)
+        self.bowl = Bowl(self.name+"_bowl",\
+                         origin.add(Base.Vector(self.__bowlXoff,\
+                                                self.__bowlYoff,\
+                                                self.__bowlZoff)))
     def show(self,doc=None):
         if doc==None:
             doc = App.activeDocument()
@@ -473,6 +521,7 @@ class FoodBin(object):
         self.agitatorMount.show()
         self.agitator.show()
         self.vl6180x.show()
+        self.bowl.show()
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
