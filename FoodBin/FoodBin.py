@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240822.1420>
+#  Last Modified : <240822.1845>
 #
 #  Description	
 #
@@ -96,7 +96,7 @@ class Agitator(object):
     __OuterDowelRadius   = .75*25.4
     __OuterDowelStartAngle = 0
     __OuterDowelDeltaAngle = 90
-    __AgitatorLength = 3 * 25.4
+    __AgitatorLength = 3.125 * 25.4
     __AgitatorDiskSpacing = (3 / 3)*25.4
     __CenterDowelLength = 4 * 25.4
     __FrontDowelHoleDiameter = 13.5
@@ -129,7 +129,7 @@ class Agitator(object):
             disk = Part.Face(Part.Wire(Part.makeCircle(self.__AgitatorDiskDiameter/2,\
                                                        diskOrigin,\
                                                        Base.Vector(0,1,0))))\
-                             .extrude(Base.Vector(0,self.__DiskThickness,0))
+                             .extrude(Base.Vector(0,-self.__DiskThickness,0))
             if i == 0:
                 disk = DFRobotGearMotor.AgitatorMountPlate.MountYHoleRing(disk,diskOrigin,self.__DiskThickness)
             disk = disk.cut(self.center)
@@ -202,10 +202,19 @@ class Bowl(object):
 
 class FoodBin(object):
     __Width  = 7.5 * 25.4
+    @classmethod
+    def Width(cls):
+        return cls.__Width
     __Height = 20  * 25.4
+    @classmethod
+    def Height(cls):
+        return cls.__Height
     __BinBottomOffset = 6 * 25.4
     __BackDepth = 2.75 * 25.4
     __Length = 7.5 * 25.4
+    @classmethod
+    def Length(cls):
+        return cls.__Length
     __Thickness = .125 * 25.4
     __FingerWidth = .5 * 25.4
     __BaseThick = (3.0/8.0) * 25.4
@@ -426,6 +435,8 @@ class FoodBin(object):
                             self.name+"_agitatorMotor",\
                             agitatorMotorOrigin)
         self.back = self.back.cut(self.agitatorMotor.ShaftHole(backOrigin.y,-self.__Thickness))
+        for i in range(0,4):
+            self.back = self.back.cut(self.agitatorMotor.MountingHole(i,backOrigin.y,-self.__Thickness))
         yoff = DFRobotGearMotor.DFRobotGearMotor.ShaftLength-\
                 DFRobotGearMotor.DFRobotGearMotor.ShaftDFlatLength
         mplateOrigin = self.agitatorMotor.shaftOrigin.add(Base.Vector(0,-yoff,0))
@@ -462,18 +473,16 @@ class FoodBin(object):
         self.strainGuage = Adafruit.StrainGuageVerticalFlipped(\
                     self.name+"_strainGuage",\
                     strainOrigin)
-        paddle =  Part.Face(Part.Wire(Part.makeCircle(\
-                    self.__bowlPaddleDiameter/2,\
-                    origin.add(Base.Vector(self.__bowlXoff,\
-                                           self.__bowlYoff,\
-                                           self.__BaseThick+12.7)))))\
-                          .extrude(Base.Vector(0,0,self.__Thickness))
-        plength = self.__bowlXoff-strainOrigin.x
-        pwidth  = self.__paddleWidth
-        p1 = Part.makePlane(plength,pwidth,\
-                            strainOrigin.add(Base.Vector(0,0,12.7)))\
+        plength = (self.__bowlXoff-strainOrigin.x)+25.4
+        pwidth  = 50.8 #self.__paddleWidth
+        paddle = Part.makePlane(plength,pwidth,\
+                            strainOrigin.add(Base.Vector(0,-(25.4-12.5),12.7)))\
                     .extrude(Base.Vector(0,0,self.__Thickness))
-        paddle = paddle.fuse(p1)
+        pnotch = Part.makePlane(12.7,25.4-12.5,\
+                                strainOrigin.add(Base.Vector(0,25.4,\
+                                                 12.7)))\
+                             .extrude(Base.Vector(0,0,self.__Thickness))
+        paddle = paddle.cut(pnotch)
         paddle = paddle.cut(self.strainGuage.StrainMountHole(\
                         0,strainOrigin.z+12.7,\
                         self.__Thickness))
