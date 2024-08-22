@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 20 15:19:24 2024
-#  Last Modified : <240820.1534>
+#  Last Modified : <240822.1211>
 #
 #  Description	
 #
@@ -95,3 +95,5 @@ if __name__ == '__main__':
     #   foodbin_agitator_disk2
     #   foodbin_agitator_disk3
     #   foodbin_agitator_disk4
+    #   foodbin_paddle
+    #   foodbin_bowlSupportPlate

@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240822.1019>
+#  Last Modified : <240822.1228>
 #
 #  Description	
 #
@@ -234,6 +234,7 @@ class FoodBin(object):
     __paddleWidth = 25
     __bowlBoxHeight = 12.7+(.125 * 25.4)+(1*25.4)
     __bowlBoxSupportThick = (3/4)*25.4
+    __bowlSupportPlateScrewHoleDiameter = (3/16)*25.4
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -488,7 +489,7 @@ class FoodBin(object):
             .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
         self.rightBowlBoxSupport = Part.makePlane(\
                 self.__bowlBoxSupportThick,\
-                self.__BowlExtension,\
+                self.__BowlExtension+self.__Length-self.__BackDepth-self.__Thickness,\
                 origin.add(Base.Vector(self.__Width-(self.__Thickness+self.__bowlBoxSupportThick),\
                                        -self.__BowlExtension,\
                                        self.__BaseThick)))\
@@ -500,14 +501,40 @@ class FoodBin(object):
                     -self.__BowlExtension,\
                     self.__BaseThick)))\
             .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
-        self.bowlSupportPlate = Part.makePlane(\
+        bowlSupportPlate = Part.makePlane(\
                     self.__Width-(2*self.__Thickness),\
                     self.__BowlExtension-12.5,\
                     origin.add(Base.Vector(self.__Thickness,\
                                            -self.__BowlExtension,\
                                            self.__BaseThick+(self.__bowlBoxHeight-self.__Thickness))))\
              .extrude(Base.Vector(0,0,self.__Thickness))
-        self.bowlSupportPlate = self.bowl.CutHole(self.bowlSupportPlate)
+        self.bowlSupportPlate = self.bowl.CutHole(bowlSupportPlate)
+        self.__bowlSupportPlateScrewHoles()
+    def __bowlSupportPlateScrewHoles(self):
+        holes = list()
+        holes.append(self.origin.add(Base.Vector(\
+                self.__Thickness+(self.__bowlBoxSupportThick/2),
+                (-self.__BowlExtension)+25.4,\
+                self.__BaseThick)))
+        holes.append(self.origin.add(Base.Vector(\
+                self.__Thickness+(self.__bowlBoxSupportThick/2),
+                -(1.5*25.4),\
+                self.__BaseThick)))
+        holes.append(self.origin.add(Base.Vector(\
+                self.__Width-(self.__Thickness+(self.__bowlBoxSupportThick/2)),\
+                (-self.__BowlExtension)+25.4,\
+                self.__BaseThick)))
+        holes.append(self.origin.add(Base.Vector(\
+                self.__Width-(self.__Thickness+(self.__bowlBoxSupportThick/2)),\
+                -(1.5*25.4),\
+                self.__BaseThick)))
+        for h in holes:
+            hole = Part.Face(Part.Wire(Part.makeCircle(\
+                        self.__bowlSupportPlateScrewHoleDiameter/2,
+                        h))).extrude(Base.Vector(0,0,self.__bowlBoxHeight))
+            self.leftBowlBoxSupport = self.leftBowlBoxSupport.cut(hole)
+            self.rightBowlBoxSupport = self.rightBowlBoxSupport.cut(hole)
+            self.bowlSupportPlate = self.bowlSupportPlate.cut(hole)
     def show(self,doc=None):
         if doc==None:
             doc = App.activeDocument()
