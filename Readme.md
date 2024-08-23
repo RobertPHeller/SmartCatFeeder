@@ -23,5 +23,8 @@ DF Robot Parts list
 - 2x [Turbo Metal Gear Worm Motor (12V 40RPM 8kg.cm)](https://www.dfrobot.com/product-1484.html)
 Amazon Parts list
 - [Van Ness Pets Lightweight Stainless Steel Cat Bowl, 8 OZ Food And Water Dish, Natural](https://www.amazon.com/Van-Ness-Lightweight-Dish-8-Ounce/dp/B00LM90GJI/)
-- [Baltic Birch Plywood 24 x 48 x 1/8 Inch - 3 mm](https://www.amazon.com/Baltic-Birch-Plywood-Inch-Woodpeckers/dp/B0CLBH4FG9/)
+Woodpeckers Crafts Parts List
+- [1/8" x 24" x 48" Baltic Birch Sheets B/BB](https://woodpeckerscrafts.com/1-8-x-24-x-48-baltic-birch-sheets-b-bb/)
+- 2x [1/4" x 12" Dowel](https://woodpeckerscrafts.com/1-4-x-12-dowel/)
+- [1/2" x 12" Dowel Rod](https://woodpeckerscrafts.com/1-2-x-12-dowel-rod/)
 
