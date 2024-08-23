@@ -19,10 +19,13 @@ your cat will be fed when the power goes out.
 - 2x [STEMMA QT / Qwiic JST SH 4-Pin Cable - 50mm Long](https://www.adafruit.com/product/4399)
 - [STEMMA QT / Qwiic JST SH 4-pin Cable - 100mm Long](https://www.adafruit.com/product/4210)
 - [Woven USB Cable with USB Type A to Right Angle USB Type C - Black 1 meter long](https://www.adafruit.com/product/5031)
+
 DF Robot Parts list
 - 2x [Turbo Metal Gear Worm Motor (12V 40RPM 8kg.cm)](https://www.dfrobot.com/product-1484.html)
+
 Amazon Parts list
 - [Van Ness Pets Lightweight Stainless Steel Cat Bowl, 8 OZ Food And Water Dish, Natural](https://www.amazon.com/Van-Ness-Lightweight-Dish-8-Ounce/dp/B00LM90GJI/)
+
 Woodpeckers Crafts Parts List
 - [1/8" x 24" x 48" Baltic Birch Sheets B/BB](https://woodpeckerscrafts.com/1-8-x-24-x-48-baltic-birch-sheets-b-bb/)
 - 2x [1/4" x 12" Dowel](https://woodpeckerscrafts.com/1-4-x-12-dowel/)
