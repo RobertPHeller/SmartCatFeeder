@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 20 15:19:24 2024
-#  Last Modified : <240822.1808>
+#  Last Modified : <240822.2143>
 #
 #  Description	
 #
@@ -42,7 +42,7 @@
 
 
 import FreeCAD as App
-import Part, TechDraw
+import Part, TechDraw, TechDrawGui
 from FreeCAD import Base
 
 import os
@@ -98,6 +98,8 @@ if __name__ == '__main__':
     #   foodbin_agitator_disk4 -- sheet 1
     #   foodbin_paddle -- sheet 3
     #   foodbin_bowlSupportPlate -- sheet 3
+    #   foodbin_screenFlapSupport -- sheet 3
+    #   foodbin_screenFlapLockPlate -- sheet 3
     
     sideWidth = FoodBin.FoodBin.Length()
     sideHeight = FoodBin.FoodBin.Height()
@@ -226,5 +228,26 @@ if __name__ == '__main__':
     paddle_.Y = 6.35+side_centerY
     paddle_.Rotation = 90.0
     paddle_.Direction = (0.0,0.0,-1.0)
-    
+    screenFlapSupport = doc.foodbin_screenFlapSupport
+    screenFlapSupport_ = doc.addObject('TechDraw::DrawViewPart','Screen_Flap_Support')
+    doc.SmallCutPanelPage_3.addView(screenFlapSupport_)
+    screenFlapSupport_.Source = screenFlapSupport
+    screenFlapSupport_.X = 6.35+(3.75 * 25.4)+(5.25*25.4)+6.35+(5*25.4)+70.8+6.35
+    screenFlapSupport_.Y = 6.35+side_centerY
+    screenFlapSupport_.Rotation = 90.0
+    screenFlapSupport_.Direction = (1.0,0.0,0.0)
+    screenFlapLockPlate = doc.foodbin_screenFlapLockPlate
+    screenFlapLockPlate_ = doc.addObject('TechDraw::DrawViewPart','Screen_Flap_Lock_Plate')
+    doc.SmallCutPanelPage_3.addView(screenFlapLockPlate_)
+    screenFlapLockPlate_.Source = screenFlapLockPlate
+    screenFlapLockPlate_.X = 6.35+(3.75 * 25.4)+(5.25*25.4)+6.35+(5*25.4)+70.8+6.35+(3*25.4)
+    screenFlapLockPlate_.Y = 6.35+side_centerY
+    screenFlapLockPlate_.Rotation = 90.0
+    screenFlapLockPlate_.Direction = (1.0,0.0,0.0)
+        
     doc.recompute()
+
+    #TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_1,"SmartCatFeeder_Page1.svg")
+    #TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_2,"SmartCatFeeder_Page2.svg")
+    #TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_3,"SmartCatFeeder_Page3.svg")
+

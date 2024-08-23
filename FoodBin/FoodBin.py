@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240822.1845>
+#  Last Modified : <240822.2126>
 #
 #  Description	
 #
@@ -228,6 +228,8 @@ class FoodBin(object):
     __AdafruitNAU7802ZOff = 30
     __Adafruitvl6180xXOff = 25.4
     __Adafruitvl6180xZOff = 7*25.4
+    __flapWidth = 3.36*25.4
+    __flapHeight = 2.7*25.4
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     __BaseColor = tuple([1.0,1.0,0.0])
     __LidColor  = tuple([1.0,1.0,1.0])
@@ -535,6 +537,21 @@ class FoodBin(object):
                  .extrude(Base.Vector(self.__Length,0,0)))
         self.right = self.right.cut(notch)
         self.left  = self.left.cut(notch)
+        self.screenFlapSupport = Part.makePlane(\
+                    self.__flapHeight,\
+                    self.__flapWidth,\
+                    origin.add(Base.Vector(\
+                            0,\
+                            self.__Adafruit35inTFTYOff+self.__flapWidth,\
+                            self.__Adafruit35inTFTZOff+(2.4*25.4))),\
+              Base.Vector(1,0,0)).extrude(Base.Vector(-self.__Thickness,0,0))
+        self.screenFlapLockPlate = Part.makePlane(\
+                    12.5,self.__flapWidth,\
+                    origin.add(Base.Vector(\
+                            -self.__Thickness,\
+                            self.__Adafruit35inTFTYOff+self.__flapWidth,\
+                            self.__Adafruit35inTFTZOff+(2.4*25.4)+self.__flapHeight-12.5)),\
+               Base.Vector(1,0,0)).extrude(Base.Vector(-self.__Thickness,0,0))
         self.b1 = HalfByHalf.XBeam(\
                 origin.add(Base.Vector(\
                         self.__Thickness,\
@@ -594,12 +611,12 @@ class FoodBin(object):
         obj.Shape = self.left
         obj.Label=self.name+"_left"
         obj.ViewObject.ShapeColor=self.__Color
-        obj.ViewObject.Transparency=50
+        #obj.ViewObject.Transparency=50
         obj = doc.addObject("Part::Feature",self.name+"_right")
         obj.Shape = self.right
         obj.Label=self.name+"_right"
         obj.ViewObject.ShapeColor=self.__Color
-        obj.ViewObject.Transparency=50
+        #obj.ViewObject.Transparency=50
         obj = doc.addObject("Part::Feature",self.name+"_back")
         obj.Shape = self.back
         obj.Label=self.name+"_back"
@@ -687,6 +704,14 @@ class FoodBin(object):
         obj.Shape = self.b4
         obj.Label=self.name+"_b4"
         obj.ViewObject.ShapeColor=self.__BaseColor
+        obj = doc.addObject("Part::Feature",self.name+"_screenFlapSupport")
+        obj.Shape = self.screenFlapSupport
+        obj.Label=self.name+"_screenFlapSupport"
+        obj.ViewObject.ShapeColor=self.__Color
+        obj = doc.addObject("Part::Feature",self.name+"_screenFlapLockPlate")
+        obj.Shape = self.screenFlapLockPlate
+        obj.Label=self.name+"_screenFlapLockPlate"
+        obj.ViewObject.ShapeColor=self.__Color
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
