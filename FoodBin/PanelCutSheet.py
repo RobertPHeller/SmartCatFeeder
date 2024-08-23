@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 20 15:19:24 2024
-#  Last Modified : <240822.2143>
+#  Last Modified : <240823.1532>
 #
 #  Description	
 #
@@ -48,6 +48,25 @@ from FreeCAD import Base
 import os
 import sys
 sys.path.append(os.path.dirname(__file__))
+import time
+from PySide.QtCore import QCoreApplication, QEventLoop, QTimer
+
+def execute(loop, ms):
+    timer = QTimer()
+    timer.setSingleShot(True)
+    
+    timer.timeout.connect(loop.quit)
+    timer.start(ms)
+    loop.exec_()
+
+def sleep(ms):
+    if not QCoreApplication.instance():
+        app = QCoreApplication([])
+        execute(app, ms)
+    else:
+        loop = QEventLoop()
+        execute(loop, ms)
+
 
 import FoodBin
 
@@ -247,7 +266,9 @@ if __name__ == '__main__':
         
     doc.recompute()
 
-    #TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_1,"SmartCatFeeder_Page1.svg")
-    #TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_2,"SmartCatFeeder_Page2.svg")
-    #TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_3,"SmartCatFeeder_Page3.svg")
+    sleep(500)
+
+    TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_1,"SmartCatFeeder_Page1.svg")
+    TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_2,"SmartCatFeeder_Page2.svg")
+    TechDrawGui.exportPageAsSvg(doc.SmallCutPanelPage_3,"SmartCatFeeder_Page3.svg")
 
