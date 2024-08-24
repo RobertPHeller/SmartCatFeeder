@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240817.0827>
+//  Last Modified : <240824.0855>
 //
 //  Description	
 //
@@ -80,7 +80,7 @@ void setup() {
         while (1) delay(100);
     }
     prefs.Read();
-    Schedule::Schedule::Read("/Schedule.dat");
+    Schedule::Schedule::Read();
     Clock::Initialize();
     Networking::Initialize();
     Mechanical::Initialize();

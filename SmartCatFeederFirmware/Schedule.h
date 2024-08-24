@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240816.1631>
+//  Last Modified : <240824.0906>
 //
 //  Description	
 //
@@ -92,9 +92,9 @@ public:
             return nullptr;
         }
     }
-    static int Read(const char *schedfile)
+    static int Read()
     {
-        File file = SPIFFS.open(schedfile);
+        File file = SPIFFS.open(schedfile_);
         if(!file) return 0; // no schedfile
         for (auto it = Schedule_.begin(); it != Schedule_.end(); it++)
         {
@@ -116,10 +116,10 @@ public:
         } while(file);
         file.close();
     }
-    static int Write(const char *schedfile)
+    static int Write()
     {
         char buffer[256];
-        File file = SPIFFS.open(schedfile,FILE_WRITE,true);
+        File file = SPIFFS.open(schedfile_,FILE_WRITE,true);
         if(!file) return -1; // can't write/create schedfile!
         for (auto it = Schedule_.begin(); it != Schedule_.end(); it++)
         {
@@ -148,6 +148,7 @@ private:
     Clock::TimeOfDay when_;
     Sensors::Weight goalAmmount_;
     static std::vector<Schedule *> Schedule_;
+    static const char schedfile_[];
 };
 
 }
