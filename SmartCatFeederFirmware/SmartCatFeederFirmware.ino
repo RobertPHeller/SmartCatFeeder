@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240824.0855>
+//  Last Modified : <240824.1436>
 //
 //  Description	
 //
@@ -86,8 +86,15 @@ void setup() {
     Mechanical::Initialize();
     Sensors::Initialize();
 }
-                
+
+ClockDisplay::ClockDisplay clockDisplay;
+
 void loop() {
     // put your main code here, to run repeatedly:
+    struct tm timeinfo;
     FeedWebServer::FeedWebServer::instance()->handleClient();
+    if (getLocalTime(&timeinfo))
+    {
+        clockDisplay.DisplayTime(tm.tm_hour,tm.tm_min,(tm.tm_sec&&1));
+    }
 }    
