@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240824.2054>
+//  Created       : Sat Aug 24 20:25:43 2024
+//  Last Modified : <240824.2050>
 //
 //  Description	
 //
@@ -35,9 +35,9 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file Schedule.cpp
+/// @file Preferences.cpp
 /// @author Robert Heller
-/// @date Sat Aug 24 09:01:45 2024
+/// @date Sat Aug 24 20:25:43 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
@@ -45,22 +45,41 @@
 static const char rcsid[] = "@(#) : $Id$";
 
 
-#include "Schedule.h"
+#include <string>
+#include <FS.h>
+#include <SPIFFS.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
 
-namespace Schedule {
+#include "Preferences.h"
+#include "Display.h"
 
-const char Schedule::schedfile_[] = "/Schedule.dat";
+namespace Preferences {
 
-bool Schedule::ScheduleScreen()
+bool Preferences::SettingsScreen()
 {
+    switch (screen_)
+    {
+    case start:
+        break;
+    case ssid:
+        break;
+    case hostname:
+        break;
+    case clockfmt:
+        break;
+    case timezone:
+        break;
+    }
 }
 
-void Schedule::ScheduleScreenStart()
+void Preferences::SettingsScreenStart()
 {
+    screen_ = start;
+    Display::Display.fillScreen(HX8357_BLACK);
 }
 
-void Schedule::CheckForFeeding()
-{
-}
 
 }
+ 

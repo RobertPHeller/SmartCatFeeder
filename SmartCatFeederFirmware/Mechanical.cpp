@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:27:29 2024
-//  Last Modified : <240816.1627>
+//  Last Modified : <240824.2054>
 //
 //  Description	
 //
@@ -50,6 +50,18 @@ static const char rcsid[] = "@(#) : $Id$";
 namespace Mechanical {
 
 void Initialize()
+{
+}
+
+bool ManualFeeding()
+{
+}
+
+void ManualFeedingStart()
+{
+}
+
+void CheckFeedCycle()
 {
 }
 

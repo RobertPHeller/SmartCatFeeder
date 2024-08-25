@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240816.2102>
+//  Last Modified : <240824.2029>
 //
 //  Description	
 //
@@ -160,7 +160,10 @@ public:
     {
         timeZone_ = timezone;
     }
+    bool SettingsScreen();
+    void SettingsScreenStart();
 private:
+    enum {start, ssid, hostname, clockfmt, timezone} screen_;
     std::string ssid_;
     std::string password_;
     std::string hostname_;

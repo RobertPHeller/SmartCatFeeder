@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:05:27 2024
-//  Last Modified : <240816.1628>
+//  Last Modified : <240824.1655>
 //
 //  Description	
 //
@@ -50,6 +50,10 @@ namespace Sensors {
 
 extern void Initialize();
 typedef uint16_t Weight;
+bool FoodBinLow();
+double BowlAmmount();
+
+
 }
 
 #endif // __SENSORS_H

@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:28:18 2024
-//  Last Modified : <240816.1628>
+//  Last Modified : <240824.2039>
 //
 //  Description	
 //
@@ -51,6 +51,14 @@ static const char rcsid[] = "@(#) : $Id$";
 namespace Sensors {
 
 void Initialize()
+{
+}
+
+bool FoodBinLow()
+{
+}
+
+double BowlAmmount()
 {
 }
 

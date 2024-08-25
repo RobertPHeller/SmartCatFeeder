@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240824.1436>
+//  Last Modified : <240824.2052>
 //
 //  Description	
 //
@@ -65,6 +65,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "Preferences.h"
 #include "Schedule.h"
 #include "FeedWebServer.h"
+#include "ClockDisplay.h"
 
 DEFINE_SINGLETON_INSTANCE(Preferences::Preferences);
 static Preferences::Preferences prefs("/Preferences.dat");
@@ -89,12 +90,124 @@ void setup() {
 
 ClockDisplay::ClockDisplay clockDisplay;
 
+#include "clock.xbm.h"
+#include "gear.xbm.h"
+#include "hand.xbm.h"
+
+static enum {MainScreen, SettingsScreen, ScheduleScreen, ManualScreen} currentScreen = MainScreen;
+
 void loop() {
     // put your main code here, to run repeatedly:
     struct tm timeinfo;
+    uint16_t x, y, z1, z2;
     FeedWebServer::FeedWebServer::instance()->handleClient();
-    if (getLocalTime(&timeinfo))
+    Schedule::Schedule::CheckForFeeding();
+    Mechanical::CheckFeedCycle();
+    switch (currentScreen)
     {
-        clockDisplay.DisplayTime(tm.tm_hour,tm.tm_min,(tm.tm_sec&&1));
+    case MainScreen:
+        Display::Display.fillScreen(HX8357_BLACK);
+        if (getLocalTime(&timeinfo))
+        {
+            clockDisplay.DisplayTime(timeinfo.tm_hour,timeinfo.tm_min,(timeinfo.tm_sec&&1));
+        }
+        else
+        {
+            delay(1000);
+            return;
+        }
+        if (Sensors::FoodBinLow())
+        {
+            Display::Display.setTextColor(HX8357_RED,HX8357_BLACK);
+            Display::Display.setTextSize(3);
+            Display::Display.setCursor(0,50);
+            Display::Display.println("Food bin is low!");
+        }
+        Display::Display.setTextColor(HX8357_WHITE,HX8357_BLACK);
+        Display::Display.setTextSize(2);
+        Display::Display.setCursor(0,100);
+        Display::Display.printf("Bowl contains %3.1f Oz.",Sensors::BowlAmmount());
+        Display::Display.setCursor(0,150);
+        {
+            Clock::TimeOfDay now;
+            now.Hour = timeinfo.tm_hour;
+            now.Minute = timeinfo.tm_min;
+            const Schedule::Schedule *next = Schedule::Schedule::NextSchedule(now);
+            if (next != nullptr)
+            {
+                Clock::TimeOfDay when = next->GetWhen();
+                Sensors::Weight weight = next->GetGoalAmmount();
+                int8_t hour;
+                switch (Preferences::Preferences::instance()->GetClockFormat())
+                {
+                case Preferences::Preferences::Twelve:
+                    hour = when.Hour;
+                    if (hour  > 12) hour -= 12;
+                    if (hour == 0) hour = 12;
+                    Display::Display.printf("Next feeding at %2d:%02d%s, %2d Oz.",
+                                            hour,when.Minute,
+                                            (when.Hour<12)?"AM":"PM",
+                                            weight);
+                    break;
+                case Preferences::Preferences::TwentyFour:
+                    Display::Display.printf("Next feeding at %2d:%02d, %2d Oz.",
+                                            when.Hour,when.Minute,
+                                            weight);
+                    break;
+                }
+            }
+            else
+            {
+                Display::Display.println("No feeding scheduled.");
+            }
+        }
+        // touch icons
+        Display::Display.drawXBitmap(25,400,gear_bits,gear_width,gear_height,HX8357_GREEN);
+        Display::Display.drawXBitmap(125,400,clock_bits,clock_width,clock_height,HX8357_BLUE);
+        Display::Display.drawXBitmap(230,400,hand_bits,hand_width,hand_height,HX8357_YELLOW);
+        if (Display::TouchScreen.read_touch(&x, &y, &z1, &z2))
+        {
+            if (y >= 400 && y <= 450)
+            {
+                if (x >= 25 && x <= 75)
+                {
+                    // gear: settings
+                    Preferences::Preferences::instance()->SettingsScreenStart();
+                    currentScreen = SettingsScreen;
+                }
+                else if (x >= 125 && x <= 175)
+                {
+                    // clock: schedule
+                    Schedule::Schedule::ScheduleScreenStart();
+                    currentScreen = ScheduleScreen;
+                }
+                else if (x >= 230 && x <= 280)
+                {
+                    // hand -- manual feading
+                    Mechanical::ManualFeedingStart();
+                    currentScreen = ManualScreen;
+                }
+            }
+        }
+        break;
+    case SettingsScreen:
+        if (!Preferences::Preferences::instance()->SettingsScreen()) 
+        {
+            currentScreen = MainScreen;
+        }
+        break;
+    case ScheduleScreen:
+        if (!Schedule::Schedule::ScheduleScreen())
+        {
+            currentScreen = MainScreen;
+        }
+        break;
+    case ManualScreen:
+        if (!Mechanical::ManualFeeding())
+        {
+            currentScreen = MainScreen;
+        }
+        break;
     }
+    delay(100);
 }    

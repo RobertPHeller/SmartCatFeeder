@@ -1,4 +1,4 @@
-// -!- C++ -!- //////////////////////////////////////////////////////////////
+// -!- c++ -!- //////////////////////////////////////////////////////////////
 //
 //  System        : 
 //  Module        : 
@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240824.2054>
+//  Created       : Sat Aug 24 21:11:51 2024
+//  Last Modified : <240824.2126>
 //
 //  Description	
 //
@@ -35,32 +35,35 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file Schedule.cpp
+/// @file Keyboard.h
 /// @author Robert Heller
-/// @date Sat Aug 24 09:01:45 2024
+/// @date Sat Aug 24 21:11:51 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
-static const char rcsid[] = "@(#) : $Id$";
+#ifndef __KEYBOARD_H
+#define __KEYBOARD_H
+
+#include <Adafruit_GFX.h>
+#include "Display.h"
 
 
-#include "Schedule.h"
+namespace Keyboard {
 
-namespace Schedule {
-
-const char Schedule::schedfile_[] = "/Schedule.dat";
-
-bool Schedule::ScheduleScreen()
+class Keyboard
 {
+public:
+    typedef enum {LowerAlnum, UpperAlnum, Special1Num, Special2Num} KeyMode;
+    Keyboard() : mode_(LowerAlnum){}
+    ~Keyboard() {}
+    void SetMode(KeyMode mode);
+    bool KeyPressed(char &c);
+private:
+    KeyMode mode_;
+};
+
 }
 
-void Schedule::ScheduleScreenStart()
-{
-}
+#endif // __KEYBOARD_H
 
-void Schedule::CheckForFeeding()
-{
-}
-
-}

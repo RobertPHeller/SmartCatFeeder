@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:04:21 2024
-//  Last Modified : <240817.2021>
+//  Last Modified : <240824.2053>
 //
 //  Description	
 //
@@ -50,6 +50,9 @@ namespace Mechanical {
 
 extern void Initialize();
 
+bool ManualFeeding();
+void ManualFeedingStart();
+void CheckFeedCycle();
 }
 
 #endif // __MECHANICAL_H

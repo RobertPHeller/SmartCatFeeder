@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240824.0906>
+//  Last Modified : <240824.2101>
 //
 //  Description	
 //
@@ -78,6 +78,20 @@ public:
     bool TimeEQ(const Clock::TimeOfDay time) const {
         return (time.Hour == when_.Hour && time.Minute == when_.Minute);
     }
+    bool TimeGT(const Clock::TimeOfDay time) const {
+        if (when_.Hour > time.Hour)
+        {
+            return true;
+        }
+        else if (time.Hour == when_.Hour && when_.Minute > time.Minute)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     Clock::TimeOfDay GetWhen() const  {return when_;}
     Sensors::Weight GetGoalAmmount() const  {return goalAmmount_;}
     static size_t Size() {return Schedule_.size();}
@@ -115,6 +129,7 @@ public:
             }
         } while(file);
         file.close();
+        return 0;
     }
     static int Write()
     {
@@ -142,6 +157,30 @@ public:
         else
         {
             return false;
+        }
+    }
+    static bool ScheduleScreen();
+    static void ScheduleScreenStart();
+    static void CheckForFeeding();
+    static const Schedule * NextSchedule(const Clock::TimeOfDay& now)
+    {
+        auto next_time = [now](Schedule *s){return s->TimeGT(now);};
+        auto it = find_if(Schedule_.begin(),Schedule_.end(),next_time);
+        if (it != Schedule_.end())
+        {
+            return *it;
+        }
+        else
+        {
+            it = Schedule_.begin();
+            if (it != Schedule_.end())
+            {
+                return *it;
+            }
+            else
+            {
+                return nullptr;
+            }
         }
     }
 private:
