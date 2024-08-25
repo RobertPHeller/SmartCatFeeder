@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240824.2029>
+//  Last Modified : <240825.1702>
 //
 //  Description	
 //
@@ -52,6 +52,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include "Keyboard.h"
 
 namespace Preferences {
 
@@ -170,6 +171,7 @@ private:
     std::string timeZone_;
     std::string prefsfile_;
     ClockFormat clockFormat_;
+    Keyboard::Keyboard keyboard;
     
 };
 
