@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sun Aug 25 08:41:52 2024
-//  Last Modified : <240825.1556>
+//  Last Modified : <240825.2009>
 //
 //  Description	
 //
@@ -85,13 +85,19 @@ const Keyboard::KeyCell *Keyboard::getTouch(uint16_t x, uint16_t y) const
     }
     for (int i=0; i<Keys_; i+=KeysRowStride_)
     {
-        if (y < keys[i].y || y > (keys[i].y+KeyRowHeight_)) continue;
-        for (int j=0; j<KeysRowStride_; j++)
+        int16_t ky = KOrigY_+(keys[i].row*KeyRowHeight_);
+        if (y >= ky || y <= (ky+KeyRowHeight_))
         {
-            if (x < keys[i+j].x || x > (keys[i+j].x+KeyColumnWidth_)) continue;
-            return &keys[i+j];
+            for (int j=0; j<KeysRowStride_; j++)
+            {
+                int16_t kx = KOrigX_+(keys[i+j].col*KeyColumnWidth_);
+                if (x >= kx || x <= (kx+KeyColumnWidth_)) 
+                {
+                    return &keys[i+j];
+                }
+            }
+            return nullptr;
         }
-        return nullptr;
     }
     return nullptr;
 }
@@ -164,8 +170,8 @@ void Keyboard::drawkeyboard_()
     }
     for (int i=0;i<Keys_;i++)
     {
-        int16_t x = keys[i].x;
-        int16_t y = keys[i].y;
+        int16_t x = KOrigX_+(keys[i].col*KeyColumnWidth_);
+        int16_t y = KOrigY_+(keys[i].row*KeyRowHeight_);
         IconId icon = (IconId) keys[i].iconid;
         unsigned char c = keys[i].c;
         Display::Display.fillRect(x,y,KeyColumnWidth_,KeyRowHeight_,HX8357_BLACK);
