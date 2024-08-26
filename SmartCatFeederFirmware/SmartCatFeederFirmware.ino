@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240824.2052>
+//  Last Modified : <240826.1405>
 //
 //  Description	
 //
@@ -66,10 +66,86 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "Schedule.h"
 #include "FeedWebServer.h"
 #include "ClockDisplay.h"
+#include "Button_xbm.h"
 
 DEFINE_SINGLETON_INSTANCE(Preferences::Preferences);
 static Preferences::Preferences prefs("/Preferences.dat");
 DECLARESCHEDULE;
+
+#include "clock.xbm.h"
+#include "gear.xbm.h"
+#include "hand.xbm.h"
+
+Button_xbm::Button_xbm clock_button_, gear_button_, hand_button_;
+
+Button_xbm::Button_xbm *buttons[] = {
+    &gear_button_,
+    &clock_button_,
+    &hand_button_
+};
+
+ClockDisplay::ClockDisplay clockDisplay;
+
+
+static enum {MainScreen, SettingsScreen, ScheduleScreen, ManualScreen} currentScreen = MainScreen;
+
+void check_buttons()
+{
+    int btn = -1;
+    TS_Point p = Display::TouchScreen.getPoint();
+    if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+    {
+        // this is our way of tracking touch 'release'!
+        p.x = p.y = p.z = -1;
+    }
+    // Scale from ~0->4000 to  tft.width using the calibration #'s
+    if (p.z != -1) 
+    {
+        int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+        int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+        p.x = px;
+        p.y = py;
+    }
+    for (uint8_t b=0; b<3; b++)
+    {
+        if (buttons[b]->contains(p.x, p.y))
+        {
+            buttons[b]->press(true);
+        }
+        else
+        {
+            buttons[b]->press(false);
+        }
+    }
+    for (uint8_t b=0; b<3; b++) 
+    {
+        if (buttons[b]->justReleased())
+        {
+            btn = b;
+        }
+        if (buttons[b]->justPressed())
+        {
+            delay(100); // UI debouncing
+        }
+    }
+    switch (btn)
+    {
+    case 0:
+        Preferences::Preferences::instance()->SettingsScreenStart();
+        currentScreen = SettingsScreen;
+        break;
+    case 1:
+        Schedule::Schedule::ScheduleScreenStart();
+        currentScreen = ScheduleScreen;
+        break;        
+    case 2:
+        Mechanical::ManualFeedingStart();
+        currentScreen = ManualScreen;
+        break;
+    default:
+        break;
+    }
+}
 
 #define FORMAT_SPIFFS_IF_FAILED true
 void setup() {
@@ -86,15 +162,11 @@ void setup() {
     Networking::Initialize();
     Mechanical::Initialize();
     Sensors::Initialize();
+    gear_button_.initButtonUL(&Display::Display,25,400,gear_width,gear_height,gear_bits,HX8357_GREEN);
+    clock_button_.initButtonUL(&Display::Display,125,400,clock_width,clock_height,clock_bits,HX8357_BLUE);
+    hand_button_.initButtonUL(&Display::Display,230,400,hand_width,hand_height,hand_bits,HX8357_YELLOW);
+    
 }
-
-ClockDisplay::ClockDisplay clockDisplay;
-
-#include "clock.xbm.h"
-#include "gear.xbm.h"
-#include "hand.xbm.h"
-
-static enum {MainScreen, SettingsScreen, ScheduleScreen, ManualScreen} currentScreen = MainScreen;
 
 void loop() {
     // put your main code here, to run repeatedly:
@@ -162,33 +234,10 @@ void loop() {
             }
         }
         // touch icons
-        Display::Display.drawXBitmap(25,400,gear_bits,gear_width,gear_height,HX8357_GREEN);
-        Display::Display.drawXBitmap(125,400,clock_bits,clock_width,clock_height,HX8357_BLUE);
-        Display::Display.drawXBitmap(230,400,hand_bits,hand_width,hand_height,HX8357_YELLOW);
-        if (Display::TouchScreen.read_touch(&x, &y, &z1, &z2))
-        {
-            if (y >= 400 && y <= 450)
-            {
-                if (x >= 25 && x <= 75)
-                {
-                    // gear: settings
-                    Preferences::Preferences::instance()->SettingsScreenStart();
-                    currentScreen = SettingsScreen;
-                }
-                else if (x >= 125 && x <= 175)
-                {
-                    // clock: schedule
-                    Schedule::Schedule::ScheduleScreenStart();
-                    currentScreen = ScheduleScreen;
-                }
-                else if (x >= 230 && x <= 280)
-                {
-                    // hand -- manual feading
-                    Mechanical::ManualFeedingStart();
-                    currentScreen = ManualScreen;
-                }
-            }
-        }
+        gear_button_.drawButton();
+        clock_button_.drawButton();
+        hand_button_.drawButton();
+        check_buttons();
         break;
     case SettingsScreen:
         if (!Preferences::Preferences::instance()->SettingsScreen()) 

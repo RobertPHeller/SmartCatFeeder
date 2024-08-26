@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240825.1702>
+//  Last Modified : <240826.1941>
 //
 //  Description	
 //
@@ -52,7 +52,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <Adafruit_GFX.h>
 #include "Keyboard.h"
+
 
 namespace Preferences {
 
@@ -69,7 +71,35 @@ public:
           , timeZone_("EST5EDT,M3.2.0,M11.1.0")   // TZ_America_New_York
           , prefsfile_(prefsfile)
           , clockFormat_(Twelve)
+          , ssid_button_(ssid,&Display::Display,10,45,300,42*3,HX8357_WHITE,
+                         HX8357_BLACK,HX8357_GREEN,"Network Name:",5)
+          , hostname_button_(hostname,&Display::Display,10,173,300,42*2,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_GREEN,
+                             "Host name:",5)
+          , clockfmt_button_(hostname,&Display::Display,10,259,300,42*2,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_GREEN,
+                             "Clock Format:",5)
+          , timeZone_button_(timezone,&Display::Display,10,345,300,42*2,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_GREEN,
+                             "Time Zone:",5)
+          
     {
+        return_.initButtonUL(&Display::Display,10,431,300,42,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_BLUE,
+                             "Return",5);
+        yes_.initButtonUL(&Display::Display,35,259,100,42,
+                          HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                          "Yes",5);
+        no_.initButtonUL(&Display::Display,195,259,100,42,
+                         HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                         "No",5);
+        previous_.initButtonUL(&Display::Display,35,388,100,42,
+                               HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                               "Previous",5);
+        next_.initButtonUL(&Display::Display,195,388,100,42,
+                           HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                           "Next",5);
+        
     }
     int Read()
     {
@@ -164,7 +194,10 @@ public:
     bool SettingsScreen();
     void SettingsScreenStart();
 private:
-    enum {start, ssid, hostname, clockfmt, timezone} screen_;
+    typedef enum {start, waitformainselection, ssid, disconnectYesNo, 
+        displaySSIDs, selectSSID, getpassword, saveandconnectYesNo, hostname, 
+        clockfmt, timezone, exit} ScreenMode;
+    ScreenMode screen_;
     std::string ssid_;
     std::string password_;
     std::string hostname_;
@@ -172,6 +205,66 @@ private:
     std::string prefsfile_;
     ClockFormat clockFormat_;
     Keyboard::Keyboard keyboard;
+    void displayAllSettings_();
+    void waitformainselection_();
+    void displayYesNo_(const char *question);
+    int yesnoanswer_();
+    int16_t ssid_count_, ssid_index_;
+    void displayWiFissids_();
+    int select_ssid_from_list_();
+    void set_ssid_(int rel_ssid_index);
+    class SettingsButton {
+    public:
+        SettingsButton(ScreenMode next, Adafruit_GFX *gfx, int16_t x, 
+                       int16_t y, uint16_t w, uint16_t h, uint16_t outline, 
+                       uint16_t fill, uint16_t textcolor, const char *label, 
+                       uint8_t textsize);
+        void drawButton(const char * value,const char *message = NULL, 
+                        bool inverted = false);
+        bool contains(int16_t x, int16_t y);
+        /**********************************************************************/
+        /*!
+         *     @brief    Sets button state, should be done by some touch function
+         *     @param    p  True for pressed, false for not.
+         *   */
+        /**********************************************************************/
+        void press(bool p) {
+            laststate = currstate;
+            currstate = p;
+        }
+        
+        bool justPressed();
+        bool justReleased();
+        /**********************************************************************/
+        /*!
+         *     @brief    Query whether the button is currently pressed
+         *     @returns  True if pressed
+         *   */
+        /**********************************************************************/
+        bool isPressed(void) { return currstate; };
+        ScreenMode GetNext() const {return _next;}
+    private:
+        ScreenMode _next;
+        Adafruit_GFX *_gfx;
+        int16_t _x1, _y1; // Coordinates of top-left corner
+        uint16_t _w, _h;
+        uint8_t _textsize_x;
+        uint8_t _textsize_y;
+        uint16_t _outlinecolor, _fillcolor, _textcolor;
+        char _label[30];
+        bool currstate, laststate;
+    };
+    
+    SettingsButton ssid_button_;
+    SettingsButton hostname_button_;
+    SettingsButton clockfmt_button_;
+    SettingsButton timeZone_button_;
+    Adafruit_GFX_Button return_;
+    Adafruit_GFX_Button yes_;
+    Adafruit_GFX_Button no_;
+    Adafruit_GFX_Button previous_;
+    Adafruit_GFX_Button next_;
+    
     
 };
 

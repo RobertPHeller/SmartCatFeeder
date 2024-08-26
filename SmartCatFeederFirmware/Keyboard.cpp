@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sun Aug 25 08:41:52 2024
-//  Last Modified : <240825.2009>
+//  Last Modified : <240826.1323>
 //
 //  Description	
 //
@@ -106,9 +106,24 @@ bool Keyboard::KeyPressed(char &c)
 {
     uint16_t x, y, z1, z2;
     if (mode_ == Off) return false;
-    if (Display::TouchScreen.read_touch(&x, &y, &z1, &z2))
+    TS_Point p = Display::TouchScreen.getPoint();
+    if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
     {
-        const KeyCell *cell = getTouch(x,y);
+        // this is our way of tracking touch 'release'!
+        p.x = p.y = p.z = -1;
+    }
+    // Scale from ~0->4000 to  tft.width using the calibration #'s
+    if (p.z != -1) 
+    {
+        int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+        int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+        p.x = px;
+        p.y = py;
+    }
+    
+    if (p.z != -1)
+    {
+        const KeyCell *cell = getTouch(p.x,p.y);
         if (cell == nullptr)
         {
             return false;
@@ -214,6 +229,8 @@ void Keyboard::drawkeyboard_()
     }
 }
 
-
+const Keyboard::KeyCell Keyboard::LowerAlnum_[50];
+const Keyboard::KeyCell Keyboard::UpperAlnum_[50];
+const Keyboard::KeyCell Keyboard::Special_[50];
 
 }
