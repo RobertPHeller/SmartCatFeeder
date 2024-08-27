@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 21:11:51 2024
-//  Last Modified : <240825.2002>
+//  Last Modified : <240827.1517>
 //
 //  Description	
 //
@@ -48,6 +48,16 @@
 #include <Adafruit_GFX.h>
 #include "Display.h"
 
+#include <stdio.h>
+
+#define HASSERT(x) if (!(x)) \
+{ \
+    char buffer[256];\
+    snprintf(buffer,sizeof(buffer),"Assertion failed in file " __FILE__ " line %d: assert(%s)", __LINE__, #x); \
+    Serial.println(buffer);\
+    while(1) delay(100);\
+}
+
 
 namespace Keyboard {
 
@@ -58,8 +68,16 @@ public:
     ~Keyboard() {}
     void start();
     void end();
-    bool KeyPressed(char &c);
+    char KeyPressed();
 private:
+    static constexpr uint8_t Keys_ = 50;
+    static constexpr uint8_t KeysRowStride_ = 10;
+    static constexpr uint8_t KeyRowHeight_ = 32;
+    static constexpr uint8_t KeyColumnWidth_ = 24;
+    static constexpr uint16_t KOrigX_ = 120;
+    static constexpr uint16_t KOrigY_ = 160;
+    static constexpr uint16_t KWidth_ = KeysRowStride_*KeyColumnWidth_;
+    static constexpr uint16_t KHeight_ = KeyRowHeight_*(Keys_/KeysRowStride_);
     typedef enum {Off=0, LowerAlnum, UpperAlnum, Special} KeyMode;
     void SetMode(KeyMode mode) {mode_ = mode;}
     typedef enum {blank=0, shift, return_l, return_r, delete_l, delete_r, 
@@ -74,8 +92,30 @@ private:
     } KeyCell;
     KeyMode mode_;
     void drawkeyboard_();
-    const KeyCell *getTouch(uint16_t x, uint16_t y) const;
-    static constexpr const KeyCell LowerAlnum_[50] = {
+    const KeyCell *getTouch(uint16_t x, uint16_t y);
+    uint8_t key_currstate[Keys_], key_laststate[Keys_];
+    bool keyJustPressed(uint8_t i)
+    {
+        HASSERT(i < Keys_);
+        return (key_currstate[i] && !key_laststate[i]);
+    }
+    bool keyJustReleased(uint8_t i)
+    {
+        HASSERT(i < Keys_);
+        return  (!key_currstate[i] && key_laststate[i]);
+    }
+    void keyPress(uint8_t i, bool p)
+    {
+        HASSERT(i < Keys_);
+        key_laststate[i] = key_currstate[i];
+        key_currstate[i] = p;
+    }
+    bool keyIsPressed(uint8_t i)
+    {
+        HASSERT(i < Keys_); 
+        return key_currstate[i];
+    }
+    static constexpr const KeyCell LowerAlnum_[Keys_] = {
         {0,0,1,LowerAlnum,blank,'1'},
         {1,0,1,LowerAlnum,blank,'2'},
         {2,0,1,LowerAlnum,blank,'3'},
@@ -127,7 +167,7 @@ private:
         {8,4,1,LowerAlnum,delete_l,'\b'},
         {9,4,1,LowerAlnum,delete_r,'\b'}
     };
-    static constexpr const KeyCell UpperAlnum_[50] = {
+    static constexpr const KeyCell UpperAlnum_[Keys_] = {
         {0,0,1,LowerAlnum,blank,'1'},
         {1,0,1,LowerAlnum,blank,'2'},
         {2,0,1,LowerAlnum,blank,'3'},
@@ -179,7 +219,7 @@ private:
         {8,4,1,LowerAlnum,delete_l,'\b'},
         {9,4,1,LowerAlnum,delete_r,'\b'}
     };
-    static constexpr const KeyCell Special_[50] = {
+    static constexpr const KeyCell Special_[Keys_] = {
         {0,0,1,Special,blank,'!'},
         {1,0,1,Special,blank,'@'},
         {2,0,1,Special,blank,'#'},
@@ -231,14 +271,6 @@ private:
         {8,4,1,Special,delete_l,'\b'},
         {9,4,1,Special,delete_r,'\b'}
     };
-    static constexpr uint8_t Keys_ = 50;
-    static constexpr uint8_t KeysRowStride_ = 10;
-    static constexpr uint8_t KeyRowHeight_ = 32;
-    static constexpr uint8_t KeyColumnWidth_ = 24;
-    static constexpr uint16_t KOrigX_ = 120;
-    static constexpr uint16_t KOrigY_ = 160;
-    static constexpr uint16_t KWidth_ = KeysRowStride_*KeyColumnWidth_;
-    static constexpr uint16_t KHeight_ = KeyRowHeight_*(Keys_/KeysRowStride_);
 };
 
 }

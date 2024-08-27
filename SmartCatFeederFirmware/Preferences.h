@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240827.1411>
+//  Last Modified : <240827.1555>
 //
 //  Description	
 //
@@ -203,6 +203,8 @@ private:
     bool displayYesNo_(const char *question);
     void displayWiFissids_(int first, int count);
     void ssidSelected(int i);
+    void ssidGetPassword(const char *ssid,char *passwordBuffer,
+                         size_t bufferSize);
     static constexpr const uint8_t LISTSIZE = 8;
     bool list_currstate[LISTSIZE], list_laststate[LISTSIZE];
     bool listJustPressed(uint8_t i)
@@ -221,7 +223,7 @@ private:
         list_laststate[i] = list_currstate[i];
         list_currstate[i] = p;
     }
-    bool listPressed(uint8_t i) 
+    bool listIsPressed(uint8_t i) 
     {
         HASSERT(i < LISTSIZE);
         return list_currstate[i];

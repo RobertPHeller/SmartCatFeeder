@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sun Aug 25 08:41:52 2024
-//  Last Modified : <240826.1323>
+//  Last Modified : <240827.1517>
 //
 //  Description	
 //
@@ -48,6 +48,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <Adafruit_GFX.h>
 #include "Display.h"
 #include "Keyboard.h"
+#include "BackgroundTask.h"
 
 namespace Keyboard {
 
@@ -64,10 +65,8 @@ void Keyboard::end()
 }
 
 
-const Keyboard::KeyCell *Keyboard::getTouch(uint16_t x, uint16_t y) const
+const Keyboard::KeyCell *Keyboard::getTouch(uint16_t x, uint16_t y)
 {
-    if (x < KOrigX_ || x > (KOrigX_+KWidth_)) return nullptr;
-    if (y < KOrigY_) return nullptr;
     const KeyCell *keys;
     switch (mode_)
     {
@@ -86,69 +85,68 @@ const Keyboard::KeyCell *Keyboard::getTouch(uint16_t x, uint16_t y) const
     for (int i=0; i<Keys_; i+=KeysRowStride_)
     {
         int16_t ky = KOrigY_+(keys[i].row*KeyRowHeight_);
-        if (y >= ky || y <= (ky+KeyRowHeight_))
+        for (int j=0; j<KeysRowStride_; j++)
         {
-            for (int j=0; j<KeysRowStride_; j++)
+            int16_t kx = KOrigX_+(keys[i+j].col*KeyColumnWidth_);
+            if ((x >= kx) && (x < (kx+KeyColumnWidth_)) &&
+                (y >= ky) && (y < (ky+KeyRowHeight_)))
             {
-                int16_t kx = KOrigX_+(keys[i+j].col*KeyColumnWidth_);
-                if (x >= kx || x <= (kx+KeyColumnWidth_)) 
+                keyPress(i+j,true);
+                if (keyJustPressed(i+j))
+                {
+                    BackgroundTask::RunTasks(100);
+                }
+            }
+            else
+            {
+                keyPress(i+j,false);
+                if (keyJustReleased(i+j))
                 {
                     return &keys[i+j];
                 }
             }
-            return nullptr;
         }
+        return nullptr;
     }
     return nullptr;
 }
 
-bool Keyboard::KeyPressed(char &c)
+char Keyboard::KeyPressed()
 {
-    uint16_t x, y, z1, z2;
-    if (mode_ == Off) return false;
-    TS_Point p = Display::TouchScreen.getPoint();
-    if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+    if (mode_ == Off) return '\0';
+    while (true)
     {
-        // this is our way of tracking touch 'release'!
-        p.x = p.y = p.z = -1;
-    }
-    // Scale from ~0->4000 to  tft.width using the calibration #'s
-    if (p.z != -1) 
-    {
-        int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
-        int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
-        p.x = px;
-        p.y = py;
-    }
-    
-    if (p.z != -1)
-    {
-        const KeyCell *cell = getTouch(p.x,p.y);
-        if (cell == nullptr)
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
         {
-            return false;
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
         }
-        else
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
         {
-            if ((KeyMode)(cell->newmode) != mode_)
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        
+        if (p.z != -1)
+        {
+            const KeyCell *cell = getTouch(p.x,p.y);
+            if (cell != nullptr)
             {
-                mode_ = (KeyMode)(cell->newmode);
-                drawkeyboard_();
-            }
-            if (cell->ischar == 1)
-            {
-                c = cell->c;
-                return true;
-            }
-            else
-            {
-                return false;
+                if ((KeyMode)(cell->newmode) != mode_)
+                {
+                    mode_ = (KeyMode)(cell->newmode);
+                    drawkeyboard_();
+                }
+                if (cell->ischar == 1)
+                {
+                    return cell->c;
+                }
             }
         }
-    }
-    else
-    {
-        return false;
     }
 }
 
@@ -229,8 +227,8 @@ void Keyboard::drawkeyboard_()
     }
 }
 
-const Keyboard::KeyCell Keyboard::LowerAlnum_[50];
-const Keyboard::KeyCell Keyboard::UpperAlnum_[50];
-const Keyboard::KeyCell Keyboard::Special_[50];
+const Keyboard::KeyCell Keyboard::LowerAlnum_[Keyboard::Keys_];
+const Keyboard::KeyCell Keyboard::UpperAlnum_[Keyboard::Keys_];
+const Keyboard::KeyCell Keyboard::Special_[Keyboard::Keys_];
 
 }

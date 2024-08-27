@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 20:25:43 2024
-//  Last Modified : <240827.1409>
+//  Last Modified : <240827.1744>
 //
 //  Description	
 //
@@ -52,10 +52,12 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <ctype.h>
 #include <stdio.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
 
 #include "BackgroundTask.h"
 #include "Preferences.h"
 #include "Display.h"
+#include "FeedWebServer.h"
 
 namespace Preferences {
 
@@ -169,7 +171,7 @@ void Preferences::Settings()
         }
         if (ssid_button_.contains(p.x, p.y))
         {
-        ssid_button_.press(true);  // tell the button it is pressed
+            ssid_button_.press(true);  // tell the button it is pressed
             if (ssid_button_.justPressed()) 
             {
                 BackgroundTask::RunTasks(100);
@@ -482,6 +484,91 @@ void Preferences::displayWiFissids_(int first, int count)
     return_.drawButton();
 }
 
+void Preferences::ssidSelected(int selected)
+{
+    char ssid_buffer[64];
+    char password_buffer[64];
+    strncpy(ssid_buffer,WiFi.SSID(selected).c_str(),63);
+    ssid_buffer[63] = '\0';
+    password_buffer[0] = '\0'; // assume no password
+    if (WiFi.encryptionType(selected) != WIFI_AUTH_OPEN)
+    {
+        ssidGetPassword(ssid_buffer,password_buffer,64);
+    }
+    if (displayYesNo_("Save and connect?"))
+    {
+        SetSSID(ssid_buffer);
+        SetPassword(password_buffer);
+        Write();
+        WiFi.begin(GetSSID(),GetPassword());
+        for (int i = 0; i < 120; i++)
+        {
+            if (WiFi.status() == WL_CONNECTED) break;
+            delay(500);
+            Display::Display.print(".");
+        }
+        Display::Display.println("");
+        if (WiFi.status() != WL_CONNECTED) {
+            Display::PrintError("Not Connected: Network not initialized.");
+            return;
+        }
+        Display::Display.print("Connected to ");
+        Display::Display.println(GetSSID());
+        Display::Display.print("IP address: ");
+        Display::Display.println(WiFi.localIP());
+        if (!MDNS.begin(GetHostname()))
+        {
+            Display::PrintError("Error setting up MDNS responder!");
+            return;
+        }
+        Display::Display.println("mDNS responder started");
+        FeedWebServer::FeedWebServer::StartServer();
+        // Add service to MDNS-SD
+        MDNS.addService("http", "tcp", 80);
+    }        
+}
+
+void Preferences::ssidGetPassword(const char *ssid,char *passwordBuffer,
+                                  size_t bufferSize)
+{
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42*2,HX8357_WHITE);
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5);
+    Display::Display.setCursor(11,11);
+    Display::Display.println(ssid);
+    Display::Display.setCursor(11,Display::Display.getCursorY());
+    keyboard.start();
+    char c, *p = passwordBuffer;
+    *passwordBuffer = '\0';
+    while ((c=keyboard.KeyPressed()) != '\r')
+    {
+        if (bufferSize<2) break;
+        if (c == '\b')
+        {
+            if (p > passwordBuffer)
+            {
+                *--p = '\0';
+                bufferSize++;
+                Display::Display.setCursor(Display::Display.getCursorX()-5*6,
+                                           Display::Display.getCursorY());
+                Display::Display.drawChar(Display::Display.getCursorX(),
+                                          Display::Display.getCursorY(),
+                                          ' ',
+                                          HX8357_BLUE,HX8357_WHITE,5,5);
+            }
+        }
+        else
+        {
+            *p++ = c;
+            bufferSize--;
+            Display::Display.print(c);
+        }
+    }
+    *p = '\0';
+    keyboard.end();
+}
+
 void Preferences::hostnameScreen()
 {
 }
@@ -495,95 +582,5 @@ void Preferences::timeZoneScreen()
 }
 
 
-#ifdef NOTYET
-
-int Preferences::select_ssid_from_list_()
-{
-    return -1;
-}
-
-
-void Preferences::set_ssid_(int rel_ssid_index)
-{
-}
-
-
-bool Preferences::SettingsScreen()
-{
-    switch (screen_)
-    {
-    case start:
-        displayAllSettings_();
-        screen_ = waitformainselection;
-    case waitformainselection:
-        waitformainselection_();
-        break;
-    case ssid:
-        break;
-    case displaySSIDs:
-        displayWiFissids_();
-        screen_ = selectSSID;
-        return true;
-    case disconnectYesNo:
-        switch (yesnoanswer_())
-        {
-        case -1:
-            break;
-        case 0:
-            screen_ = start;
-            break;
-        case 1:
-            WiFi.mode(WIFI_STA);
-            WiFi.disconnect();
-            BackgroundTask::RunTasks(100);
-            screen_ = ssid;
-            break;
-        }
-        break;
-    case selectSSID:
-        {
-            int selected = select_ssid_from_list_();
-            if (selected >= 0)
-            {
-                set_ssid_(ssid_index_+selected);
-            }
-        }
-        break;
-    case getpassword:
-        break;
-    case saveandconnectYesNo:
-        switch (yesnoanswer_())
-        {
-        case -1:
-            break;
-        case 0:
-            screen_ = start;
-            break;
-        case 1:
-            // save prefs and connect...
-            break;
-        }
-        break;
-    case hostname:
-        break;
-    case clockfmt:
-        break;
-    case timezone:
-        break;
-    case exit:
-        return false;
-        break;
-    }
-    return true;
-}
-
-void Preferences::SettingsScreenStart()
-{
-    screen_ = start;
-    Display::Display.fillScreen(HX8357_BLACK);
-}
-
-
-#endif
 }
  
