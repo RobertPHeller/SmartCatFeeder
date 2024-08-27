@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Fri Aug 16 21:31:26 2024
-//  Last Modified : <240827.1014>
+//  Created       : Tue Aug 27 09:52:48 2024
+//  Last Modified : <240827.1110>
 //
 //  Description	
 //
@@ -35,66 +35,39 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file FeedWebServer.h
+/// @file MainScreen.h
 /// @author Robert Heller
-/// @date Fri Aug 16 21:31:26 2024
+/// @date Tue Aug 27 09:52:48 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __FEEDWEBSERVER_H
-#define __FEEDWEBSERVER_H
+#ifndef __MAINSCREEN_H
+#define __MAINSCREEN_H
 
-#include <WebServer.h>
+#include <Adafruit_GFX.h>
+
 #include "Singleton.h"
-#include "BackgroundTask.h"
+#include "Button_xbm.h"
 
+namespace MainScreen {
 
-namespace FeedWebServer {
-
-class FeedWebServer : public BackgroundTask, public WebServer, public Singleton<FeedWebServer>
+class MainScreen : public Singleton<MainScreen>
 {
 public:
-    FeedWebServer() \
-                : WebServer(80)
-    , BackgroundTask()
-    {
-    }
-    static void StartServer()
-    {
-        instance()->_startServer();
-    }
-    virtual void RunTask()
-    {
-        handleClient();
-    }
+    MainScreen() : lastMillis_(0) {}
+    ~MainScreen() {}
+    void Initialize();
+    void Loop();
 private:
-    void _startServer()
-    {
-        on("/", Welcome);
-        on("/style.css", SendStyle);
-        on("/javascript.js", SendJavaScript);
-        on("/Robot1-110.png", SendRobot1_110);
-        onNotFound(NotFound);
-        begin();
-    }
-    static void Welcome() {instance()->_welcome();}
-    void _welcome();
-    static void NotFound() {instance()->_notFound();}
-    void _notFound();
-    static void SendStyle() {instance()->_sendStyle();}
-    void _sendStyle();
-    static void SendJavaScript() {instance()->_sendJavaScript();}
-    void _sendJavaScript();
-    static void SendRobot1_110() {instance()->_sendRobot1_110();}
-    void _sendRobot1_110();
-    String header_(String title);
-    String footer_();
+    typedef enum {gear=0, clock, hand, lastbutton} ButtonIndex;
+    Button_xbm::Button_xbm buttons_[3];
+    int lastMillis_;
+    ButtonIndex check_buttons_();
+    void refreshScreen_();
 };
-
-
 
 }
 
-#endif // __FEEDWEBSERVER_H
+#endif // __MAINSCREEN_H
 

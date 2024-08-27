@@ -7,8 +7,8 @@
 //  Date          : $Date$
 //  Author        : $Author$
 //  Created By    : Robert Heller
-//  Created       : Fri Aug 16 21:31:26 2024
-//  Last Modified : <240827.1014>
+//  Created       : Tue Aug 27 09:57:16 2024
+//  Last Modified : <240827.1020>
 //
 //  Description	
 //
@@ -35,66 +35,38 @@
 ///    You should have received a copy of the GNU General Public License
 ///    along with this program; if not, write to the Free Software
 ///    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-/// @file FeedWebServer.h
+/// @file BackgroundTask.h
 /// @author Robert Heller
-/// @date Fri Aug 16 21:31:26 2024
+/// @date Tue Aug 27 09:57:16 2024
 /// 
 ///
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __FEEDWEBSERVER_H
-#define __FEEDWEBSERVER_H
+#ifndef __BACKGROUNDTASK_H
+#define __BACKGROUNDTASK_H
 
-#include <WebServer.h>
-#include "Singleton.h"
-#include "BackgroundTask.h"
+#include <vector>
 
-
-namespace FeedWebServer {
-
-class FeedWebServer : public BackgroundTask, public WebServer, public Singleton<FeedWebServer>
+class BackgroundTask
 {
 public:
-    FeedWebServer() \
-                : WebServer(80)
-    , BackgroundTask()
+    
+    BackgroundTask()
     {
+        addTask(this);
     }
-    static void StartServer()
+    ~BackgroundTask()
     {
-        instance()->_startServer();
+        removeTask(this);
     }
-    virtual void RunTask()
-    {
-        handleClient();
-    }
+    virtual void RunTask() = 0;
+    static void RunTasks(int sleepMillis);
 private:
-    void _startServer()
-    {
-        on("/", Welcome);
-        on("/style.css", SendStyle);
-        on("/javascript.js", SendJavaScript);
-        on("/Robot1-110.png", SendRobot1_110);
-        onNotFound(NotFound);
-        begin();
-    }
-    static void Welcome() {instance()->_welcome();}
-    void _welcome();
-    static void NotFound() {instance()->_notFound();}
-    void _notFound();
-    static void SendStyle() {instance()->_sendStyle();}
-    void _sendStyle();
-    static void SendJavaScript() {instance()->_sendJavaScript();}
-    void _sendJavaScript();
-    static void SendRobot1_110() {instance()->_sendRobot1_110();}
-    void _sendRobot1_110();
-    String header_(String title);
-    String footer_();
+    typedef std::vector<BackgroundTask *> TaskVector;
+    static TaskVector taskVector_;
+    static void addTask(BackgroundTask *task);
+    static void removeTask(BackgroundTask *task);
 };
 
-
-
-}
-
-#endif // __FEEDWEBSERVER_H
+#endif // __BACKGROUNDTASK_H
 
