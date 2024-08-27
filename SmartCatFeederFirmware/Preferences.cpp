@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 20:25:43 2024
-//  Last Modified : <240827.0950>
+//  Last Modified : <240827.1409>
 //
 //  Description	
 //
@@ -53,19 +53,19 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <stdio.h>
 #include <WiFi.h>
 
+#include "BackgroundTask.h"
 #include "Preferences.h"
 #include "Display.h"
 
 namespace Preferences {
 
-Preferences::SettingsButton::SettingsButton(ScreenMode next, Adafruit_GFX *gfx,
+Preferences::SettingsButton::SettingsButton(Adafruit_GFX *gfx,
                                             int16_t x, int16_t y, uint16_t w, 
                                             uint16_t h, uint16_t outline,
                                             uint16_t fill, uint16_t textcolor, 
                                             const char *label, 
                                             uint8_t textsize)
-      : _next(next)
-, _gfx(gfx)
+      : _gfx(gfx)
 , _x1(x)
 , _y1(y)
 , _w(w)
@@ -130,9 +130,7 @@ bool Preferences::SettingsButton::justReleased()
     return (!currstate && laststate);
 }
 
-
-
-void Preferences::displayAllSettings_()
+void Preferences::Settings()
 {
     Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
     Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
@@ -152,110 +150,238 @@ void Preferences::displayAllSettings_()
     }
     timeZone_button_.drawButton(timeZone_.c_str());
     return_.drawButton();
-}
-
-void Preferences::waitformainselection_()
-{
-    TS_Point p = Display::TouchScreen.getPoint();
-    if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
-    {
-        // this is our way of tracking touch 'release'!
-        p.x = p.y = p.z = -1;
-    }
-    // Scale from ~0->4000 to  tft.width using the calibration #'s
-    if (p.z != -1) 
-    {
-        int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
-        int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
-        p.x = px;
-        p.y = py;
-    }
     
-    if (ssid_button_.contains(p.x, p.y))
+    while (true)
     {
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        if (ssid_button_.contains(p.x, p.y))
+        {
         ssid_button_.press(true);  // tell the button it is pressed
-        if (ssid_button_.justPressed()) 
-        {
-            delay(100);
+            if (ssid_button_.justPressed()) 
+            {
+                BackgroundTask::RunTasks(100);
+            }
         }
-    }
-    else
-    {
-        ssid_button_.press(false); // tell the button it is NOT pressed
-        if (ssid_button_.justReleased())
+        else
         {
-            screen_ = ssid_button_.GetNext();
+            ssid_button_.press(false); // tell the button it is NOT pressed
+            if (ssid_button_.justReleased())
+            {
+                ssidScreen();
+            }
         }
-    }
-    if (hostname_button_.contains(p.x, p.y))
-    {
-        hostname_button_.press(true);  // tell the button it is pressed
-        if (hostname_button_.justPressed())
+        if (hostname_button_.contains(p.x, p.y))
         {
-            delay(100);
+            hostname_button_.press(true);  // tell the button it is pressed
+            if (hostname_button_.justPressed())
+            {
+                BackgroundTask::RunTasks(100);
+            }
         }
-    }
-    else
-    {
-        hostname_button_.press(false); // tell the button it is NOT pressed
-        if (hostname_button_.justReleased())
+        else
         {
-            screen_ = hostname_button_.GetNext();
+            hostname_button_.press(false); // tell the button it is NOT pressed
+            if (hostname_button_.justReleased())
+            {
+                hostnameScreen();
         }
-    }
-    if (clockfmt_button_.contains(p.x, p.y))
-    {
-        clockfmt_button_.press(true);  // tell the button it is pressed
-        if (clockfmt_button_.justPressed())
+        }
+        if (clockfmt_button_.contains(p.x, p.y))
         {
-            delay(100);
+            clockfmt_button_.press(true);  // tell the button it is pressed
+            if (clockfmt_button_.justPressed())
+            {
+                BackgroundTask::RunTasks(100);
+            }
         }
-    }
-    else
-    {
-        clockfmt_button_.press(false); // tell the button it is NOT pressed
-        if (clockfmt_button_.justReleased())
+        else
         {
-            screen_ = clockfmt_button_.GetNext();
+            clockfmt_button_.press(false); // tell the button it is NOT pressed
+            if (clockfmt_button_.justReleased())
+            {
+                clockFormatScreen();
+            }
         }
-    }
-    if (timeZone_button_.contains(p.x, p.y))
-    {
+        if (timeZone_button_.contains(p.x, p.y))
+        {
         timeZone_button_.press(true);  // tell the button it is pressed
-        if (clockfmt_button_.justPressed())
-        {
-            delay(100);
+            if (clockfmt_button_.justPressed())
+            {
+                BackgroundTask::RunTasks(100);
+            }
         }
-    }
-    else
-    {
-        timeZone_button_.press(false); // tell the button it is NOT pressed
-        if (timeZone_button_.justReleased())
+        else
         {
-            screen_ = clockfmt_button_.GetNext();
+            timeZone_button_.press(false); // tell the button it is NOT pressed
+            if (timeZone_button_.justReleased())
+            {
+                timeZoneScreen();
+            }
         }
-    }
-    if (return_.contains(p.x, p.y))
-    {
+        if (return_.contains(p.x, p.y))
+        {
         return_.press(true);  // tell the button it is pressed
-        if (return_.justPressed())
+            if (return_.justPressed())
+            {
+                return_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
         {
-            return_.drawButton(true);
-            delay(100);
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return_.drawButton();
+                break;
+            }
+        }
+        
+    }
+}    
+
+void Preferences::ssidScreen()
+{
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        if (displayYesNo_("Disconnect network?"))
+        {
+            WiFi.mode(WIFI_STA);
+            WiFi.disconnect();
+            BackgroundTask::RunTasks(100);
+        }
+        else
+        {
+            return;
         }
     }
-    else
+    int netCount = WiFi.scanNetworks();
+    int first = 0;
+    displayWiFissids_(first,netCount);
+    while (true)
     {
-        return_.press(false); // tell the button it is NOT pressed
-        if (return_.justReleased())
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
         {
-            return_.drawButton();
-            screen_ = exit;
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        for (int i=0; i<8; i++)
+        {
+            if (i+first >= netCount) break;
+            int y = 44*i;
+            int x = 10;
+            int w = 300;
+            int h = 42;
+            if ((p.x >= x) && (p.x < (int16_t)(x + w)) && (p.y >= y) &&
+                p.y < (int16_t)(y + h))
+            {
+                listPress(i,true);
+                if (listJustPressed(i))
+                {
+                    BackgroundTask::RunTasks(100);
+                }
+            }
+            else
+            {
+                listPress(i,false);
+                if (listJustReleased(i))
+                {
+                    ssidSelected(i+first);
+                    return;
+                }
+            }
+        }
+        bool havePrev = first > 0;
+        bool haveNext = (first+8) <netCount;
+        if (havePrev)
+        {
+            if (previous_.contains(p.x, p.y))
+            {
+                previous_.press(true);  // tell the button it is pressed
+                if (previous_.justPressed())
+                {
+                    previous_.drawButton(true);
+                    BackgroundTask::RunTasks(100);
+                }
+            }
+            else
+            {
+                previous_.press(false); // tell the button it is NOT pressed
+                if (previous_.justReleased())
+                {
+                    previous_.drawButton();
+                    first -= 8;
+                    if (first < 0) first = 0;
+                    displayWiFissids_(first,netCount);
+                }
+            }
+        }
+        if (haveNext)
+        {
+            if (next_.contains(p.x, p.y))
+            {
+                next_.press(true);  // tell the button it is pressed
+                if (next_.justPressed())
+                {
+                    next_.drawButton(true);
+                    BackgroundTask::RunTasks(100);
+                }
+            }
+            else
+            {
+                next_.press(false); // tell the button it is NOT pressed
+                if (next_.justReleased())
+                {
+                    next_.drawButton();
+                    first += 8;
+                    displayWiFissids_(first,netCount);
+                }
+            }
+        }
+        if (return_.contains(p.x, p.y))
+        {
+            return_.press(true);  // tell the button it is pressed
+            if (return_.justPressed())
+            {
+                return_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return_.drawButton();
+                return;
+            }
         }
     }
 }
 
-void Preferences::displayYesNo_(char const* question)
+bool Preferences::displayYesNo_(char const* question)
 {
     Display::Display.fillScreen(HX8357_BLACK);
     Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
@@ -265,67 +391,65 @@ void Preferences::displayYesNo_(char const* question)
     Display::Display.println(question);
     yes_.drawButton();
     no_.drawButton();
-}
-
-int Preferences::yesnoanswer_()
-{
-    int result = -1;
-    TS_Point p = Display::TouchScreen.getPoint();
-    if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+    while (true)
     {
-        // this is our way of tracking touch 'release'!
-        p.x = p.y = p.z = -1;
-    }
-    // Scale from ~0->4000 to  tft.width using the calibration #'s
-    if (p.z != -1) 
-    {
-        int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
-        int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
-        p.x = px;
-        p.y = py;
-    }
-    if (yes_.contains(p.x, p.y))
-    {
-        yes_.press(true);  // tell the button it is pressed
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        if (yes_.contains(p.x, p.y))
+        {
+            yes_.press(true);  // tell the button it is pressed
         if (yes_.justPressed())
         {
             yes_.drawButton(true);
-            delay(100);
+            BackgroundTask::RunTasks(100);
         }
-    }
-    else
-    {
-        yes_.press(false); // tell the button it is NOT pressed
-        if (yes_.justReleased())
+        }
+        else
         {
-            yes_.drawButton();
-            result = 1;
+            yes_.press(false); // tell the button it is NOT pressed
+            if (yes_.justReleased())
+            {
+                yes_.drawButton();
+                return(true);
+            }
         }
-    }
-    if (no_.contains(p.x, p.y))
-    {
-        no_.press(true);  // tell the button it is pressed
-        if (no_.justPressed())
+        if (no_.contains(p.x, p.y))
         {
-            no_.drawButton(true);
-            delay(100);
+            no_.press(true);  // tell the button it is pressed
+            if (no_.justPressed())
+            {
+                no_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
         }
-    }
-    else
-    {
-        no_.press(false); // tell the button it is NOT pressed
-        if (no_.justReleased())
+        else
         {
-            no_.drawButton();
-            result = 0;
+            no_.press(false); // tell the button it is NOT pressed
+            if (no_.justReleased())
+            {
+                no_.drawButton();
+                return(false);
+            }
         }
     }
-    return result;
 }
+
 
 #include "lock.xbm.h"
 
-void Preferences::displayWiFissids_()
+void Preferences::displayWiFissids_(int first, int count)
 {
     Display::Display.fillScreen(HX8357_BLACK);
     Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
@@ -336,124 +460,48 @@ void Preferences::displayWiFissids_()
     Display::Display.setTextColor(HX8357_GREEN,HX8357_WHITE);
     for (int i=0; i<8; i++)
     {
-        if (i+ssid_index_ >= ssid_count_) break;
+        if (i+first >= count) break;
         int y = 44*i;
         Display::Display.fillRect(10,y-1,300,42,HX8357_WHITE);
         Display::Display.setCursor(11,y);
-        Display::Display.print(WiFi.SSID(i+ssid_index_).c_str());
-        if (WiFi.encryptionType(i+ssid_index_) != WIFI_AUTH_OPEN)
+        Display::Display.print(WiFi.SSID(i+first).c_str());
+        if (WiFi.encryptionType(i+first) != WIFI_AUTH_OPEN)
         {
             Display::Display.drawXBitmap(270,y,lock_bits,lock_width,
                                          lock_height,HX8357_GREEN);
         }
     }
-    if (ssid_index_ > 0)
+    if (first > 0)
     {
         previous_.drawButton();
     }
-    if (ssid_index_+8 < ssid_count_)
+    if (first+8 < count)
     {
         next_.drawButton();
     }
     return_.drawButton();
 }
 
+void Preferences::hostnameScreen()
+{
+}
+
+void Preferences::clockFormatScreen()
+{
+}
+
+void Preferences::timeZoneScreen()
+{
+}
+
+
+#ifdef NOTYET
+
 int Preferences::select_ssid_from_list_()
 {
-    TS_Point p = Display::TouchScreen.getPoint();
-        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
-    {
-        // this is our way of tracking touch 'release'!
-        p.x = p.y = p.z = -1;
-    }
-    // Scale from ~0->4000 to  tft.width using the calibration #'s
-    if (p.z != -1) 
-    {
-        int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
-        int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
-        p.x = px;
-        p.y = py;
-    }
-    for (int i=0; i<8; i++)
-    {
-        if (i+ssid_index_ >= ssid_count_) break;
-        int y = 44*i;
-        int x = 10;
-        int w = 300;
-        int h = 42;
-        if ((p.x >= x) && (p.x < (int16_t)(x + w)) && (p.y >= y) &&
-            p.y < (int16_t)(y + h))
-        {
-            return i;
-        }
-    }
-    bool havePrev = ssid_index_ > 0;
-    bool haveNext = (ssid_index_+8) < ssid_count_;
-    if (havePrev)
-    {
-        if (previous_.contains(p.x, p.y))
-        {
-            previous_.press(true);  // tell the button it is pressed
-            if (previous_.justPressed())
-            {
-                previous_.drawButton(true);
-                delay(100);
-            }
-        }
-        else
-        {
-            previous_.press(false); // tell the button it is NOT pressed
-            if (previous_.justReleased())
-            {
-                previous_.drawButton();
-                ssid_index_ -= 8;
-                if (ssid_index_ < 0) ssid_index_ = 0;
-                screen_ = displaySSIDs;
-            }
-        }
-    }
-    if (haveNext)
-    {
-        if (next_.contains(p.x, p.y))
-        {
-            next_.press(true);  // tell the button it is pressed
-            if (next_.justPressed())
-            {
-                next_.drawButton(true);
-                delay(100);
-            }
-        }
-        else
-        {
-            next_.press(false); // tell the button it is NOT pressed
-            if (next_.justReleased())
-            {
-                next_.drawButton();
-                ssid_index_ += 8;
-                screen_ = displaySSIDs;
-            }
-        }
-    }
-    if (return_.contains(p.x, p.y))
-    {
-        return_.press(true);  // tell the button it is pressed
-        if (return_.justPressed())
-        {
-            return_.drawButton(true);
-            delay(100);
-        }
-    }
-    else
-    {
-        return_.press(false); // tell the button it is NOT pressed
-        if (return_.justReleased())
-        {
-            return_.drawButton();
-            screen_ = start;
-        }
-    }
     return -1;
 }
+
 
 void Preferences::set_ssid_(int rel_ssid_index)
 {
@@ -471,19 +519,6 @@ bool Preferences::SettingsScreen()
         waitformainselection_();
         break;
     case ssid:
-        if (WiFi.status() == WL_CONNECTED)
-        {
-            displayYesNo_("Disconnect network?");
-            screen_ = disconnectYesNo;
-            return true;
-        }
-        else
-        {
-            ssid_count_ = WiFi.scanNetworks();
-            ssid_index_ = 0;
-            screen_ = displaySSIDs;
-            return true;
-        }
         break;
     case displaySSIDs:
         displayWiFissids_();
@@ -500,7 +535,7 @@ bool Preferences::SettingsScreen()
         case 1:
             WiFi.mode(WIFI_STA);
             WiFi.disconnect();
-            delay(100);
+            BackgroundTask::RunTasks(100);
             screen_ = ssid;
             break;
         }
@@ -549,6 +584,6 @@ void Preferences::SettingsScreenStart()
 }
 
 
-
+#endif
 }
  

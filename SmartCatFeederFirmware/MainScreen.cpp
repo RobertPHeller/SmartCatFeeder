@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Tue Aug 27 09:52:58 2024
-//  Last Modified : <240827.1127>
+//  Last Modified : <240827.1236>
 //
 //  Description	
 //
@@ -76,6 +76,7 @@ void MainScreen::Loop()
     switch (check_buttons_())
     {
     case gear:
+        Preferences::Preferences::instance()->Settings();
         break;
     case clock:
         break;
