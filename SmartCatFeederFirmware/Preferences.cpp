@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 20:25:43 2024
-//  Last Modified : <240827.1744>
+//  Last Modified : <240828.1021>
 //
 //  Description	
 //
@@ -289,10 +289,10 @@ void Preferences::ssidScreen()
             p.x = px;
             p.y = py;
         }
-        for (int i=0; i<8; i++)
+        for (int i=0; i<LISTSIZE; i++)
         {
             if (i+first >= netCount) break;
-            int y = 44*i;
+            int y = 52+(44*i);
             int x = 10;
             int w = 300;
             int h = 42;
@@ -316,7 +316,7 @@ void Preferences::ssidScreen()
             }
         }
         bool havePrev = first > 0;
-        bool haveNext = (first+8) <netCount;
+        bool haveNext = (first+LISTSIZE) <netCount;
         if (havePrev)
         {
             if (previous_.contains(p.x, p.y))
@@ -334,7 +334,7 @@ void Preferences::ssidScreen()
                 if (previous_.justReleased())
                 {
                     previous_.drawButton();
-                    first -= 8;
+                    first -= LISTSIZE;
                     if (first < 0) first = 0;
                     displayWiFissids_(first,netCount);
                 }
@@ -357,7 +357,7 @@ void Preferences::ssidScreen()
                 if (next_.justReleased())
                 {
                     next_.drawButton();
-                    first += 8;
+                    first += LISTSIZE;
                     displayWiFissids_(first,netCount);
                 }
             }
@@ -385,8 +385,8 @@ void Preferences::ssidScreen()
 
 bool Preferences::displayYesNo_(char const* question)
 {
-    Display::Display.fillScreen(HX8357_BLACK);
-    Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
+    Display::Display.fillRect(0,160,480,160,HX8357_BLACK);
+    Display::Display.fillRect(10,161,300,42,HX8357_WHITE);
     Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
     Display::Display.setTextSize(5);
     Display::Display.setCursor(11,11);
@@ -460,10 +460,10 @@ void Preferences::displayWiFissids_(int first, int count)
     Display::Display.setCursor(11,11); 
     Display::Display.println("Networks:");
     Display::Display.setTextColor(HX8357_GREEN,HX8357_WHITE);
-    for (int i=0; i<8; i++)
+    for (int i=0; i<LISTSIZE; i++)
     {
         if (i+first >= count) break;
-        int y = 44*i;
+        int y = (44*i)+52;
         Display::Display.fillRect(10,y-1,300,42,HX8357_WHITE);
         Display::Display.setCursor(11,y);
         Display::Display.print(WiFi.SSID(i+first).c_str());
@@ -477,7 +477,7 @@ void Preferences::displayWiFissids_(int first, int count)
     {
         previous_.drawButton();
     }
-    if (first+8 < count)
+    if (first+LISTSIZE < count)
     {
         next_.drawButton();
     }
@@ -571,16 +571,209 @@ void Preferences::ssidGetPassword(const char *ssid,char *passwordBuffer,
 
 void Preferences::hostnameScreen()
 {
+    char hostname_buffer[64];
+    char c, *p = hostname_buffer;
+    size_t bufferSize=sizeof(hostname_buffer);
+    
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5);
+    Display::Display.setCursor(11,11);
+    Display::Display.println("Hostname:");
+    keyboard.start();
+    *p = '\0';
+    while ((c=keyboard.KeyPressed()) != '\r')
+    {
+        if (bufferSize<2) break;
+        if (c == '\b')
+        {
+            if (p > hostname_buffer)
+            {
+                *--p = '\0';
+                bufferSize++;
+                Display::Display.setCursor(Display::Display.getCursorX()-5*6,
+                                           Display::Display.getCursorY());
+                Display::Display.drawChar(Display::Display.getCursorX(),
+                                          Display::Display.getCursorY(),
+                                          ' ',
+                                          HX8357_BLUE,HX8357_WHITE,5,5);
+            }
+        }
+        else
+        {
+            *p++ = c;
+            bufferSize--;
+            Display::Display.print(c);
+        }
+    }
+    *p = '\0';
+    keyboard.end();
+    
 }
 
 void Preferences::clockFormatScreen()
 {
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42,HX8357_WHITE); 
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5);
+    Display::Display.setCursor(11,11);
+    Display::Display.println("Clock Format");
+    Twelve_.drawButton(clockFormat_==Twelve);
+    TwentyFour_.drawButton(clockFormat_==TwentyFour);
+    Apply_.drawButton();
+    return_.drawButton();
+    ClockFormat newClockFormat = clockFormat_;
+    while (true)
+    {
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        if (Twelve_.contains(p.x,p.y))
+        {
+            newClockFormat = Twelve;
+            Twelve_.drawButton(true);
+            TwentyFour_.drawButton(false);
+        }
+        if (TwentyFour_.contains(p.x,p.y))
+        {
+            newClockFormat = TwentyFour;
+            Twelve_.drawButton(false);
+            TwentyFour_.drawButton(true);
+        }
+        if (Apply_.contains(p.x, p.y))
+        {
+            Apply_.press(true);  // tell the button it is pressed
+            if (Apply_.justPressed())
+            {
+                BackgroundTask::RunTasks(100); 
+            }
+        }
+        else
+        {
+            Apply_.press(false); // tell the button it is NOT pressed
+            if (Apply_.justReleased())
+            {
+                if (clockFormat_ != newClockFormat)
+                {
+                    clockFormat_ = newClockFormat;
+                    Write();
+                    return;
+                }
+            }
+        }
+        if (return_.contains(p.x, p.y))
+        {
+            return_.press(true);  // tell the button it is pressed
+            if (return_.justPressed())
+            {
+                BackgroundTask::RunTasks(100); 
+            }
+        }
+        else
+        {
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return;
+            }
+        }
+    }
 }
 
 void Preferences::timeZoneScreen()
 {
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5);
+    Display::Display.setCursor(11,11); 
+    Display::Display.println("Time Zones:");
+    Display::Display.setTextColor(HX8357_GREEN,HX8357_WHITE);
+    for (int i=0; i<LISTSIZE; i++)
+    {
+        int y = (44*i)+52;
+        Display::Display.fillRect(10,y-1,300,42,HX8357_WHITE); 
+        Display::Display.setCursor(11,y);
+        Display::Display.print(TimeZoneList_[i].name);
+    }
+    return_.drawButton();
+    while (true)
+    {
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        for (int i=0; i<LISTSIZE; i++)
+        {
+            int y = 52+(44*i);
+            int x = 10;
+            int w = 300;
+            int h = 42;
+            if ((p.x >= x) && (p.x < (int16_t)(x + w)) && (p.y >= y) &&
+                p.y < (int16_t)(y + h))
+            {
+                listPress(i,true);
+                if (listJustPressed(i))
+                {
+                    BackgroundTask::RunTasks(100);
+                }
+            }
+            else
+            {
+                listPress(i,false);
+                if (listJustReleased(i))
+                {
+                    if (timeZone_ == TimeZoneList_[i].value) return;
+                    timeZone_ = TimeZoneList_[i].value;
+                    Write();
+                    return;
+                }
+            }
+        }
+        if (return_.contains(p.x, p.y))
+        {
+            return_.press(true);  // tell the button it is pressed
+            if (return_.justPressed())
+            {
+                return_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return_.drawButton();
+                return;
+            }
+        }
+    }
 }
 
-
+const Preferences::TzEntry Preferences::TimeZoneList_[Preferences::LISTSIZE];
 }
  

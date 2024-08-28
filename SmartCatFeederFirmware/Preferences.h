@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240827.1555>
+//  Last Modified : <240828.0948>
 //
 //  Description	
 //
@@ -83,22 +83,30 @@ public:
                              HX8357_WHITE,HX8357_BLACK,HX8357_GREEN,
                              "Time Zone:",5)
     {
-        return_.initButtonUL(&Display::Display,10,431,300,42,
+        return_.initButtonUL(&Display::Display,10,278,300,42,
                              HX8357_WHITE,HX8357_BLACK,HX8357_BLUE,
                              "Return",5);
-        yes_.initButtonUL(&Display::Display,35,259,100,42,
+        yes_.initButtonUL(&Display::Display,35,236,100,42,
                           HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
                           "Yes",5);
-        no_.initButtonUL(&Display::Display,195,259,100,42,
+        no_.initButtonUL(&Display::Display,195,236,100,42,
                          HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
                          "No",5);
-        previous_.initButtonUL(&Display::Display,35,388,100,42,
+        previous_.initButtonUL(&Display::Display,35,236,100,42,
                                HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
                                "Previous",5);
-        next_.initButtonUL(&Display::Display,195,388,100,42,
+        next_.initButtonUL(&Display::Display,195,236,100,42,
                            HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
                            "Next",5);
-        
+        Twelve_.initButtonUL(&Display::Display,35,52,100,42,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                             "12",5);
+        TwentyFour_.initButtonUL(&Display::Display,195,52,100,42,
+                                 HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                                 "24",5);
+        Apply_.initButtonUL(&Display::Display,35,96,300,42,
+                           HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                           "Apply",5);
     }
     int Read()
     {
@@ -205,7 +213,7 @@ private:
     void ssidSelected(int i);
     void ssidGetPassword(const char *ssid,char *passwordBuffer,
                          size_t bufferSize);
-    static constexpr const uint8_t LISTSIZE = 8;
+    static constexpr const uint8_t LISTSIZE = 4;
     bool list_currstate[LISTSIZE], list_laststate[LISTSIZE];
     bool listJustPressed(uint8_t i)
     {
@@ -281,8 +289,23 @@ private:
     Adafruit_GFX_Button no_;
     Adafruit_GFX_Button previous_;
     Adafruit_GFX_Button next_;
+    Adafruit_GFX_Button Twelve_;
+    Adafruit_GFX_Button TwentyFour_;
+    Adafruit_GFX_Button Apply_;
     
+    static constexpr uint8_t NAMEZIZE = 10;
+    static constexpr uint8_t TZSIZE = 32;
     
+    typedef struct tzEntry {
+        char name[NAMEZIZE];
+        char value[TZSIZE];
+    } TzEntry;
+    static constexpr const TzEntry TimeZoneList_[LISTSIZE] = {
+        {"Eastern", "EST5EDT,M3.2.0,M11.1.0"},
+        {"Central", "CST6CDT,M3.2.0,M11.1.0"},
+        {"Mountain", "MST7MDT,M3.2.0,M11.1.0"},
+        {"Pacific", "PST8PDT,M3.2.0,M11.1.0"}
+    };
 };
 
 }
