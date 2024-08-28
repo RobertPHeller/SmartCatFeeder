@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240827.1028>
+//  Last Modified : <240828.1043>
 //
 //  Description	
 //
@@ -69,8 +69,7 @@ static const char rcsid[] = "@(#) : $Id$";
 
 DEFINE_SINGLETON_INSTANCE(Preferences::Preferences);
 static Preferences::Preferences prefs("/Preferences.dat");
-DECLARESCHEDULE;
-
+DEFINE_SINGLETON_INSTANCE(Schedule::ScheduleManager);
 DEFINE_SINGLETON_INSTANCE(MainScreen::MainScreen);
 MainScreen::MainScreen mainScreen;
 

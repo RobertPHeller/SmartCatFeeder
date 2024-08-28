@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240828.0948>
+//  Last Modified : <240828.1150>
 //
 //  Description	
 //
@@ -53,6 +53,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <Adafruit_GFX.h>
+#include <Adafruit_HX8357.h>
 #include "Keyboard.h"
 
 

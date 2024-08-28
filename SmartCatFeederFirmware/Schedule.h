@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240824.2101>
+//  Last Modified : <240828.1419>
 //
 //  Description	
 //
@@ -45,11 +45,18 @@
 #ifndef __SCHEDULE_H
 #define __SCHEDULE_H
 
+#include <Arduino.h>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include "Clock.h"
 #include "Sensors.h"
+#include "Singleton.h"
+#include "BackgroundTask.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_HX8357.h>
+#include "Display.h"
+
 #include <FS.h>
 #include <SPIFFS.h>
 #include <string.h>
@@ -159,9 +166,6 @@ public:
             return false;
         }
     }
-    static bool ScheduleScreen();
-    static void ScheduleScreenStart();
-    static void CheckForFeeding();
     static const Schedule * NextSchedule(const Clock::TimeOfDay& now)
     {
         auto next_time = [now](Schedule *s){return s->TimeGT(now);};
@@ -183,6 +187,25 @@ public:
             }
         }
     }
+    static size_t NumberOfFeedings() {return Schedule_.size();}
+    static const Schedule * ScheduleElement(size_t index)
+    {
+        if (index < Schedule_.size())
+        {
+            return Schedule_[index];
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    static void DeleteElement(size_t index)
+    {
+        if (index < Schedule_.size())
+        {
+            delete Schedule_[index];
+        }
+    }
 private:
     Clock::TimeOfDay when_;
     Sensors::Weight goalAmmount_;
@@ -190,9 +213,91 @@ private:
     static const char schedfile_[];
 };
 
+class ScheduleManager : public BackgroundTask, public Singleton<ScheduleManager>
+{
+public:
+    ScheduleManager() 
+                : BackgroundTask() 
+    {
+        return_.initButtonUL(&Display::Display,10,278,300,42,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_BLUE,
+                             "Return",5);
+        yes_.initButtonUL(&Display::Display,35,236,100,42,
+                          HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                          "Yes",5);
+        no_.initButtonUL(&Display::Display,195,236,100,42,
+                         HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                         "No",5);
+        previous_.initButtonUL(&Display::Display,10,236,100,42,
+                               HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                               "Previous",5);
+        next_.initButtonUL(&Display::Display,110,236,100,42,
+                           HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                           "Next",5);
+        add_.initButtonUL(&Display::Display,210,236,100,42,
+                          HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                          "+",5);
+        delete_.initButtonUL(&Display::Display,10,236,300,42,
+                             HX8357_WHITE,HX8357_BLACK,HX8357_RED,
+                             "Delete",5);
+        
+    }
+    virtual void RunTask()
+    {
+        struct tm timeinfo;
+        if (getLocalTime(&timeinfo))
+        {
+            Clock::TimeOfDay now;
+            now.Hour = timeinfo.tm_hour;
+            now.Minute = timeinfo.tm_min;
+            Sensors::Weight goalAmmount;
+            if (Schedule::IsTime(now,goalAmmount))
+            {
+                // start feeding: goalAmmount
+            }
+        }
+    }
+    void ScheduleManagement();
+private:
+    void displaySchedule_(int first);
+    void scheduleSelected_(int index);
+    void addSchedule_();
+    void addSchedule_12_();
+    void addSchedule_24_();
+    static constexpr const uint8_t LISTSIZE = 4;
+    bool list_currstate[LISTSIZE], list_laststate[LISTSIZE];
+    bool listJustPressed(uint8_t i)
+    {
+        HASSERT(i < LISTSIZE);
+        return (list_currstate[i] && !list_laststate[i]);
+    }
+    bool listJustReleased(uint8_t i)
+    {
+        HASSERT(i < LISTSIZE);
+        return  (!list_currstate[i] && list_laststate[i]);
+    }
+    void listPress(uint8_t i, bool p)
+    {
+        HASSERT(i < LISTSIZE);
+        list_laststate[i] = list_currstate[i];
+        list_currstate[i] = p;
+    }
+    bool listIsPressed(uint8_t i) 
+    {
+        HASSERT(i < LISTSIZE);
+        return list_currstate[i];
+    }
+    Adafruit_GFX_Button return_;
+    Adafruit_GFX_Button yes_;
+    Adafruit_GFX_Button no_;
+    Adafruit_GFX_Button previous_;
+    Adafruit_GFX_Button next_;
+    Adafruit_GFX_Button add_;
+    Adafruit_GFX_Button delete_;
+};
+
 }
 
-#define DECLARESCHEDULE std::vector<Schedule::Schedule *> Schedule::Schedule::Schedule_
 
 #endif // __SCHEDULE_H
 

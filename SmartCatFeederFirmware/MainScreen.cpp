@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Tue Aug 27 09:52:58 2024
-//  Last Modified : <240827.1236>
+//  Last Modified : <240828.1044>
 //
 //  Description	
 //
@@ -79,6 +79,7 @@ void MainScreen::Loop()
         Preferences::Preferences::instance()->Settings();
         break;
     case clock:
+        Schedule::ScheduleManager::instance()->ScheduleManagement();
         break;
     case hand:
         break;
