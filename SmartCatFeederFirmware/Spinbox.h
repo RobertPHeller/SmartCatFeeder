@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Wed Aug 28 14:40:22 2024
-//  Last Modified : <240828.1642>
+//  Last Modified : <240828.2221>
 //
 //  Description	
 //
@@ -57,6 +57,11 @@ public:
             uint16_t outline, uint16_t fill,uint16_t textcolor,
             int16_t minv, int16_t maxv, 
             const char *fmt = "%d");
+    void SetRange(int16_t minv, int16_t maxv)
+    {
+        _minVal = minv;
+        _maxVal = maxv;
+    }
     void drawBox(int16_t value = 0);
     void processAt(int16_t x, int16_t y);
     int16_t Value() {return _value;}

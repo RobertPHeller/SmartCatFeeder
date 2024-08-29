@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240828.1419>
+//  Last Modified : <240828.2312>
 //
 //  Description	
 //
@@ -56,6 +56,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_HX8357.h>
 #include "Display.h"
+#include "Spinbox.h"
 
 #include <FS.h>
 #include <SPIFFS.h>
@@ -217,7 +218,15 @@ class ScheduleManager : public BackgroundTask, public Singleton<ScheduleManager>
 {
 public:
     ScheduleManager() 
-                : BackgroundTask() 
+                : BackgroundTask()
+          , _hours(&Display::Display,100,152,HX8357_WHITE,HX8357_BLACK,
+                   HX8357_BLUE,1,12,"%2d")
+          , _minutes(&Display::Display,150,152,HX8357_WHITE,HX8357_BLACK,
+                     HX8357_BLUE,0,59,"%02d")
+          , _ounces(&Display::Display,100,194,HX8357_WHITE,HX8357_BLACK,
+                    HX8357_BLUE,1,8,"%d")
+          , _ampm(&Display::Display,200,152,HX8357_WHITE,HX8357_BLACK,
+                  HX8357_BLUE)
     {
         return_.initButtonUL(&Display::Display,10,278,300,42,
                              HX8357_WHITE,HX8357_BLACK,HX8357_BLUE,
@@ -259,6 +268,46 @@ public:
     }
     void ScheduleManagement();
 private:
+    class AMPMSelectbox {
+    public:
+        typedef enum {AM, PM} AmPmValue;
+        AMPMSelectbox(Adafruit_GFX *gfx, int16_t x, int16_t y,
+                      uint16_t outline, uint16_t fill,uint16_t color);
+        void drawBox(AmPmValue = AM);
+        void processAt(int16_t x, int16_t y);
+        AmPmValue Value() {return _value;}
+    protected:
+        bool amContains(int16_t x, int16_t y);
+        void amPress(bool p)
+        {
+            am_laststate = am_currstate;
+            am_currstate = p;
+        }
+        bool amJustPressed();
+        bool amJustReleased();
+        void am();
+        bool pmContains(int16_t x, int16_t y);
+        void pmPress(bool p)
+        {
+            pm_laststate = pm_currstate;
+            pm_currstate = p;
+        }
+        bool pmJustPressed();
+        bool pmJustReleased();
+        void pm();
+    private:
+        Adafruit_GFX *_gfx;
+        int16_t _x1, _y1; // Coordinates of top-left corner
+        int16_t _ww, _hh; // total width, total height
+        int16_t _am_x1, _am_y1; // Coordinates of top-left corner of am
+        int16_t _am_w, _am_h;
+        int16_t _pm_x1, _pm_y1; // Coordinates of top-left corner of pm
+        int16_t _pm_w, _pm_h;
+        uint16_t _outlinecolor, _fillcolor, _color;
+        AmPmValue _value;
+        bool am_currstate, am_laststate;
+        bool pm_currstate, pm_laststate;
+    };
     void displaySchedule_(int first);
     void scheduleSelected_(int index);
     void addSchedule_();
@@ -294,6 +343,8 @@ private:
     Adafruit_GFX_Button next_;
     Adafruit_GFX_Button add_;
     Adafruit_GFX_Button delete_;
+    Spinbox _hours, _minutes, _ounces;
+    AMPMSelectbox _ampm;
 };
 
 }

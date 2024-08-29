@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240828.1420>
+//  Last Modified : <240828.2320>
 //
 //  Description	
 //
@@ -60,6 +60,7 @@ static const char rcsid[] = "@(#) : $Id$";
 
 #include "Preferences.h"
 #include "Schedule.h"
+#include "Spinbox.h"
 
 namespace Schedule {
 
@@ -355,6 +356,150 @@ void ScheduleManager::addSchedule_()
         break;
     }
 }
+
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#include "am.xbm.h"
+#include "pm.xbm.h"
+#include "incr.xbm.h"
+#include "decr.xbm.h"
+
+ScheduleManager::AMPMSelectbox::AMPMSelectbox(Adafruit_GFX *gfx, int16_t x, 
+                                              int16_t y, uint16_t outline, 
+                                              uint16_t fill, uint16_t color)
+      : _gfx(gfx)
+, _x1(x)
+, _y1(y)
+, _am_w(incr_width)
+, _am_h(incr_height)
+, _pm_w(decr_width)
+, _pm_h(decr_height)
+, _outlinecolor(outline)
+, _fillcolor(fill)
+, _color(color)
+{
+    _ww = am_width+incr_width+4;
+    _hh = am_height+4;
+    _am_y1 = _y1;
+    _pm_y1 = (_y1+_hh)-decr_height;
+    int16_t right = _x1 + _ww;
+    _am_x1 = right-incr_width;
+    _pm_x1 = right-decr_width;
+}
+
+void ScheduleManager::AMPMSelectbox::drawBox(ScheduleManager::AMPMSelectbox::AmPmValue value)
+{
+    _value = value;
+    int w = _ww - max(incr_width,decr_width);
+    uint8_t r = min(w, _hh) / 4; // Corner radius
+    _gfx->fillRoundRect(_x1, _y1, w, _hh,  r, _fillcolor);
+    _gfx->drawRoundRect(_x1, _y1, w, _hh,  r, _outlinecolor);
+    switch (_value)
+    {
+    case AM:
+        _gfx->drawXBitmap(_x1+2,_y1+2,am_bits,am_width,am_height,_color);
+        break;
+    case PM:
+        _gfx->drawXBitmap(_x1+2,_y1+2,pm_bits,pm_width,pm_height,_color);
+        break;
+    }
+    _gfx->drawXBitmap(_am_x1,_am_y1,incr_bits,incr_width,incr_height,
+                      _color);
+    _gfx->drawXBitmap(_pm_x1,_pm_y1,decr_bits,decr_width,decr_height,
+                      _color);
+}
+
+void ScheduleManager::AMPMSelectbox::processAt(int16_t x, int16_t y)
+{
+    if (amContains(x,y))
+    {
+        amPress(true);
+    }
+    else
+    {
+        amPress(false);
+    }
+    if (pmContains(x,y))
+    {
+        pmPress(true);
+    }
+    else
+    {
+        pmPress(false);
+    }
+    if (amJustReleased())
+    {
+        am();
+    }
+    if (amJustPressed()) 
+    {
+        BackgroundTask::RunTasks(100);
+    }
+    if (pmJustReleased())
+    {
+        pm();
+    }
+    if (pmJustPressed()) 
+    {
+        BackgroundTask::RunTasks(100);
+    }
+}
+
+bool ScheduleManager::AMPMSelectbox::amContains(int16_t x, int16_t y)
+{
+    return ((x >= _am_x1) && (x < (int16_t)(_am_x1 + _am_w)) && 
+            (y >= _am_y1) && (y < (int16_t)(_am_y1 + _am_h)));
+}
+
+bool ScheduleManager::AMPMSelectbox::amJustPressed()
+{
+    return (am_currstate && !am_laststate); 
+}
+
+bool ScheduleManager::AMPMSelectbox::amJustReleased()
+{
+    return (!am_currstate && am_laststate); 
+}
+
+void ScheduleManager::AMPMSelectbox::am()
+{
+    if (_value != AM)
+    {
+        _value = AM;
+        _gfx->fillRect(_x1+2,_y1+2,am_width,am_height,_fillcolor);
+        _gfx->drawXBitmap(_x1+2,_y1+2,am_bits,am_width,am_height,_color);
+    }
+}
+
+bool ScheduleManager::AMPMSelectbox::pmContains(int16_t x, int16_t y)
+{
+    return ((x >= _pm_x1) && (x < (int16_t)(_pm_x1 + _pm_w)) && 
+            (y >= _pm_y1) && (y < (int16_t)(_pm_y1 + _pm_h)));
+}
+
+bool ScheduleManager::AMPMSelectbox::pmJustPressed()
+{
+    return (pm_currstate && !pm_laststate); 
+}
+
+bool ScheduleManager::AMPMSelectbox::pmJustReleased()
+{
+    return (!pm_currstate && pm_laststate); 
+}
+
+void ScheduleManager::AMPMSelectbox::pm()
+{
+    if (_value != PM)
+    {
+        _value = PM;
+        _gfx->fillRect(_x1+2,_y1+2,pm_width,pm_height,_fillcolor);
+        _gfx->drawXBitmap(_x1+2,_y1+2,pm_bits,pm_width,pm_height,_color);
+    }
+}
+
+
 
 void ScheduleManager::addSchedule_12_()
 {
