@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 21:32:10 2024
-//  Last Modified : <240817.1634>
+//  Last Modified : <240829.1358>
 //
 //  Description	
 //
@@ -78,7 +78,7 @@ static String currentTime()
                  hour,timeinfo.tm_min,(timeinfo.tm_hour<12)?"AM":"PM");
         break;
     case Preferences::Preferences::TwentyFour:
-        snprintf(buffer,sizeof(buffer),"<h2>Current time: %02:%02d</h2>",
+        snprintf(buffer,sizeof(buffer),"<h2>Current time: %2d:%02d</h2>",
                  timeinfo.tm_hour,timeinfo.tm_min);
         break;
     }
