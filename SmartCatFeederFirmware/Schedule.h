@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240828.2312>
+//  Last Modified : <240829.1010>
 //
 //  Description	
 //
@@ -219,14 +219,14 @@ class ScheduleManager : public BackgroundTask, public Singleton<ScheduleManager>
 public:
     ScheduleManager() 
                 : BackgroundTask()
-          , _hours(&Display::Display,100,152,HX8357_WHITE,HX8357_BLACK,
+          , _hours(&Display::Display,10,52,HX8357_WHITE,HX8357_BLACK,
                    HX8357_BLUE,1,12,"%2d")
-          , _minutes(&Display::Display,150,152,HX8357_WHITE,HX8357_BLACK,
+          , _minutes(&Display::Display,114,52,HX8357_WHITE,HX8357_BLACK,
                      HX8357_BLUE,0,59,"%02d")
-          , _ounces(&Display::Display,100,194,HX8357_WHITE,HX8357_BLACK,
-                    HX8357_BLUE,1,8,"%d")
-          , _ampm(&Display::Display,200,152,HX8357_WHITE,HX8357_BLACK,
+          , _ampm(&Display::Display,188,52,HX8357_WHITE,HX8357_BLACK,
                   HX8357_BLUE)
+          , _ounces(&Display::Display,10,52+52,HX8357_WHITE,HX8357_BLACK,
+                    HX8357_BLUE,1,8,"%d")
     {
         return_.initButtonUL(&Display::Display,10,278,300,42,
                              HX8357_WHITE,HX8357_BLACK,HX8357_BLUE,

@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240828.2320>
+//  Last Modified : <240829.1015>
 //
 //  Description	
 //
@@ -501,12 +501,193 @@ void ScheduleManager::AMPMSelectbox::pm()
 
 
 
-void ScheduleManager::addSchedule_12_()
-{
-}
-
 void ScheduleManager::addSchedule_24_()
 {
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5);
+    Display::Display.setCursor(11,11); 
+    Display::Display.println("Add Feeding");
+    _hours.SetRange(0,23);
+    _hours.drawBox(0);
+    Display::Display.drawChar(84,52,':',HX8357_BLUE,HX8357_WHITE,5);
+    _minutes.drawBox(0);
+    _ounces.drawBox(1);
+    Display::Display.setCursor(84,52+52);
+    Display::Display.setTextColor(HX8357_BLUE);
+    Display::Display.setTextSize(5,5);
+    Display::Display.print(" ounces");
+    add_.drawButton();
+    return_.drawButton();
+    while (true)
+    {
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        _hours.processAt(p.x,p.y);
+        _minutes.processAt(p.x,p.y);
+        _ounces.processAt(p.x,p.y);
+        if (add_.contains(p.x, p.y))
+        {
+            add_.press(true);  // tell the button it is pressed
+            if (add_.justPressed())
+            {
+                add_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            add_.press(false); // tell the button it is NOT pressed
+            if (add_.justReleased())
+            {
+                add_.drawButton();
+                Clock::TimeOfDay when;
+                when.Hour = _hours.Value();
+                when.Minute = _minutes.Value();
+                Sensors::Weight goalAmmount = _ounces.Value();
+                (void) new Schedule(when,goalAmmount);
+                return;
+            }
+        }
+        if (return_.contains(p.x, p.y))
+        {
+            return_.press(true);  // tell the button it is pressed
+            if (return_.justPressed())
+            {
+                return_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return_.drawButton();
+                return;
+            }
+        }
+    }
+}
+
+void ScheduleManager::addSchedule_12_()
+{
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5);
+    Display::Display.setCursor(11,11); 
+    Display::Display.println("Add Feeding");
+    _hours.SetRange(1,12);
+    _hours.drawBox(1);
+    Display::Display.drawChar(84,52,':',HX8357_BLUE,HX8357_WHITE,5);
+    _minutes.drawBox(0);
+    _ampm.drawBox(AMPMSelectbox::AM);
+    _ounces.drawBox(1);
+    Display::Display.setCursor(84,52+52);
+    Display::Display.setTextColor(HX8357_BLUE);
+    Display::Display.setTextSize(5,5);
+    Display::Display.print(" ounces");
+    add_.drawButton();
+    return_.drawButton();
+    while (true)
+    {
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        _hours.processAt(p.x,p.y);
+        _minutes.processAt(p.x,p.y);
+        _ounces.processAt(p.x,p.y);
+        _ampm.processAt(p.x,p.y);
+        if (add_.contains(p.x, p.y))
+        {
+            add_.press(true);  // tell the button it is pressed
+            if (add_.justPressed())
+            {
+                add_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            add_.press(false); // tell the button it is NOT pressed
+            if (add_.justReleased())
+            {
+                add_.drawButton();
+                Clock::TimeOfDay when;
+                int hour = _hours.Value();
+                switch (_ampm.Value())
+                {
+                case AMPMSelectbox::AM:
+                    if (hour == 12)
+                    {
+                        when.Hour = 0;
+                    }
+                    else
+                    {
+                        when.Hour = hour;
+                    }
+                    break;
+                case AMPMSelectbox::PM:
+                    if (hour == 12)
+                    {
+                        when.Hour = 12;
+                    }
+                    else
+                    {
+                        when.Hour = hour+12;
+                    }
+                    break;
+                }
+                when.Minute = _minutes.Value();
+                Sensors::Weight goalAmmount = _ounces.Value();
+                (void) new Schedule(when,goalAmmount);
+                return;
+            }
+        }
+        if (return_.contains(p.x, p.y))
+        {
+            return_.press(true);  // tell the button it is pressed
+            if (return_.justPressed())
+            {
+                return_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return_.drawButton();
+                return;
+            }
+        }
+    }
 }
 
 }
