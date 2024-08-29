@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:27:29 2024
-//  Last Modified : <240824.2054>
+//  Last Modified : <240829.1346>
 //
 //  Description	
 //
@@ -44,25 +44,158 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
-
+#include <Arduino.h>
 #include <Adafruit_MotorShield.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_HX8357.h>
+#include <Adafruit_TSC2007.h>
+#include "Display.h"
+#include "Sensors.h"
+#include "Singleton.h"
+#include "Mechanical.h"
+#include "Spinbox.h"
 
 namespace Mechanical {
 
+static Adafruit_MotorShield motorshield;
+static FeedMotors motors;
+
 void Initialize()
 {
+    if (!motorshield.begin())
+    {
+        Display::PrintError("Could not find Motor Shield. Check wiring.");
+        while (1) delay(100);
+    }
 }
 
-bool ManualFeeding()
+FeedMotors::FeedMotors()
+      : BackgroundTask()
+, feedMotor_(motorshield.getMotor(1))
+, agitatorMotor_(motorshield.getMotor(3))
+, running_(false)
+,  _ounces(&Display::Display,10,52+52,HX8357_WHITE,HX8357_BLACK,
+           HX8357_BLUE,1,8,"%d")
 {
+    return_.initButtonUL(&Display::Display,10,278,300,42,
+                         HX8357_WHITE,HX8357_BLACK,HX8357_BLUE,
+                         "Return",5);
+    feed_.initButtonUL(&Display::Display,210,236,100,42,
+                       HX8357_WHITE,HX8357_BLACK,HX8357_MAGENTA,
+                       "Feed",5);
 }
 
-void ManualFeedingStart()
+void FeedMotors::RunTask()
 {
+    if (! running_) return;
+    if (Sensors::BowlAmmount() >= goalAmmount_)
+    {
+        stop_();
+    }
 }
 
-void CheckFeedCycle()
+void FeedMotors::start_()
 {
+    if (running_) return;
+    feedMotor_->setSpeed(255);
+    feedMotor_->run(FORWARD);
+    feedMotor_->run(RELEASE);
+    agitatorMotor_->setSpeed(255);
+    agitatorMotor_->run(FORWARD);
+    agitatorMotor_->run(RELEASE);
+}
+
+void FeedMotors::stop_()
+{
+    if (! running_) return;
+    feedMotor_->setSpeed(0);
+    feedMotor_->run(RELEASE);
+    agitatorMotor_->setSpeed(0);
+    agitatorMotor_->run(RELEASE);
+    running_ = false;
+}
+
+void FeedMotors::StartFeeding(Sensors::Weight goalAmmount)
+{
+    if (running_) return;
+    goalAmmount_ = goalAmmount;
+    if (Sensors::BowlAmmount() < goalAmmount_)
+    {
+        start_();
+    }
+}
+
+void FeedMotors::ManualFeed()
+{
+    Display::Display.fillScreen(HX8357_BLACK);
+    Display::Display.fillRect(10,10,300,42,HX8357_WHITE);
+    Display::Display.setTextColor(HX8357_BLUE,HX8357_WHITE);
+    Display::Display.setTextSize(5); 
+    Display::Display.setCursor(11,11);
+    Display::Display.println("Feed Ammount");
+    _ounces.drawBox(1);
+    Display::Display.setCursor(84,52+52);
+    Display::Display.setTextColor(HX8357_BLUE);
+    Display::Display.setTextSize(5,5);
+    Display::Display.print(" ounces");
+    feed_.drawButton();
+    return_.drawButton();
+    while (true)
+    {
+        TS_Point p = Display::TouchScreen.getPoint();
+        if (((p.x == 0) && (p.y == 0)) || (p.z < 10)) 
+        {
+            // this is our way of tracking touch 'release'!
+            p.x = p.y = p.z = -1;
+        }
+        // Scale from ~0->4000 to  tft.width using the calibration #'s
+        if (p.z != -1) 
+        {
+            int py = map(p.x, Display::TSMax_x, Display::TSMin_x, 0, Display::Display.height());
+            int px = map(p.y, Display::TSMin_y, Display::TSMax_y, 0, Display::Display.width());
+            p.x = px;
+            p.y = py;
+        }
+        _ounces.processAt(p.x,p.y);
+        if (feed_.contains(p.x, p.y))
+        {
+            feed_.press(true);  // tell the button it is pressed
+            if (feed_.justPressed())
+            {
+                feed_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            feed_.press(false); // tell the button it is NOT pressed
+            if (feed_.justReleased())
+            {
+                feed_.drawButton();
+                StartFeeding(_ounces.Value());
+                return;
+            }
+        }
+        if (return_.contains(p.x, p.y))
+        {
+            return_.press(true);  // tell the button it is pressed
+            if (return_.justPressed())
+            {
+                return_.drawButton(true);
+                BackgroundTask::RunTasks(100);
+            }
+        }
+        else
+        {
+            return_.press(false); // tell the button it is NOT pressed
+            if (return_.justReleased())
+            {
+                return_.drawButton();
+                return;
+            }
+        }
+    }
+    
 }
 
 }

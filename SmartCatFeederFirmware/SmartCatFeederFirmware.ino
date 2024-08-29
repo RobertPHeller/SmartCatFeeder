@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 12:59:18 2024
-//  Last Modified : <240828.1043>
+//  Last Modified : <240829.1202>
 //
 //  Description	
 //
@@ -71,6 +71,8 @@ DEFINE_SINGLETON_INSTANCE(Preferences::Preferences);
 static Preferences::Preferences prefs("/Preferences.dat");
 DEFINE_SINGLETON_INSTANCE(Schedule::ScheduleManager);
 DEFINE_SINGLETON_INSTANCE(MainScreen::MainScreen);
+DEFINE_SINGLETON_INSTANCE(Mechanical::FeedMotors);
+
 MainScreen::MainScreen mainScreen;
 
 #define FORMAT_SPIFFS_IF_FAILED true

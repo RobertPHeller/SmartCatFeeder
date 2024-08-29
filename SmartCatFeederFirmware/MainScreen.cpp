@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Tue Aug 27 09:52:58 2024
-//  Last Modified : <240828.1044>
+//  Last Modified : <240829.1229>
 //
 //  Description	
 //
@@ -82,6 +82,7 @@ void MainScreen::Loop()
         Schedule::ScheduleManager::instance()->ScheduleManagement();
         break;
     case hand:
+        Mechanical::FeedMotors::instance()->ManualFeed();
         break;
     default:
         break;

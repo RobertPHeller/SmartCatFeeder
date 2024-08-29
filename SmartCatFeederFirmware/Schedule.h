@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240829.1010>
+//  Last Modified : <240829.1234>
 //
 //  Description	
 //
@@ -51,6 +51,7 @@
 #include <algorithm>
 #include "Clock.h"
 #include "Sensors.h"
+#include "Mechanical.h"
 #include "Singleton.h"
 #include "BackgroundTask.h"
 #include <Adafruit_GFX.h>
@@ -262,7 +263,7 @@ public:
             Sensors::Weight goalAmmount;
             if (Schedule::IsTime(now,goalAmmount))
             {
-                // start feeding: goalAmmount
+                Mechanical::FeedMotors::instance()->StartFeeding(goalAmmount);
             }
         }
     }

@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:04:21 2024
-//  Last Modified : <240824.2053>
+//  Last Modified : <240829.1348>
 //
 //  Description	
 //
@@ -45,14 +45,38 @@
 #ifndef __MECHANICAL_H
 #define __MECHANICAL_H
 
+#include <Arduino.h>
+#include <Adafruit_MotorShield.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_HX8357.h>
+#include "Sensors.h"
+#include "Singleton.h"
+#include "BackgroundTask.h"
+#include "Spinbox.h"
 
 namespace Mechanical {
 
 extern void Initialize();
 
-bool ManualFeeding();
-void ManualFeedingStart();
-void CheckFeedCycle();
+class FeedMotors : public BackgroundTask, public Singleton<FeedMotors>
+{
+public:
+    FeedMotors();
+    virtual void RunTask();
+    void StartFeeding(Sensors::Weight goalAmmount);
+    void ManualFeed();
+private:
+    void start_();
+    void stop_();
+    Adafruit_DCMotor *feedMotor_;
+    Adafruit_DCMotor *agitatorMotor_;
+    Sensors::Weight goalAmmount_;
+    bool running_;
+    Spinbox _ounces;
+    Adafruit_GFX_Button return_;
+    Adafruit_GFX_Button feed_;
+};
+
 }
 
 #endif // __MECHANICAL_H
