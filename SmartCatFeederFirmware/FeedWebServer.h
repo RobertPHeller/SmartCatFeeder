@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 21:31:26 2024
-//  Last Modified : <240827.1014>
+//  Last Modified : <240829.1550>
 //
 //  Description	
 //
@@ -71,15 +71,21 @@ public:
 private:
     void _startServer()
     {
-        on("/", Welcome);
+        on("/", MainScreen);
         on("/style.css", SendStyle);
         on("/javascript.js", SendJavaScript);
         on("/Robot1-110.png", SendRobot1_110);
+        on("/icons8-gear-50.png", SendIcons8_gear_50);
+        on("/icons8-clock-50.png", SendIcons8_clock_50);
+        on("/icons8-hand-50.png", SendIcons8_hand_50);
+        on("/settings", Settings);
+        on("/schedule", Schedule);
+        on("/manual", Manual);
         onNotFound(NotFound);
         begin();
     }
-    static void Welcome() {instance()->_welcome();}
-    void _welcome();
+    static void MainScreen() {instance()->_MainScreen();}
+    void _MainScreen();
     static void NotFound() {instance()->_notFound();}
     void _notFound();
     static void SendStyle() {instance()->_sendStyle();}
@@ -88,6 +94,18 @@ private:
     void _sendJavaScript();
     static void SendRobot1_110() {instance()->_sendRobot1_110();}
     void _sendRobot1_110();
+    static void SendIcons8_gear_50() {instance()->_SendIcons8_gear_50();}
+    void _SendIcons8_gear_50();
+    static void SendIcons8_clock_50() {instance()->_SendIcons8_clock_50();}
+    void _SendIcons8_clock_50();
+    static void SendIcons8_hand_50() {instance()->_SendIcons8_hand_50();}
+    void _SendIcons8_hand_50();
+    static void Settings() {instance()->_Settings();}
+    void _Settings();
+    static void Schedule() {instance()->_Schedule();}
+    void _Schedule();
+    static void Manual() {instance()->_Manual();}
+    void _Manual();
     String header_(String title);
     String footer_();
 };

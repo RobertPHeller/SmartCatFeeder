@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 08:49:55 2024
-//  Last Modified : <240828.1150>
+//  Last Modified : <240829.2043>
 //
 //  Description	
 //
@@ -52,6 +52,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <WebServer.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_HX8357.h>
 #include "Keyboard.h"
@@ -200,6 +201,7 @@ public:
         timeZone_ = timezone;
     }
     void Settings();
+    String SettingsPage(WebServer *webserver);
 private:
     std::string ssid_;
     std::string password_;

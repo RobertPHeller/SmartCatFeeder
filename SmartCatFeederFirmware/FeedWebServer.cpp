@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 21:32:10 2024
-//  Last Modified : <240829.1358>
+//  Last Modified : <240829.2042>
 //
 //  Description	
 //
@@ -52,45 +52,21 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "Preferences.h"
 #include "FeedWebServer.h"
 #include "Revision.h"
-#include "Robot1-110.h"
+#include "MainScreen.h"
+
 
 namespace FeedWebServer {
 
 static FeedWebServer server;
 DEFINE_SINGLETON_INSTANCE(FeedWebServer);
 
-static String currentTime()
-{
-    char buffer[64];
-    struct tm timeinfo;
-    int8_t hour;
-    
-    if (!getLocalTime(&timeinfo))
-    {
-        return String("<h2>No time available (yet)</h2>");
-    }
-    switch (Preferences::Preferences::instance()->GetClockFormat()) {
-    case Preferences::Preferences::Twelve:
-        hour = timeinfo.tm_hour;
-        if (hour  > 12) hour -= 12;
-        if (hour == 0) hour = 12;
-        snprintf(buffer,sizeof(buffer),"<h2>Current time: %2d:%02d%s</h2>",
-                 hour,timeinfo.tm_min,(timeinfo.tm_hour<12)?"AM":"PM");
-        break;
-    case Preferences::Preferences::TwentyFour:
-        snprintf(buffer,sizeof(buffer),"<h2>Current time: %2d:%02d</h2>",
-                 timeinfo.tm_hour,timeinfo.tm_min);
-        break;
-    }
-    return String(buffer);
-}
 
-void FeedWebServer::_welcome()
+void FeedWebServer::_MainScreen()
 {
     send(200, "text/html", 
          header_("Smart Cat Feeder") + 
          "<h1>Smart Cat Feeder</h1>" +
-         currentTime() +
+         MainScreen::MainScreen::instance()->Page() +
          footer_());
     
 }
@@ -103,6 +79,36 @@ void FeedWebServer::_notFound()
          footer_());
     
 }
+
+void FeedWebServer::_Settings()
+{
+    send(200, "text/html",
+         header_("Settings Management") +
+         "<h1>Settings Management</h1>" +
+         Preferences::Preferences::instance()->SettingsPage(this) +
+         footer_());
+}
+
+void FeedWebServer::_Schedule()
+{
+    send(200, "text/html",
+         header_("Schedule Management") +
+         "<h1>Schedule Management</h1>" +
+         // Schedule::ScheduleManagement::instance()->ScheduleManagementPage(this) +
+         footer_());
+}
+
+void FeedWebServer::_Manual()
+{
+    send(200, "text/html",
+         header_("Manual Feeding") +
+         "<h1>Manual Feeding</h1>" +
+         // Mechanical::FeedMotors::instance()->ManualFeedingPage(this<) +
+         footer_());
+}
+
+
+
 void FeedWebServer::_sendStyle()
 {
     send(200, "text/css", R"stylesheet(
@@ -147,13 +153,34 @@ String FeedWebServer::footer_()
 </html>)html");
 }
 
+#include "Robot1-110.h"
 void FeedWebServer::_sendRobot1_110()
 {
     uint8_t buffer[base64_decode_expected_len(sizeof(ROBOT1_110))];
     int status = base64_decode_chars(ROBOT1_110,sizeof(ROBOT1_110),(char *)buffer);
     send(200,"image/png",String((const char *)buffer));
 }
-
+#include "icons8-gear-50.png.h"
+void FeedWebServer::_SendIcons8_gear_50()
+{
+    uint8_t buffer[base64_decode_expected_len(sizeof(ICONS8GEAR50))];
+    int status = base64_decode_chars(ICONS8GEAR50,sizeof(ICONS8GEAR50),(char *)buffer);
+    send(200,"image/png",String((const char *)buffer));
+}
+#include "icons8-clock-50.png.h"
+void FeedWebServer::_SendIcons8_clock_50()
+{
+    uint8_t buffer[base64_decode_expected_len(sizeof(ICONS8CLOCK50))];
+    int status = base64_decode_chars(ICONS8CLOCK50,sizeof(ICONS8CLOCK50),(char *)buffer);
+    send(200,"image/png",String((const char *)buffer));
+}
+#include "icons8-hand-50.png.h"
+void FeedWebServer::_SendIcons8_hand_50()
+{
+    uint8_t buffer[base64_decode_expected_len(sizeof(ICONS8HAND50))];
+    int status = base64_decode_chars(ICONS8HAND50,sizeof(ICONS8HAND50),(char *)buffer);
+    send(200,"image/png",String((const char *)buffer));
+}
     
 
 }

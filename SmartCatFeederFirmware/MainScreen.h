@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Tue Aug 27 09:52:48 2024
-//  Last Modified : <240827.1110>
+//  Last Modified : <240829.1452>
 //
 //  Description	
 //
@@ -59,6 +59,7 @@ public:
     ~MainScreen() {}
     void Initialize();
     void Loop();
+    String Page();
 private:
     typedef enum {gear=0, clock, hand, lastbutton} ButtonIndex;
     Button_xbm::Button_xbm buttons_[3];

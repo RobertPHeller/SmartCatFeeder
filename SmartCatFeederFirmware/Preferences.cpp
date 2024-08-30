@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 20:25:43 2024
-//  Last Modified : <240828.1021>
+//  Last Modified : <240830.1324>
 //
 //  Description	
 //
@@ -254,6 +254,123 @@ void Preferences::Settings()
         
     }
 }    
+
+static bool AllowedMode(String mode)
+{
+    if (mode == "ssid") return true;
+    if (mode == "hostname") return true;
+    if (mode == "clockfmt") return true;
+    if (mode == "timezone") return true;
+    return false;
+}
+
+String Preferences::SettingsPage(WebServer *webserver)
+{
+    char buffer[256];
+    String result("<form method='post' action='/settings' >\n");
+    String mode = webserver->arg("setting");
+    result += "<ul style='list-style-type: none;'>\n";
+    if (mode == "ssid")
+    {
+        if ( webserver->hasArg("update") )
+        {
+            SetSSID(webserver->arg("newssid").c_str());
+            SetPassword(webserver->arg("newpassword").c_str());
+            Write();
+        }
+        result += "<li><label for='ssid'>Network name:</label>\n";
+        result += "<input type='text' id='ssid' name='newssid' size='25' /></li>\n";
+        result += "<li><label for='password'>Password (leave blank for none):</label>\n";
+        result += "<input type='password' id='password' name='newpassword' size='25' /></li>\n";
+        
+    }
+    else if (mode == "hostname")
+    {
+        if ( webserver->hasArg("update") )
+        {
+            SetHostname(webserver->arg("newhostname").c_str());
+            Write();
+        }
+        result += "<input type='hidden' name='setting' value='hostname' />\n";
+        result += "<li><label for='hostname'>Hostname:</label>\n";
+        result += "<input type='text' id='hostname' name='newhostname' size='25' /></li>\n";\
+    }
+    else if (mode == "clockfmt")
+    {
+        if ( webserver->hasArg("update") )
+        {
+            SetClockFormat((ClockFormat)atoi(webserver->arg("clockformat").c_str()));
+            Write();
+        }
+        result += "<input type='hidden' name='setting' value='clockfmt' />\n";
+        result += "<li><label for='clockfmt'>Clock format:</label>\n";
+        result += "<select name='clockformat' id='clockfmt.>\n";
+        snprintf(buffer,sizeof(buffer),
+                 "<option value='%d' %s>12 Hour</option>\n",
+                 (int)Twelve,(GetClockFormat() == Twelve)?"selected":"");
+        result += buffer;
+        snprintf(buffer,sizeof(buffer),
+                 "<option value='%d' %s>24 Hour</option>\n",
+                 (int)TwentyFour,(GetClockFormat() == TwentyFour)?"selected":"");
+        result += buffer;
+        result += "</select></li>\n";
+    }
+    else if (mode == "timezone")
+    {
+        if ( webserver->hasArg("update") )
+        {
+            SetTimeZone(webserver->arg("timezone").c_str());
+            Write();
+        }
+        result += "<input type='hidden' name='setting' value='timezone' />\n";
+        result += "<li><label for='tz'>Time Zone:</label>\n";
+        result += "<select name='timezone' id='tz'>\n";
+        for (size_t i = 0; i < LISTSIZE; i++)
+        {
+            snprintf(buffer,sizeof(buffer),
+                     "<option value='%s' %s>%s</option>\n",
+                     TimeZoneList_[i].value,
+                     (strcmp(TimeZoneList_[i].value,GetTimeZone()) == 0)?"selected":"",
+                     TimeZoneList_[i].name);
+            result += buffer;
+        }
+        result += "</select></li>\n";
+    }
+    else
+    {
+    
+        result += "<li><button type='submit' name='setting' value='ssid'>";
+        result += ssid_.c_str();
+        result += "</button></li>\n";
+        result += "<li><button type='submit' name='setting' value='hostname'>";
+        result += hostname_.c_str();
+        result += "</button></li>\n";
+        result += "<li><button type='submit' name='setting' value='clockfmt'>";
+        switch (clockFormat_)
+        {
+        case Twelve:
+            result += "12 Hour";
+            break;
+        case TwentyFour:
+            result += "24 Hour";
+            break;
+        }
+        result += "</button></li>\n";
+        result += "<li><button type='submit' name='setting' value='timezone'>";
+        result += timeZone_.c_str();
+        result += "</button></li>\n";
+    }
+    result += "</ul>\n";
+    if (AllowedMode(mode))
+    {
+        result += "<input type='hidden' name='setting' value='" + mode + 
+              "' />\n";
+        result += "<button type='submit' name='update' value='true'>Update</button>\n";
+    }
+    result += "</form>\n";
+    result += "<a href='/'>Back to Home</a>&nbsp; <a href='/settings'>Back to Settings</a>";
+    return result;
+}
 
 void Preferences::ssidScreen()
 {
@@ -775,5 +892,7 @@ void Preferences::timeZoneScreen()
 }
 
 const Preferences::TzEntry Preferences::TimeZoneList_[Preferences::LISTSIZE];
+
+
 }
  

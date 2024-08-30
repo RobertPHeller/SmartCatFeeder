@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Tue Aug 27 09:52:58 2024
-//  Last Modified : <240829.1229>
+//  Last Modified : <240829.1527>
 //
 //  Description	
 //
@@ -139,6 +139,7 @@ MainScreen::ButtonIndex MainScreen::check_buttons_()
 
 ClockDisplay::ClockDisplay clockDisplay;
 
+
 void MainScreen::refreshScreen_()
 {
     struct tm timeinfo;
@@ -199,4 +200,94 @@ void MainScreen::refreshScreen_()
         buttons_[b].drawButton();
     }
 }
+
+static String currentTime()
+{
+    char buffer[64];
+    struct tm timeinfo;
+    int8_t hour;
+    
+    if (!getLocalTime(&timeinfo))
+    {
+        return String("<h2>No time available (yet)</h2>");
+    }
+    switch (Preferences::Preferences::instance()->GetClockFormat()) {
+    case Preferences::Preferences::Twelve:
+        hour = timeinfo.tm_hour;
+        if (hour  > 12) hour -= 12;
+        if (hour == 0) hour = 12;
+        snprintf(buffer,sizeof(buffer),"<h2>Current time: %2d:%02d%s</h2>",
+                 hour,timeinfo.tm_min,(timeinfo.tm_hour<12)?"AM":"PM");
+        break;
+    case Preferences::Preferences::TwentyFour:
+        snprintf(buffer,sizeof(buffer),"<h2>Current time: %2d:%02d</h2>",
+                 timeinfo.tm_hour,timeinfo.tm_min);
+        break;
+    }
+    return String(buffer);
+}
+
+static String webButtons()
+{
+    String result("<div id=\"buttonbox\">");
+    result+="<a href='/settings'><img src='/icons8-gear-50.png' width='50' height='50' alt='settings' /></a>";
+    result+="<a href='/schedule'><img src='/icons8-clock-50.png' width='50' height='50' alt='schedule' /></a>";
+    result+="<a href='/manual'><img src='/icons8-hand-50.png' width='50' height='50' alt='manual' /></a>";
+    result+="</div>";
+    return result;
+}
+
+String MainScreen::Page()
+{
+    char buffer[256];
+    String result = currentTime();
+    if (Sensors::FoodBinLow())
+    {
+        result += "<h3 style=\"color:red;\">Food bin is low!</h3>";
+    }
+    snprintf(buffer,sizeof(buffer),"<h4>Bowl contains %3.1f Oz.</h4>",
+             Sensors::BowlAmmount());
+    result += buffer;
+    struct tm timeinfo;
+    if (getLocalTime(&timeinfo))
+    {
+        Clock::TimeOfDay now;
+        now.Hour = timeinfo.tm_hour; 
+        now.Minute = timeinfo.tm_min;
+        const Schedule::Schedule *next = Schedule::Schedule::NextSchedule(now);
+        if (next != nullptr)
+        {
+            Clock::TimeOfDay when = next->GetWhen();
+            Sensors::Weight weight = next->GetGoalAmmount();
+            int8_t hour;
+            switch (Preferences::Preferences::instance()->GetClockFormat())
+            {
+            case Preferences::Preferences::Twelve:
+                hour = when.Hour;
+                if (hour  > 12) hour -= 12;
+                if (hour == 0) hour = 12;
+                snprintf(buffer,sizeof(buffer),
+                         "<h4>Next feeding at %2d:%02d%s, %2d Oz.</h4>",
+                         hour,when.Minute,
+                         (when.Hour<12)?"AM":"PM",
+                         weight);
+                break;
+            case Preferences::Preferences::TwentyFour:
+                snprintf(buffer,sizeof(buffer),
+                         "<h4>Next feeding at %2d:%02d, %2d Oz.</h4>",
+                         when.Hour,when.Minute,
+                         weight);
+                break;
+            }
+        }
+        else
+        {
+            strncpy(buffer,"<h4>No feeding scheduled.</h4>",sizeof(buffer));
+        }
+        result += buffer;
+    }
+    result += webButtons();
+    return result;
+}
+
 }
