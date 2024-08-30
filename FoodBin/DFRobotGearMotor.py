@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Aug 18 11:37:13 2024
-#  Last Modified : <240819.1355>
+#  Last Modified : <240830.1645>
 #
 #  Description	
 #
@@ -44,6 +44,7 @@
 import FreeCAD as App
 import Part, TechDraw
 from FreeCAD import Base
+import Mesh
 
 import os
 import sys
@@ -371,9 +372,9 @@ class AugerMountPlate(MotorDrivePlate):
                                                       (self.__DeltaAngle*3)))
         peg4Y = self.__MountHoleRadius * math.sin(radians(self.__StartAngle+\
                                                       (self.__DeltaAngle*3)))
-        smallPegOrig = self.origin.add(Base.Vector(peg1X,peg1Y,self.HubLength))
-        smallPeg = Part.Face(Part.Wire(Part.makeCircle(self.__SmallPeg,smallPegOrig,Base.Vector(0,0,1)))).extrude(Base.Vector(0,0,self.__PegLength))
-        self.plate = self.plate.fuse(smallPeg)
+        #smallPegOrig = self.origin.add(Base.Vector(peg1X,peg1Y,self.HubLength))
+        #smallPeg = Part.Face(Part.Wire(Part.makeCircle(self.__SmallPeg,smallPegOrig,Base.Vector(0,0,1)))).extrude(Base.Vector(0,0,self.__PegLength))
+        #self.plate = self.plate.fuse(smallPeg)
         screwHoleOrig = self.origin.add(Base.Vector(peg2X,peg2Y,self.HubLength-self.PlateThick))
         screwHole = Part.Face(Part.Wire(Part.makeCircle(self.__LargeHole,screwHoleOrig))).extrude(Base.Vector(0,0,self.PlateThick))
         self.plate = self.plate.cut(screwHole)
@@ -480,6 +481,8 @@ class GearMotorMount(object):
     __PipeInner    = 41
     __FlangeHeight = 8
     __FlangeDiameter = 57.78
+    __ScrewHeadDepth = 3
+    __ScrewHeadDia = 5.5
     def __init__(self,name,origin):
         self.name = name
         if not isinstance(origin,Base.Vector):
@@ -509,29 +512,45 @@ class GearMotorMount(object):
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(shaftSpacer)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1,\
-                                              DFRobotGearMotor.MountingHoleY1(),\
+                                              DFRobotGearMotor.GearBoxHeight-DFRobotGearMotor.MountingHoleY1(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2,mhO)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
+        mhO = mhO.add(Base.Vector(0,0,self.__FlangeHeight-self.__ScrewHeadDepth))
+        head = Part.Face(Part.Wire(Part.makeCircle(self.__ScrewHeadDia/2,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight+self.__PipeHeight))
+        part = part.cut(head)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX1,\
-                                              DFRobotGearMotor.MountingHoleY2(),\
+                                              DFRobotGearMotor.GearBoxHeight-DFRobotGearMotor.MountingHoleY2(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2,mhO)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
+        mhO = mhO.add(Base.Vector(0,0,self.__FlangeHeight-self.__ScrewHeadDepth))
+        head = Part.Face(Part.Wire(Part.makeCircle(self.__ScrewHeadDia/2,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight+self.__PipeHeight))
+        part = part.cut(head)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2,\
-                                              DFRobotGearMotor.MountingHoleY1(),\
+                                              DFRobotGearMotor.GearBoxHeight-DFRobotGearMotor.MountingHoleY1(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2,mhO)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
+        mhO = mhO.add(Base.Vector(0,0,self.__FlangeHeight-self.__ScrewHeadDepth))
+        head = Part.Face(Part.Wire(Part.makeCircle(self.__ScrewHeadDia/2,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight+self.__PipeHeight))
+        part = part.cut(head)
         mhO = mountFaceOrigin.add(Base.Vector(DFRobotGearMotor.MountingHoleX2,\
-                                              DFRobotGearMotor.MountingHoleY2(),\
+                                              DFRobotGearMotor.GearBoxHeight-DFRobotGearMotor.MountingHoleY2(),\
                                               0))
-        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2)))\
+        mh = Part.Face(Part.Wire(Part.makeCircle(DFRobotGearMotor.MountingHoleDia/2,mhO)))\
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight))
         part = part.cut(mh)
+        mhO = mhO.add(Base.Vector(0,0,self.__FlangeHeight-self.__ScrewHeadDepth))
+        head = Part.Face(Part.Wire(Part.makeCircle(self.__ScrewHeadDia/2,mhO)))\
+                                        .extrude(Base.Vector(0,0,self.__FlangeHeight+self.__PipeHeight))
+        part = part.cut(head)
         self.part = part
     def show(self,doc=None):
         if doc==None:
@@ -543,7 +562,7 @@ class GearMotorMount(object):
     def MakeSTL(self,filename):
         doc = App.activeDocument()
         obj = doc.addObject("Part::Feature","temp")
-        obj.Shape=self.plate
+        obj.Shape=self.part
         objs = list()
         objs.append(obj)
         Mesh.export(objs,filename)
@@ -555,5 +574,12 @@ if __name__ == '__main__':
     doc = App.newDocument("Motor")
     mount = GearMotorMount("mount",Base.Vector(0,0,0))
     mount.show(doc)
+    mount.MakeSTL("GearMotorMount.stl")
+    agitatorMount = AgitatorMountPlate("agitatorMount",Base.Vector(200,0,0))
+    agitatorMount.show(doc)
+    agitatorMount.MakeSTL("AgitatorMountPlate.stl")
+    augerMount = AugerMountPlate("augerMount",Base.Vector(400,0,0))
+    augerMount.show(doc)
+    augerMount.MakeSTL("AugerMountPlate.stl")    
     Gui.activeDocument().activeView().viewTop()
     Gui.SendMsgToActiveView("ViewFit")
