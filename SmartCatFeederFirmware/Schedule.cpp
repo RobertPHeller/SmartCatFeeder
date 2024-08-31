@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240829.1015>
+//  Last Modified : <240830.1442>
 //
 //  Description	
 //
@@ -253,6 +253,10 @@ void ScheduleManager::displaySchedule_(int first)
     }
     add_.drawButton(); 
     return_.drawButton();
+}
+
+String ScheduleManager::ScheduleManagementPage(WebServer *server)
+{
 }
 
 void ScheduleManager::scheduleSelected_(int index)

@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 21:32:10 2024
-//  Last Modified : <240829.2042>
+//  Last Modified : <240830.1437>
 //
 //  Description	
 //
@@ -50,6 +50,8 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <libb64/cdecode.h>
 #include "Singleton.h"
 #include "Preferences.h"
+#include "Schedule.h"
+#include "Mechanical.h"
 #include "FeedWebServer.h"
 #include "Revision.h"
 #include "MainScreen.h"
@@ -94,7 +96,7 @@ void FeedWebServer::_Schedule()
     send(200, "text/html",
          header_("Schedule Management") +
          "<h1>Schedule Management</h1>" +
-         // Schedule::ScheduleManagement::instance()->ScheduleManagementPage(this) +
+         Schedule::ScheduleManager::instance()->ScheduleManagementPage(this) +
          footer_());
 }
 
@@ -103,7 +105,7 @@ void FeedWebServer::_Manual()
     send(200, "text/html",
          header_("Manual Feeding") +
          "<h1>Manual Feeding</h1>" +
-         // Mechanical::FeedMotors::instance()->ManualFeedingPage(this<) +
+         Mechanical::FeedMotors::instance()->ManualFeedingPage(this) +
          footer_());
 }
 

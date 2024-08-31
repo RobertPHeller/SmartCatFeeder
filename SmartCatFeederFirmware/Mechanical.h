@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:04:21 2024
-//  Last Modified : <240829.1348>
+//  Last Modified : <240830.1433>
 //
 //  Description	
 //
@@ -49,6 +49,7 @@
 #include <Adafruit_MotorShield.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_HX8357.h>
+#include <WebServer.h>
 #include "Sensors.h"
 #include "Singleton.h"
 #include "BackgroundTask.h"
@@ -65,6 +66,7 @@ public:
     virtual void RunTask();
     void StartFeeding(Sensors::Weight goalAmmount);
     void ManualFeed();
+    String ManualFeedingPage(WebServer *webserver);
 private:
     void start_();
     void stop_();

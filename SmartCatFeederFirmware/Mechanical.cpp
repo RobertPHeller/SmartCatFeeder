@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:27:29 2024
-//  Last Modified : <240829.1346>
+//  Last Modified : <240830.1443>
 //
 //  Description	
 //
@@ -196,6 +196,10 @@ void FeedMotors::ManualFeed()
         }
     }
     
+}
+
+String FeedMotors::ManualFeedingPage(WebServer *server)
+{
 }
 
 }

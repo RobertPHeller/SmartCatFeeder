@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240829.1234>
+//  Last Modified : <240831.1124>
 //
 //  Description	
 //
@@ -49,12 +49,14 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <functional>
 #include "Clock.h"
 #include "Sensors.h"
 #include "Mechanical.h"
 #include "Singleton.h"
 #include "BackgroundTask.h"
 #include <Adafruit_GFX.h>
+#include <WebServer.h>
 #include <Adafruit_HX8357.h>
 #include "Display.h"
 #include "Spinbox.h"
@@ -69,12 +71,29 @@ namespace Schedule {
 
 class Schedule
 {
+private:
+    static bool EarlierSched(const Schedule *x, const Schedule *y)
+    {
+        if (x->when_.Hour < y->when_.Hour)
+        {
+            return true;
+        }
+        else if (x->when_.Hour == y->when_.Hour)
+        {
+            return x->when_.Minute < y->when_.Minute;
+        }
+        else
+        {
+            return false;
+        }
+    }
 public:
     Schedule(Clock::TimeOfDay when,Sensors::Weight goalAmmount)
                 : when_(when)
           , goalAmmount_(goalAmmount)
     {
         Schedule_.push_back(this);
+        std::sort(Schedule_.begin(),Schedule_.end(),EarlierSched);
     }
     ~Schedule()
     {
@@ -268,6 +287,7 @@ public:
         }
     }
     void ScheduleManagement();
+    String ScheduleManagementPage(WebServer *webserver);
 private:
     class AMPMSelectbox {
     public:
