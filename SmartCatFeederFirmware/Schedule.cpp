@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240830.1442>
+//  Last Modified : <240831.1529>
 //
 //  Description	
 //
@@ -257,6 +257,56 @@ void ScheduleManager::displaySchedule_(int first)
 
 String ScheduleManager::ScheduleManagementPage(WebServer *server)
 {
+    char buffer[256];
+    if (server->hasArg("delete"))
+    {
+        size_t index = atoi(server->arg("delete").c_str());
+        Schedule::DeleteElement(index);
+    }
+    if (server->hasArg("add"))
+    {
+        Clock::TimeOfDay when;
+        Sensors::Weight goal = atoi(server->arg("goal").c_str());;
+        if (sscanf(server->arg("when").c_str(),"%02d:%02d",&when.Hour,&when.Minute) == 2 &&
+            goal > 0 && goal <= 8)
+        {
+            (void) new Schedule(when,goal);
+        }
+    }
+    String result("<form method='post' action='/schedule' >\n");
+    result += "<ul style='list-style-type: none;'>\n";
+    for (int i=0; i<Schedule::NumberOfFeedings(); i++)
+    {
+        int8_t hour;
+        const Schedule* ele = Schedule::Element(i);
+        Clock::TimeOfDay when = ele->GetWhen();
+        Sensors::Weight weight = ele->GetGoalAmmount();
+        switch (Preferences::Preferences::instance()->GetClockFormat())
+        {
+        case Preferences::Preferences::Twelve:
+            hour = when.Hour;
+            if (hour  > 12) hour -= 12;
+            if (hour == 0) hour = 12;
+            snprintf(buffer,sizeof(buffer),
+                     "<li>%2d:%02d%s, %2d Oz.",
+                     hour,when.Minute,(when.Hour<12)?"AM":"PM",weight);
+            break;
+        case Preferences::Preferences::TwentyFour:
+            snprintf(buffer,sizeof(buffer),"<li>%2d:%02d, %2d Oz.",when.Hour,
+                     when.Minute,weight);
+            break;
+        }
+        result += buffer;
+        snprintf(buffer,sizeof(buffer)," <button type='submit' name='delete' value='%d'>Delete</button></li>\n",i);
+        result += buffer;
+    }
+    result += "<li><label for='time'>Time:</label>";
+    result += "<input id='time' type='time' name='when' />";
+    result += "<li><label for='ammount'>Goal Ammount:</label>";
+    result += "<input id='ammount' type='number' name='goal' value='1' min='1' max='8' />";
+    result += "<button type='submit' name='add' value='1'>Add</button></li>";
+    result += "</ul></form>";
+    return result;        
 }
 
 void ScheduleManager::scheduleSelected_(int index)

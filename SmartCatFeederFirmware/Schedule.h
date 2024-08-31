@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 09:13:32 2024
-//  Last Modified : <240831.1124>
+//  Last Modified : <240831.1453>
 //
 //  Description	
 //
@@ -74,18 +74,9 @@ class Schedule
 private:
     static bool EarlierSched(const Schedule *x, const Schedule *y)
     {
-        if (x->when_.Hour < y->when_.Hour)
-        {
-            return true;
-        }
-        else if (x->when_.Hour == y->when_.Hour)
-        {
-            return x->when_.Minute < y->when_.Minute;
-        }
-        else
-        {
-            return false;
-        }
+        return (x->when_.Hour < y->when_.Hour) ||
+              (x->when_.Hour == y->when_.Hour &&
+               x->when_.Minute < y->when_.Minute);
     }
 public:
     Schedule(Clock::TimeOfDay when,Sensors::Weight goalAmmount)
