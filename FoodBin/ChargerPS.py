@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 19 19:32:50 2021
-#  Last Modified : <210921.0935>
+#  Last Modified : <240901.1244>
 #
 #  Description	
 #
@@ -42,12 +42,32 @@
 
 
 import FreeCAD as App
-import Part
+import Part, TechDraw, TechDrawGui
 from FreeCAD import Base
 
 import os
 import sys
 sys.path.append(os.path.dirname(__file__))
+import time
+import datetime
+from PySide.QtCore import QCoreApplication, QEventLoop, QTimer
+
+def execute(loop, ms):
+    timer = QTimer()
+    timer.setSingleShot(True)
+    
+    timer.timeout.connect(loop.quit)
+    timer.start(ms)
+    loop.exec_()
+
+def sleep(ms):
+    if not QCoreApplication.instance():
+        app = QCoreApplication([])
+        execute(app, ms)
+    else:
+        loop = QEventLoop()
+        execute(loop, ms)
+
 
 import BudHB
 
@@ -430,12 +450,85 @@ class ChargerPSBox(object):
             obj.Label=self.name+("_standoff%d"%(i))
             obj.ViewObject.ShapeColor=self._StandoffColor
 
+
+
+
+
 if __name__ == '__main__':
-    if "ChargerPSBox" in App.listDocuments().keys():
-        App.closeDocument("ChargerPSBox")
-    doc = App.newDocument("ChargerPSBox")
-    doc = App.activeDocument()
-    chargerBox = ChargerPSBox("chargerBox",Base.Vector(0,0,0))
-    chargerBox.show()
-    Gui.activeDocument().activeView().viewRear()
-    Gui.SendMsgToActiveView("ViewFit")
+    doc = None
+    for docname in App.listDocuments():
+        lddoc = App.getDocument(docname)
+        if lddoc.Label == 'FoodBin':
+            doc = lddoc
+            break
+    if doc == None:
+        App.open("FoodBin.FCStd")
+        doc = App.getDocument('FoodBin')
+    App.ActiveDocument=doc
+    # Clean out old garbage, if any
+    for g in doc.findObjects('TechDraw::DrawSVGTemplate'):
+        doc.removeObject(g.Name)
+    for g in doc.findObjects('TechDraw::DrawPage'):
+        doc.removeObject(g.Name)
+    for g in doc.findObjects('TechDraw::DrawViewPart'):
+        doc.removeObject(g.Name)
+    # insert a Page object and assign a template
+    template = doc.addObject('TechDraw::DrawSVGTemplate','USLetterTemplate')
+    template.Template = App.getResourceDir()+"Mod/TechDraw/Templates/USLetter_Landscape.svg"
+    edt = template.EditableTexts
+    edt['CompanyName'] = "Deepwoods Software"
+    edt['CompanyAddress'] = '51 Locke Hill Road, Wendell, MA 01379 USA' 
+    edt['DrawingTitle1']= 'Smart Cat Feeder'
+    edt['DrawingTitle2']= 'Charger and Power Supply'
+    edt['DrawnBy'] = "Robert Heller"
+    edt['CheckedBy'] = ""
+    edt['Approved1'] = ""
+    edt['Approved2'] = ""
+    edt['Code'] = ""
+    edt['Weight'] = ''
+    edt['DrawingNumber'] = datetime.datetime.now().ctime()
+    edt['Revision'] = "A"
+    template.EditableTexts = edt
+    page1 = doc.addObject('TechDraw::DrawPage','ChargerPSBoxPage1')
+    page1.Template = doc.USLetterTemplate
+    edt = page1.Template.EditableTexts
+    edt['DrawingTitle3']= "Box Bottom Drill"
+    edt['Scale'] = '1'
+    edt['Sheet'] = "Sheet 1 of 2"
+    page1.Template.EditableTexts = edt
+    page1.ViewObject.show()
+    boxbottom = doc.addObject('TechDraw::DrawViewPart','BoxBottomView')
+    page1.addView(boxbottom)
+    boxbottom.Source = doc.foodbin_chargerPSox_box_ACBox
+    boxbottom.X = 130
+    boxbottom.Y = 130
+    boxbottom.Scale = 1
+    boxbottom.Direction=(0.0,-1.0,0.0)
+    boxbottom.Caption = "Bottom"
+    #
+    doc.recompute()
+    sleep(500)
+    TechDrawGui.exportPageAsPdf(page1,"BoxBottomDrill.pdf")
+    #
+    page2 = doc.addObject('TechDraw::DrawPage','ChargerPSBoxPage2')
+    page2.Template = doc.USLetterTemplate
+    edt = page2.Template.EditableTexts
+    edt['DrawingTitle3']= "Box side Drill"
+    edt['Scale'] = '1'
+    edt['Sheet'] = "Sheet 2 of 2"
+    page2.Template.EditableTexts = edt
+    page2.ViewObject.show()
+    boxside = doc.addObject('TechDraw::DrawViewPart','BoxSideView')
+    page2.addView(boxside)
+    boxside.Source = doc.foodbin_chargerPSox_box_ACBox
+    boxside.X = 140
+    boxside.Y = 140
+    boxside.Scale = 1
+    boxside.Rotation=180
+    boxside.Direction=(0.0,0.0,-1.0)
+    boxside.Caption = "Side"
+    #
+    doc.recompute()
+    sleep(500)
+    TechDrawGui.exportPageAsPdf(page2,"BoxSideDrill.pdf")
+    

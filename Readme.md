@@ -31,3 +31,18 @@ Woodpeckers Crafts Parts List
 - 2x [1/4" x 12" Dowel](https://woodpeckerscrafts.com/1-4-x-12-dowel/)
 - [1/2" x 12" Dowel Rod](https://woodpeckerscrafts.com/1-2-x-12-dowel-rod/)
 
+Misc hardware
+- 10 M3x6mm Allen head
+- 7  M4x6mm Allen head
+- 4  M6x12mm Allen head
+- 4  M6 nuts
+- 12 M2.5x6 flat head (counter sunk)
+- 4  M2.5x12 flat head (counter sunk)
+- 16 M2.5 nuts
+- 4  M2.5x4 spacers
+- 6  6-32x1/2" round head
+- 7  6-32 nuts
+- 4  #6x1/4 spacers (one metal, 3 plastic)
+- small hinges
+- magnetic cabinate door latch
+
