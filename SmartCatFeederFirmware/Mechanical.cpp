@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:27:29 2024
-//  Last Modified : <240831.2046>
+//  Last Modified : <240831.2055>
 //
 //  Description	
 //
@@ -206,7 +206,7 @@ String FeedMotors::ManualFeedingPage(WebServer *server,int &code)
         if (goal > 0 && goal <= 8)
         {
             StartFeeding(goal);
-            server->sendHeader("Location", "/");
+            server->sendHeader("Location:", "/");
             code = 301;
             return "<p>The document has moved <a href='/'>here</a></p>";
         }
