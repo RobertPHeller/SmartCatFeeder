@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Thu Aug 15 15:04:21 2024
-//  Last Modified : <240830.1433>
+//  Last Modified : <240831.2033>
 //
 //  Description	
 //
@@ -66,7 +66,7 @@ public:
     virtual void RunTask();
     void StartFeeding(Sensors::Weight goalAmmount);
     void ManualFeed();
-    String ManualFeedingPage(WebServer *webserver);
+    String ManualFeedingPage(WebServer *webserver, int &code);
 private:
     void start_();
     void stop_();

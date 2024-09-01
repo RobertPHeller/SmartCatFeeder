@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:27:29 2024
-//  Last Modified : <240830.1443>
+//  Last Modified : <240831.2046>
 //
 //  Description	
 //
@@ -198,8 +198,27 @@ void FeedMotors::ManualFeed()
     
 }
 
-String FeedMotors::ManualFeedingPage(WebServer *server)
+String FeedMotors::ManualFeedingPage(WebServer *server,int &code)
 {
+    if (server->hasArg("feed"))
+    {
+        Sensors::Weight goal = atoi(server->arg("goal").c_str());
+        if (goal > 0 && goal <= 8)
+        {
+            StartFeeding(goal);
+            server->sendHeader("Location", "/");
+            code = 301;
+            return "<p>The document has moved <a href='/'>here</a></p>";
+        }
+    }
+    code = 200;
+    String result("<form method='post' action='/manual' >\n");
+    result += "<ul style='list-style-type: none;'>\n";
+    result += "<input id='ammount' type='number' name='goal' value='1' min='1' max='8' />";
+    result += "<button type='submit' name='feed' value='1'>Feed</button></li>";
+    result += "</ul></form>";
+    result += "<a href='/'>Back to Home</a>";
+    return result;
 }
 
 }

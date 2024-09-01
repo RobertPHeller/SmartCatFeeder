@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 21:32:10 2024
-//  Last Modified : <240830.1437>
+//  Last Modified : <240831.2044>
 //
 //  Description	
 //
@@ -102,10 +102,12 @@ void FeedWebServer::_Schedule()
 
 void FeedWebServer::_Manual()
 {
-    send(200, "text/html",
+    int code = 200;
+    String content = Mechanical::FeedMotors::instance()->ManualFeedingPage(this,code);
+    send(code, "text/html",
          header_("Manual Feeding") +
          "<h1>Manual Feeding</h1>" +
-         Mechanical::FeedMotors::instance()->ManualFeedingPage(this) +
+         content +
          footer_());
 }
 

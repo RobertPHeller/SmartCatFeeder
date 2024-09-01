@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Sat Aug 24 09:01:45 2024
-//  Last Modified : <240831.1529>
+//  Last Modified : <240831.2041>
 //
 //  Description	
 //
@@ -266,7 +266,7 @@ String ScheduleManager::ScheduleManagementPage(WebServer *server)
     if (server->hasArg("add"))
     {
         Clock::TimeOfDay when;
-        Sensors::Weight goal = atoi(server->arg("goal").c_str());;
+        Sensors::Weight goal = atoi(server->arg("goal").c_str());
         if (sscanf(server->arg("when").c_str(),"%02d:%02d",&when.Hour,&when.Minute) == 2 &&
             goal > 0 && goal <= 8)
         {
@@ -306,6 +306,7 @@ String ScheduleManager::ScheduleManagementPage(WebServer *server)
     result += "<input id='ammount' type='number' name='goal' value='1' min='1' max='8' />";
     result += "<button type='submit' name='add' value='1'>Add</button></li>";
     result += "</ul></form>";
+    result += "<a href='/'>Back to Home</a>";
     return result;        
 }
 
