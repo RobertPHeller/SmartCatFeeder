@@ -40,7 +40,7 @@ Misc hardware
 - 4  M2.5x12 flat head (counter sunk)
 - 16 M2.5 nuts
 - 4  M2.5x4 spacers
-- 6  6-32x1/2" round head
+- 6  6-32x3/4" round head
 - 7  6-32 nuts
 - 4  #6x1/4 spacers (one metal, 3 plastic)
 - small hinges
