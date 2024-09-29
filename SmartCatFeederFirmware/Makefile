@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Thu Aug 15 14:29:40 2024
-#  Last Modified : <240828.2346>
+#  Last Modified : <240929.1002>
 #
 #  Description	
 #
@@ -47,19 +47,21 @@ INO = SmartCatFeederFirmware.ino
 
 SOURCES = $(wildcard *.cpp) $(wildcard *.h)
 
-all: stamp
+TARGET = Build/$(INO).merged.bin
 
-stamp: $(INO) $(SOURCES) Revision.h partitions.csv
-	-rm -rf /tmp/arduino_build_*
+all: $(TARGET)
+
+$(TARGET): $(INO) $(SOURCES) Revision.h partitions.csv
+	-mkdir Build
 	arduino --verbose --verify \
 		--board esp32:esp32:adafruit_feather_esp32s3 \
-		--preserve-temp-files --pref upload.maximum_size=4194304\
+		--pref build.path=Build --pref upload.maximum_size=4194304\
 		--pref build.flash_size=8MB \
 		 $(INO)
-	touch stamp
 
-upload: $(INO) $(SOURCES) Revision.h partitions.csv
+upload: $(TARGET)
 	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 \
+	--pref build.path=Build --port /dev/ttyUSB0 \
 	--pref upload.maximum_size=4194304 --pref build.flash_size=8MB $(INO)
 
 Revision.h: FORCE
