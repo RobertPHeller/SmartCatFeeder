@@ -8,7 +8,7 @@
 //  Author        : $Author$
 //  Created By    : Robert Heller
 //  Created       : Fri Aug 16 16:27:29 2024
-//  Last Modified : <240831.2055>
+//  Last Modified : <240929.1250>
 //
 //  Description	
 //
@@ -103,6 +103,7 @@ void FeedMotors::start_()
     agitatorMotor_->setSpeed(255);
     agitatorMotor_->run(FORWARD);
     agitatorMotor_->run(RELEASE);
+    running_ = true;
 }
 
 void FeedMotors::stop_()
