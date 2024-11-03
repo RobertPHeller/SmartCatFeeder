@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 20 15:19:24 2024
-#  Last Modified : <240823.1532>
+#  Last Modified : <241103.0839>
 #
 #  Description	
 #
@@ -263,7 +263,15 @@ if __name__ == '__main__':
     screenFlapLockPlate_.Y = 6.35+side_centerY
     screenFlapLockPlate_.Rotation = 90.0
     screenFlapLockPlate_.Direction = (1.0,0.0,0.0)
-        
+    screenFlap  = doc.foodbin_screenFlap
+    screenFlap_ = doc.addObject('TechDraw::DrawViewPart','Screen_Flap')
+    doc.SmallCutPanelPage_3.addView(screenFlap_)
+    screenFlap_.Source = screenFlap
+    screenFlap_.X = 6.35+(3.75 * 25.4)+(5.25*25.4)+6.35+(5*25.4)+70.8+6.35+(3*25.4)
+    screenFlap_.Y = 6.35+side_centerY+(4*25.4)
+    screenFlap_.Rotation = 90.0 
+    screenFlap_.Direction = (1.0,0.0,0.0)
+    
     doc.recompute()
 
     sleep(500)
