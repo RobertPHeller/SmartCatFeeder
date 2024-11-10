@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Thu Aug 15 14:29:40 2024
-#  Last Modified : <240929.1002>
+#  Last Modified : <241110.1505>
 #
 #  Description	
 #
@@ -47,22 +47,43 @@ INO = SmartCatFeederFirmware.ino
 
 SOURCES = $(wildcard *.cpp) $(wildcard *.h)
 
-TARGET = Build/$(INO).merged.bin
+TARGET8M = Build8M/$(INO).merged.bin
+TARGET4M = Build4M/$(INO).merged.bin
 
-all: $(TARGET)
+all: $(TARGET8M)
 
-$(TARGET): $(INO) $(SOURCES) Revision.h partitions.csv
-	-mkdir Build
+8M: $(TARGET8M)
+
+4M: $(TARGET4M)
+	
+
+$(TARGET8M): $(INO) $(SOURCES) Revision.h partitions8M.csv
+	-mkdir Build8M
+	-cp partitions8M.csv partitions.csv
 	arduino --verbose --verify \
 		--board esp32:esp32:adafruit_feather_esp32s3 \
-		--pref build.path=Build --pref upload.maximum_size=4194304\
+		--pref build.path=Build8M --pref upload.maximum_size=4194304\
 		--pref build.flash_size=8MB \
 		 $(INO)
 
-upload: $(TARGET)
+$(TARGET4M): $(INO) $(SOURCES) Revision.h partitions4M.csv
+	-mkdir Build4M
+	-cp partitions4M.csv partitions.csv
+	arduino --verbose --verify \
+		--board esp32:esp32:adafruit_feather_esp32s3 \
+		--pref build.path=Build4M --pref upload.maximum_size=2097152\
+		--pref build.flash_size=4MB \
+		 $(INO)
+
+upload8M: $(TARGET8M)
 	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 \
-	--pref build.path=Build --port /dev/ttyUSB0 \
+	--pref build.path=Build8M --port /dev/ttyUSB0 \
 	--pref upload.maximum_size=4194304 --pref build.flash_size=8MB $(INO)
+
+upload4M: $(TARGET4M)
+	arduino --upload --board esp32:esp32:adafruit_feather_esp32s3 \
+	--pref build.path=Build4M --port /dev/ttyUSB0 \
+	--pref upload.maximum_size=2097152 --pref build.flash_size=4MB $(INO)
 
 Revision.h: FORCE
 	python3 ./Revision.py -d -t -H -U
