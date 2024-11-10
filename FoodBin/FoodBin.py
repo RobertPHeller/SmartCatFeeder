@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <240822.2126>
+#  Last Modified : <241103.0830>
 #
 #  Description	
 #
@@ -552,6 +552,13 @@ class FoodBin(object):
                             self.__Adafruit35inTFTYOff+self.__flapWidth,\
                             self.__Adafruit35inTFTZOff+(2.4*25.4)+self.__flapHeight-12.5)),\
                Base.Vector(1,0,0)).extrude(Base.Vector(-self.__Thickness,0,0))
+        self.screenFlap = Part.makePlane(\
+                        self.__flapHeight-12.5,self.__flapWidth,\
+                        origin.add(Base.Vector(\
+                            0,\
+                            self.__Adafruit35inTFTYOff+self.__flapWidth,\
+                            self.__Adafruit35inTFTZOff+(2.4*25.4)-(self.__flapHeight-12.5))),\
+                Base.Vector(1,0,0)).extrude(Base.Vector(-self.__Thickness,0,0))
         self.b1 = HalfByHalf.XBeam(\
                 origin.add(Base.Vector(\
                         self.__Thickness,\
@@ -711,6 +718,10 @@ class FoodBin(object):
         obj = doc.addObject("Part::Feature",self.name+"_screenFlapLockPlate")
         obj.Shape = self.screenFlapLockPlate
         obj.Label=self.name+"_screenFlapLockPlate"
+        obj.ViewObject.ShapeColor=self.__Color
+        obj = doc.addObject("Part::Feature",self.name+"_screenFlap")
+        obj.Shape = self.screenFlap
+        obj.Label=self.name+"_screenFlap"
         obj.ViewObject.ShapeColor=self.__Color
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
