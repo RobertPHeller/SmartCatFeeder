@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Thu Aug 15 14:29:40 2024
-#  Last Modified : <241103.1413>
+#  Last Modified : <240929.1002>
 #
 #  Description	
 #
@@ -55,8 +55,8 @@ $(TARGET): $(INO) $(SOURCES) Revision.h partitions.csv
 	-mkdir Build
 	arduino --verbose --verify \
 		--board esp32:esp32:adafruit_feather_esp32s3 \
-		--pref build.path=Build --pref upload.maximum_size=2097152\
-		--pref build.flash_size=4MB \
+		--pref build.path=Build --pref upload.maximum_size=4194304\
+		--pref build.flash_size=8MB \
 		 $(INO)
 
 upload: $(TARGET)
