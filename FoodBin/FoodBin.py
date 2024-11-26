@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <241103.0830>
+#  Last Modified : <241126.1525>
 #
 #  Description	
 #
@@ -42,7 +42,7 @@
 
 
 import FreeCAD as App
-import Part, TechDraw
+import Part, TechDraw, Mesh
 from FreeCAD import Base
 
 import os
@@ -283,6 +283,7 @@ class FoodBin(object):
                                         xoffset=self.__Width-self.__Thickness)
         augerMountOrigin = bottomOrigin.add(Base.Vector(self.__Width/2,\
                                                         (3.5/2)*25.4,0))
+        self.augerMount = AugerMount.AugerMount("argerMount",augerMountOrigin)
         self.bottom = AugerMount.AugerMount.CutHoles(self.bottom,\
                                                      augerMountOrigin,\
                                                      self.__Thickness)
@@ -723,6 +724,7 @@ class FoodBin(object):
         obj.Shape = self.screenFlap
         obj.Label=self.name+"_screenFlap"
         obj.ViewObject.ShapeColor=self.__Color
+        self.augerMount.show(doc)
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
