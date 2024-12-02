@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <241201.1926>
+#  Last Modified : <241201.1934>
 #
 #  Description	
 #
@@ -388,6 +388,8 @@ class FoodBin(object):
                                         self.__Thickness+self.__BowlExtension,\
                                    baseOrigin,ZNorm)\
                         .extrude(Base.Vector(0,0,self.__BaseThick))
+        bb = self.base.BoundBox
+        WoodBOM.AddPiece(bb.ZLength,bb.XLength,bb.YLength)
         batteryBaseOrigin = origin.add(Base.Vector(self.__Thickness,\
                                                    self.__Length-\
                                                    self.__BackDepth,0))
@@ -395,6 +397,8 @@ class FoodBin(object):
                                           self.__BackDepth,\
                                           batteryBaseOrigin,ZNorm)\
                         .extrude(Base.Vector(0,0,self.__BaseThick))
+        bb = self.batteryBase.BoundBox
+        WoodBOM.AddPiece(bb.ZLength,bb.XLength,bb.YLength)
         self.batteryBack = Part.makePlane(self.__BatteryHeight,\
                                           self.__Width,\
                                           batteryBaseOrigin.add(Base.Vector(\
