@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <241126.1525>
+#  Last Modified : <241201.1926>
 #
 #  Description	
 #
@@ -55,6 +55,59 @@ import ChargerPS
 import Adafruit
 import DFRobotGearMotor
 
+import csv
+
+class WoodBOM(object):
+    _woodBOM = dict()
+    @classmethod
+    def AddPiece(cls,width,height,length):
+        key = (width,height,length)
+        if key in cls._woodBOM:
+            cls._woodBOM[key] += 1
+        else:
+            cls._woodBOM[key] = 1
+    @staticmethod
+    def _normPartSizeMM(t):
+        return ("%.3fx%.3fx%.3f" % t)
+    @staticmethod
+    def _inch(mm):
+        return mm / 25.4
+    @staticmethod
+    def _normPartSizeIN(t):
+        X, Y, Z = t
+        return ("%.4fx%.4fx%.4f" % (WoodBOM._inch(X), WoodBOM._inch(Y), WoodBOM._inch(Z)))
+    _units = 'in'
+    @classmethod
+    def SetUnits(cls,units):
+        if units == 'in' or units == 'mm':
+            cls._units = units
+        else:
+            raise RuntimeError("Unsupport units!")
+    @classmethod
+    def GetUnits(cls):
+        return cls._units
+    @classmethod
+    def _normPartSize(cls,t):
+        if cls._units == 'in':
+            return WoodBOM._normPartSizeIN(t)
+        elif cls._units == 'mm':
+            return WoodBOM._normPartSizeMM(t)
+        else:
+            raise RuntimeError("Unsupport units!")
+    @classmethod
+    def ListCuts(cls,filename):
+        keys = list(cls._woodBOM.keys())
+        keys.sort()
+        f = open(filename,"w")
+        w = csv.writer(f)
+        w.writerow([("Size (%s)" % cls._units),"Count"])
+        for key in keys:
+            w.writerow([cls._normPartSize(key),cls._woodBOM[key]])
+        f.close()
+    def __init__(self):
+        raise RuntimeError("No Instances allowed for WoodBOM!")
+        
+
 class HalfByHalf(object):
     __Width = .5 * 25.4
     @classmethod
@@ -64,6 +117,8 @@ class HalfByHalf(object):
         beam = Part.makePlane(cls.__Width,cls.__Width,origin,\
                               Base.Vector(0,0,1))\
                   .extrude(Base.Vector(0,0,length))
+        bb = beam.BoundBox
+        WoodBOM.AddPiece(bb.XLength,bb.YLength,bb.ZLength)
         return beam
     @classmethod
     def XBeam(cls,origin,length):
@@ -72,6 +127,8 @@ class HalfByHalf(object):
         beam = Part.makePlane(cls.__Width,cls.__Width,origin,\
                               Base.Vector(1,0,0))\
                   .extrude(Base.Vector(length,0,0))
+        bb = beam.BoundBox
+        WoodBOM.AddPiece(bb.YLength,bb.ZLength,bb.XLength)
         return beam
     @classmethod
     def YBeam(cls,origin,length):
@@ -80,6 +137,8 @@ class HalfByHalf(object):
         beam = Part.makePlane(cls.__Width,cls.__Width,origin,\
                               Base.Vector(0,1,0))\
                   .extrude(Base.Vector(0,length,0))
+        bb = beam.BoundBox
+        WoodBOM.AddPiece(bb.ZLength,bb.XLength,bb.YLength)
         return beam
 
             
@@ -500,6 +559,8 @@ class FoodBin(object):
                                        -self.__BowlExtension,\
                                        self.__BaseThick)))\
             .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
+        bb = self.leftBowlBoxSupport.BoundBox
+        WoodBOM.AddPiece(bb.XLength,bb.ZLength,bb.YLength)
         self.rightBowlBoxSupport = Part.makePlane(\
                 self.__bowlBoxSupportThick,\
                 self.__BowlExtension+self.__Length-self.__BackDepth-self.__Thickness,\
@@ -507,6 +568,8 @@ class FoodBin(object):
                                        -self.__BowlExtension,\
                                        self.__BaseThick)))\
             .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
+        bb = self.rightBowlBoxSupport.BoundBox
+        WoodBOM.AddPiece(bb.XLength,bb.ZLength,bb.YLength)
         self.frontBowlBoxSupport = Part.makePlane(\
                     self.__Width-(2*((self.__Thickness+self.__bowlBoxSupportThick))),\
                     self.__bowlBoxSupportThick,\
@@ -514,6 +577,8 @@ class FoodBin(object):
                     -self.__BowlExtension,\
                     self.__BaseThick)))\
             .extrude(Base.Vector(0,0,self.__bowlBoxHeight-self.__Thickness))
+        bb = self.frontBowlBoxSupport.BoundBox
+        WoodBOM.AddPiece(bb.YLength,bb.ZLength,bb.XLength)
         bowlSupportPlate = Part.makePlane(\
                     self.__Width-(2*self.__Thickness),\
                     self.__BowlExtension-12.5,\
@@ -765,4 +830,4 @@ if __name__ == '__main__':
     foodbin.show()
     Gui.activeDocument().activeView().viewLeft()
     Gui.SendMsgToActiveView("ViewFit")
-        
+    WoodBOM.ListCuts("Wood.bom")        
