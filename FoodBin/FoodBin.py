@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <241201.1934>
+#  Last Modified : <241205.1251>
 #
 #  Description	
 #
@@ -293,7 +293,7 @@ class FoodBin(object):
     __BaseColor = tuple([1.0,1.0,0.0])
     __LidColor  = tuple([1.0,1.0,1.0])
     __StandoffColor = tuple([0.0,1.0,1.0])
-    __BatteryHeight = (3.7+.125)*25.4
+    __BatteryHeight = (4+.125)*25.4
     __ChargerAboveBinBottom = 7*25.4
     __wireHoleRadius = .5*25.4
     __bowlZoff = ((3.0/8.0) * 25.4)+12.7+(.125 * 25.4)
