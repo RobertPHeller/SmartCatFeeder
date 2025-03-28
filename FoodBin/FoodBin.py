@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <241205.1251>
+#  Last Modified : <250327.2022>
 #
 #  Description	
 #
@@ -155,9 +155,9 @@ class Agitator(object):
     __OuterDowelRadius   = .75*25.4
     __OuterDowelStartAngle = 0
     __OuterDowelDeltaAngle = 90
-    __AgitatorLength = 3.125 * 25.4
-    __AgitatorDiskSpacing = (3 / 3)*25.4
-    __CenterDowelLength = 4 * 25.4
+    __AgitatorLength = 4.125 * 25.4
+    __AgitatorDiskSpacing = (4 / 3)*25.4
+    __CenterDowelLength = 5 * 25.4
     __FrontDowelHoleDiameter = 13.5
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
     def __init__(self,name,origin):
@@ -268,9 +268,9 @@ class FoodBin(object):
     @classmethod
     def Height(cls):
         return cls.__Height
-    __BinBottomOffset = 6 * 25.4
+    __BinBottomOffset = 7 * 25.4
     __BackDepth = 2.75 * 25.4
-    __Length = 7.5 * 25.4
+    __Length = 8.5 * 25.4
     @classmethod
     def Length(cls):
         return cls.__Length
