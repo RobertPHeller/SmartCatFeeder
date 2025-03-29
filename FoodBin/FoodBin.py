@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <250327.2022>
+#  Last Modified : <250329.1205>
 #
 #  Description	
 #
@@ -279,14 +279,13 @@ class FoodBin(object):
     __BaseThick = (3.0/8.0) * 25.4
     __BowlExtension = 7 * 25.4
     __Adafruit35inTFTZOff = 30
-    __Adafruit35inTFTYOff = 30
-    __AdafruitPCF8523ZOff = 30+(1.3*25.4)
-    __AdafruitPCF8523YOff = 2+25.4
-    __AdafruitPCF8523XOff = Adafruit.AdafruitPCF8523.RaisedBoardHeight()
-    __AdafruitNAU7802YOff = 2+25.4
+    __Adafruit35inTFTYOff = 30+25.4
+    __AdafruitPCF8523ZOff = 6*25.4
+    __AdafruitPCF8523XOff = 25.4
+    __AdafruitNAU7802YOff = 2+(2*25.4)
     __AdafruitNAU7802ZOff = 30
     __Adafruitvl6180xXOff = 25.4
-    __Adafruitvl6180xZOff = 7*25.4
+    __Adafruitvl6180xZOff = 8*25.4
     __flapWidth = 3.36*25.4
     __flapHeight = 2.7*25.4
     __Color = tuple([210.0/255.0,180.0/255.0,140.0/255.0])
@@ -454,14 +453,6 @@ class FoodBin(object):
         self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(1,0,self.__Thickness))
         self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(2,0,self.__Thickness))
         self.left = self.left.cut(self.adafruitTFT.MakeMountingHole(3,0,self.__Thickness))
-        self.adafruitPCF8523 = Adafruit.AdafruitPCF8523(self.name+"_adafruitPCF8523",\
-                                               origin.add(Base.Vector(self.__Thickness+self.__AdafruitPCF8523XOff,\
-                                                                      self.__AdafruitPCF8523YOff,\
-                                                                      self.__AdafruitPCF8523ZOff)))
-        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(0,0,self.__Thickness))
-        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(1,0,self.__Thickness))
-        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(2,0,self.__Thickness))
-        self.left = self.left.cut(self.adafruitPCF8523.MakeMountingHole(3,0,self.__Thickness))
         self.adafruitNAU7802 = Adafruit.AdafruitNAU7802(self.name+"_adafruitNAU7802",\
                                                         origin.add(Base.Vector(self.__Thickness,\
                                                                       self.__AdafruitNAU7802YOff,\
@@ -527,6 +518,14 @@ class FoodBin(object):
                                         self.__Adafruitvl6180xZOff+7.5))
         hole = Part.Face(Part.Wire(Part.makeCircle(3.125,QWICCableHoleOrigin,YNorm))).extrude(Base.Vector(0,self.__Thickness,0))
         self.back = self.back.cut(hole)
+        self.adafruitPCF8523 = Adafruit.AdafruitPCF8523(self.name+"_adafruitPCF8523",\
+                                               origin.add(Base.Vector(self.__Thickness+self.__AdafruitPCF8523XOff,\
+                                                                      ((self.__Length-self.__BackDepth)+Adafruit.AdafruitPCF8523.RaisedBoardHeight()),\
+                                                                      self.__AdafruitPCF8523ZOff)))
+        self.back = self.back.cut(self.adafruitPCF8523.MakeMountingHole(0,backOrigin.y,self.__Thickness))
+        self.back = self.back.cut(self.adafruitPCF8523.MakeMountingHole(1,backOrigin.y,self.__Thickness))
+        self.back = self.back.cut(self.adafruitPCF8523.MakeMountingHole(2,backOrigin.y,self.__Thickness))
+        self.back = self.back.cut(self.adafruitPCF8523.MakeMountingHole(3,backOrigin.y,self.__Thickness))
         self.bowl = Bowl(self.name+"_bowl",\
                          origin.add(Base.Vector(self.__bowlXoff,\
                                                 self.__bowlYoff,\

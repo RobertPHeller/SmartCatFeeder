@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 13 18:16:55 2024
-#  Last Modified : <240821.1650>
+#  Last Modified : <250329.1206>
 #
 #  Description	
 #
@@ -186,7 +186,7 @@ class AdafruitNAU7802(object):
 class AdafruitPCF8523(object):
     __BoardLength = 1.0*25.4
     __BoardWidth  = 0.7*25.4
-    __BoardMountingHolesYZInches = [(.1,.1),(.9,.1),(.9,.6),(.1,.6)]
+    __BoardMountingHolesXZInches = [(.1,.1),(.9,.1),(.9,.6),(.1,.6)]
     __BoardMountingHolesRadius = (.1*25.4)/2
     __BoardThick = 1.6
     __BatteryHolderThick = .15*25.4
@@ -200,29 +200,29 @@ class AdafruitPCF8523(object):
             raise RuntimeError("origin is not a Vector")
         self.origin = origin
         self.board = Part.makePlane(self.__BoardWidth,self.__BoardLength,\
-                                    origin,Base.Vector(1,0,0))\
-                           .extrude(Base.Vector(self.__BoardThick,0,0))
+                                    origin,Base.Vector(0,1,0))\
+                           .extrude(Base.Vector(0,self.__BoardThick,0))
         self.MountingHoles = list()
-        for Yin,Zin in self.__BoardMountingHolesYZInches:
-            self.MountingHoles.append(origin.add(Base.Vector(0,-Yin*25.4,Zin*25.4)))
+        for Xin,Zin in self.__BoardMountingHolesXZInches:
+            self.MountingHoles.append(origin.add(Base.Vector(Xin*25.4,0,Zin*25.4)))
         #self.holes = list()
         for i in range(0,4):
-            h = self.MakeMountingHole(i,origin.x,self.__BoardThick)
+            h = self.MakeMountingHole(i,origin.y,self.__BoardThick)
             #self.holes.append(h)
             self.board = self.board.cut(h)
-        bY = self.__BoardLength/2.0
+        bX = self.__BoardLength/2.0
         bZ = self.__BoardWidth/2.0
-        bhOrigin = origin.add(Base.Vector(0,-bY,bZ))
+        bhOrigin = origin.add(Base.Vector(bX,0,bZ))
         self.bh = Part.Face(Part.Wire(Part.makeCircle(self.__BatteryHolderRadius,\
                                                       bhOrigin,\
-                                                      Base.Vector(1,0,0))))\
-                                    .extrude(Base.Vector(-self.__BatteryHolderThick))
-    def MakeMountingHole(self,index,X,Xdelta):
-        holeOrig = Base.Vector(X,self.MountingHoles[index].y,self.MountingHoles[index].z)
+                                                      Base.Vector(0,1,0))))\
+                                    .extrude(Base.Vector(0,-self.__BatteryHolderThick,0))
+    def MakeMountingHole(self,index,Y,Ydelta):
+        holeOrig = Base.Vector(self.MountingHoles[index].x,Y,self.MountingHoles[index].z)
         hole = Part.Face(Part.Wire(Part.makeCircle(self.__BoardMountingHolesRadius,\
                                                    holeOrig,\
-                                                   Base.Vector(1,0,0))))\
-                    .extrude(Base.Vector(Xdelta,0,0))
+                                                   Base.Vector(0,1,0))))\
+                    .extrude(Base.Vector(0,Ydelta,0))
         return hole
     def show(self,doc=None):
         if doc==None:
