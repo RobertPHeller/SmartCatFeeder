@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <250329.1205>
+#  Last Modified : <250330.1253>
 #
 #  Description	
 #
@@ -282,7 +282,7 @@ class FoodBin(object):
     __Adafruit35inTFTYOff = 30+25.4
     __AdafruitPCF8523ZOff = 6*25.4
     __AdafruitPCF8523XOff = 25.4
-    __AdafruitNAU7802YOff = 2+(2*25.4)
+    __AdafruitNAU7802YOff = 12+(1*25.4)
     __AdafruitNAU7802ZOff = 30
     __Adafruitvl6180xXOff = 25.4
     __Adafruitvl6180xZOff = 8*25.4

@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 13 18:16:55 2024
-#  Last Modified : <250329.1206>
+#  Last Modified : <250330.1649>
 #
 #  Description	
 #
@@ -42,7 +42,7 @@
 
 
 import FreeCAD as App
-import Part
+import Part, Mesh
 from FreeCAD import Base
 
 import os
@@ -141,10 +141,51 @@ class AdafruitTFTFeatherWing(object):
         obj.Label=self.name+'_shortHeader'
         obj.ViewObject.ShapeColor=tuple([0.2,0.2,0.2])
         
+
+
+import os
 class AdafruitNAU7802(object):
-    __BoardLength = 1.0*25.4
-    __BoardWidth  = 0.9*25.4
-    __BoardMountingHolesYZInches = [(.1,.1),(.9,.1),(.9,.8),(.1,.8)]
+    __BoardMountingHolesYZInches = [(.1,.1),(.8,.1),(.8,.9),(.1,.9)]
+    __BoardMountingHolesRadius = (.1*25.4)/2
+    __BoardThick = 1.6
+    __Step=os.path.dirname(__file__)+"/AdafruitNAU7802.step"
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector")
+        self.origin = origin
+        self.board = Part.read(self.__Step)
+        bbox=self.board.BoundBox
+        self.board.translate(Base.Vector(-bbox.XMin,-bbox.YMin,-bbox.ZMin))
+        self.board.translate(origin)
+        self.MountingHoles = list()
+        for Yin,Zin in self.__BoardMountingHolesYZInches:
+            self.MountingHoles.append(origin.add(Base.Vector(0,-Yin*25.4,Zin*25.4)))
+    def MakeMountingHole(self,index,X,Xdelta):
+        holeOrig = Base.Vector(X,self.MountingHoles[index].y,self.MountingHoles[index].z)
+        hole = Part.Face(Part.Wire(Part.makeCircle(self.__BoardMountingHolesRadius,\
+                                                   holeOrig,\
+                                                   Base.Vector(1,0,0))))\
+                    .extrude(Base.Vector(Xdelta,0,0))
+        return hole
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name+'_board')
+        obj.Shape = self.board
+        obj.Label=self.name+'_board'
+        obj.ViewObject.ShapeColor=tuple([0.0,0.0,0.0])
+        #for h in self.holes:
+        #    obj = doc.addObject("Part::Feature",self.name+'_hole')
+        #    obj.Shape = h
+        #    obj.ViewObject.ShapeColor=tuple([1.0,0.0,0.0])
+                
+
+
+class AdafruitNAU7802_orig(object):
+    __BoardLength = 0.9*25.4
+    __BoardWidth  = 1.0*25.4
+    __BoardMountingHolesYZInches = [(.1,.1),(.8,.1),(.8,.9),(.1,.9)]
     __BoardMountingHolesRadius = (.1*25.4)/2
     __BoardThick = 1.6
     def __init__(self,name,origin):
