@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <250330.1253>
+#  Last Modified : <250330.1931>
 #
 #  Description	
 #
@@ -831,6 +831,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewLeft()
+    Gui.activeDocument().activeView().viewFront()
     Gui.SendMsgToActiveView("ViewFit")
     WoodBOM.ListCuts("Wood.bom")        

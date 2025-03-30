@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 13 18:16:55 2024
-#  Last Modified : <250330.1649>
+#  Last Modified : <250330.1959>
 #
 #  Description	
 #
@@ -145,7 +145,9 @@ class AdafruitTFTFeatherWing(object):
 
 import os
 class AdafruitNAU7802(object):
-    __BoardMountingHolesYZInches = [(.1,.1),(.8,.1),(.8,.9),(.1,.9)]
+    __BoardLength = 0.9*25.4
+    __BoardWidth  = 1.0*25.4
+    __BoardMountingHolesYZInches = [(.1,.1),(.9,.1),(.9,.8),(.1,.8)]
     __BoardMountingHolesRadius = (.1*25.4)/2
     __BoardThick = 1.6
     __Step=os.path.dirname(__file__)+"/AdafruitNAU7802.step"
@@ -156,7 +158,14 @@ class AdafruitNAU7802(object):
         self.origin = origin
         self.board = Part.read(self.__Step)
         bbox=self.board.BoundBox
+        # translate board to origin
         self.board.translate(Base.Vector(-bbox.XMin,-bbox.YMin,-bbox.ZMin))
+        # Perform two rotations to get the proper orientation
+        self.board.rotate(Base.Vector(0.0,0),Base.Vector(1,0,0),-90)
+        self.board.rotate(Base.Vector(0.0,0),Base.Vector(0,0,1),-90)
+        # Retranslate to compensate for the rotates
+        self.board.translate(Base.Vector(-3.13,0,self.__BoardWidth))
+        # Finally translate to final location
         self.board.translate(origin)
         self.MountingHoles = list()
         for Yin,Zin in self.__BoardMountingHolesYZInches:
