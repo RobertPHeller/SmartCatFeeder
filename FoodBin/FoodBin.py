@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <250330.1931>
+#  Last Modified : <250330.2023>
 #
 #  Description	
 #
@@ -282,7 +282,7 @@ class FoodBin(object):
     __Adafruit35inTFTYOff = 30+25.4
     __AdafruitPCF8523ZOff = 6*25.4
     __AdafruitPCF8523XOff = 25.4
-    __AdafruitNAU7802YOff = 12+(1*25.4)
+    __AdafruitNAU7802YOff = (1.25*25.4)
     __AdafruitNAU7802ZOff = 30
     __Adafruitvl6180xXOff = 25.4
     __Adafruitvl6180xZOff = 8*25.4
@@ -294,7 +294,7 @@ class FoodBin(object):
     __StandoffColor = tuple([0.0,1.0,1.0])
     __BatteryHeight = (4+.125)*25.4
     __ChargerAboveBinBottom = 7*25.4
-    __wireHoleRadius = .5*25.4
+    __wireHoleRadius = .625*25.4
     __bowlZoff = ((3.0/8.0) * 25.4)+12.7+(.125 * 25.4)
     __bowlXoff = (7.5/2)*25.4
     __bowlYoff = -3.5*25.4
@@ -481,6 +481,11 @@ class FoodBin(object):
                                                        wireHoleOrigin,\
                                                        Base.Vector(0,1,0))))\
                           .extrude(Base.Vector(0,self.__Thickness,0))
+        self.back = self.back.cut(wireHole)
+        wireHole = Part.Face(Part.Wire(Part.makeCircle(self.__wireHoleRadius,\
+                                                       wireHoleOrigin.add(Base.Vector(self.__wireHoleRadius,0,0)),\
+                                                       Base.Vector(0,1,0))))\
+                           .extrude(Base.Vector(0,self.__Thickness,0))
         self.back = self.back.cut(wireHole)
         agitatorMotorOrigin = \
             DFRobotGearMotor.DFRobotGearMotor_UpsideDown.OriginFromShaftHole(\
@@ -831,6 +836,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewFront()
+    Gui.activeDocument().activeView().viewLeft()
     Gui.SendMsgToActiveView("ViewFit")
     WoodBOM.ListCuts("Wood.bom")        

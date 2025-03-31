@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Tue Aug 13 18:16:55 2024
-#  Last Modified : <250330.1959>
+#  Last Modified : <250330.2011>
 #
 #  Description	
 #
@@ -164,7 +164,7 @@ class AdafruitNAU7802(object):
         self.board.rotate(Base.Vector(0.0,0),Base.Vector(1,0,0),-90)
         self.board.rotate(Base.Vector(0.0,0),Base.Vector(0,0,1),-90)
         # Retranslate to compensate for the rotates
-        self.board.translate(Base.Vector(-3.13,0,self.__BoardWidth))
+        self.board.translate(Base.Vector(-3.13,0,self.__BoardLength))
         # Finally translate to final location
         self.board.translate(origin)
         self.MountingHoles = list()
