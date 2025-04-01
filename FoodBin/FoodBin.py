@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Sep 12 20:13:56 2021
-#  Last Modified : <250330.2023>
+#  Last Modified : <250331.1602>
 #
 #  Description	
 #
@@ -259,6 +259,58 @@ class Bowl(object):
         obj.Label=self.name
         obj.ViewObject.ShapeColor=self.__Color
 
+class Tee(object):
+    __OuterDiameter = (2.25*25.4)
+    __InnerDiameter = (1.875*25.4)
+    __Length        = (4.125*25.4)
+    @classmethod
+    def Length(cls):
+        return cls.__Length
+    __Rise          = (2.5*25.4)
+    @classmethod
+    def Rise(cls):
+        return cls.__Rise
+    __Front         = (2.5*25.4)
+    @classmethod
+    def Front(cls):
+        return cls.__Front
+    __Color         = tuple([1.0,1.0,1.0])
+    def __init__(self,name,origin):
+        self.name = name
+        if not isinstance(origin,Base.Vector):
+            raise RuntimeError("origin is not a Vector!")
+        self.origin = origin
+        TNorm = Base.Vector(0,1,0)
+        RNorm = Base.Vector(0,0,1)
+        TBody = Part.Face(Part.Wire(Part.makeCircle(self.__OuterDiameter/2.0,\
+                                                    origin,\
+                                                    TNorm)))\
+                          .extrude(Base.Vector(0,self.__Length,0))
+        Rise = Part.Face(Part.Wire(Part.makeCircle(self.__OuterDiameter/2.0,\
+                                                   origin.add(Base.Vector(0,self.__Front,0)),\
+                                                   RNorm)))\
+                           .extrude(Base.Vector(0,0,self.__Rise))
+        Rise = Rise.cut(TBody)
+        TBody = TBody.fuse(Rise)
+        TBody = TBody.cut(\
+                Part.Face(Part.Wire(Part.makeCircle(self.__InnerDiameter/2.0,\
+                                                    origin.add(Base.Vector(0,self.__Front,0)),\
+                                                   RNorm)))\
+                           .extrude(Base.Vector(0,0,self.__Rise)))
+        TBody = TBody.cut(\
+                Part.Face(Part.Wire(Part.makeCircle(self.__InnerDiameter/2.0,\
+                                                    origin,\
+                                                    TNorm)))\
+                           .extrude(Base.Vector(0,self.__Length,0)))
+        self.body = TBody
+    def show(self,doc=None):
+        if doc==None:
+            doc = App.activeDocument()
+        obj = doc.addObject("Part::Feature",self.name)
+        obj.Shape = self.body
+        obj.Label=self.name
+        obj.ViewObject.ShapeColor=self.__Color
+
 class FoodBin(object):
     __Width  = 7.5 * 25.4
     @classmethod
@@ -345,6 +397,14 @@ class FoodBin(object):
         self.bottom = AugerMount.AugerMount.CutHoles(self.bottom,\
                                                      augerMountOrigin,\
                                                      self.__Thickness)
+        TOrigin = augerMountOrigin.add(Base.Vector(0,-Tee.Front(),-(Tee.Rise()+10)))
+        self.tee = Tee("Tee",TOrigin)
+        gearMotorMountOrigin = TOrigin.add(Base.Vector(0,Tee.Length()+DFRobotGearMotor.GearMotorMount.FlangeHeight(),0))
+        self.gearMotorMount = DFRobotGearMotor.GearMotorMount("GearMotorMount",gearMotorMountOrigin)
+        self.gearMotorMount.rotate(gearMotorMountOrigin,Base.Vector(1,0,0),90)
+        self.gearMotorMount.rotate(gearMotorMountOrigin,Base.Vector(0,1,0),180)
+        augerGearMotorOrigin = DFRobotGearMotor.DFRobotGearMotor.OriginFromShaftHole(gearMotorMountOrigin.add(Base.Vector(0,DFRobotGearMotor.GearMotorMount.TotalHeight()+4.69,0)))
+        self.augerGearMotor = DFRobotGearMotor.DFRobotGearMotor("AugerGearMotor",augerGearMotorOrigin)
         frontOrigin = origin.add(Base.Vector(0,0,self.__BinBottomOffset))
         self.front = Part.makePlane(self.__Height-self.__BinBottomOffset,\
                                     self.__Width,frontOrigin,YNorm)\
@@ -798,6 +858,9 @@ class FoodBin(object):
         obj.Label=self.name+"_screenFlap"
         obj.ViewObject.ShapeColor=self.__Color
         self.augerMount.show(doc)
+        self.tee.show(doc)
+        self.gearMotorMount.show(doc)
+        self.augerGearMotor.show(doc)
     def __cutXZfingers(self,panel,*,startx=0,endx=0,zoffset=0,yoffset=0):
         x = startx
         ZNorm=Base.Vector(0,0,1)
@@ -836,6 +899,6 @@ if __name__ == '__main__':
     doc = App.activeDocument()
     foodbin = FoodBin("foodbin",Base.Vector(0,0,0))
     foodbin.show()
-    Gui.activeDocument().activeView().viewLeft()
+    Gui.activeDocument().activeView().viewRight()
     Gui.SendMsgToActiveView("ViewFit")
     WoodBOM.ListCuts("Wood.bom")        

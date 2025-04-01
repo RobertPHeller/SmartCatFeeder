@@ -8,7 +8,7 @@
 #  Author        : $Author$
 #  Created By    : Robert Heller
 #  Created       : Sun Aug 18 11:37:13 2024
-#  Last Modified : <240830.1645>
+#  Last Modified : <250331.1546>
 #
 #  Description	
 #
@@ -480,6 +480,12 @@ class GearMotorMount(object):
     __PipeHeight   = 14.5
     __PipeInner    = 41
     __FlangeHeight = 8
+    @classmethod
+    def FlangeHeight(cls):
+        return cls.__FlangeHeight
+    @classmethod
+    def TotalHeight(cls):
+        return cls.__PipeHeight+cls.__FlangeHeight
     __FlangeDiameter = 57.78
     __ScrewHeadDepth = 3
     __ScrewHeadDia = 5.5
@@ -552,6 +558,10 @@ class GearMotorMount(object):
                                         .extrude(Base.Vector(0,0,self.__FlangeHeight+self.__PipeHeight))
         part = part.cut(head)
         self.part = part
+    def rotate(self,base,dir,angle):
+        self.part.rotate(base,dir,angle)
+    def translate(self,neworigin):
+        self.part.translate(neworigin)
     def show(self,doc=None):
         if doc==None:
             doc = App.activeDocument()
